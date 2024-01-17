@@ -10,10 +10,10 @@ import { SITE } from "./src/config";
 export default defineConfig({
   site: SITE.website,
   base: SITE.base,
-  build: {
-    assets: "static",
-    inlineStylesheets: "always",
-  },
+  // build: {
+  //   assets: "static",
+  //   inlineStylesheets: "always",
+  // },
   integrations: [
     tailwind({
       applyBaseStyles: false,
