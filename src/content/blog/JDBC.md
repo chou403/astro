@@ -1,7 +1,6 @@
 ---
 title: "JDBC"
 description: "JDBC的介绍"
-# pubDatetime: 'Sep 1 2023'
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---

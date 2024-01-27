@@ -1,7 +1,6 @@
 ---
 title: "Netty"
 description: "Netty相关学习（待补充版）"
-# pubDatetime: 'Sep 1 2023'
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---

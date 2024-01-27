@@ -1,7 +1,6 @@
 ---
 title: "Docker"
 description: "linux 安装 docker 以及使用"
-# pubDatetime: 'Sep 22 2023'
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---
@@ -37,20 +36,21 @@ heroImage: "/blog-placeholder-1.jpg"
 
 > {
 > "registry-mirrors": [
+>
 > > "https://registry.docker-cn.com",
 > > "http://hub-mirror.c.163.com",
 > > "https://docker.mirrors.ustc.edu.cn",
 > > "https://kfwkfulq.mirror.aliyuncs.com"
 > > ],
-> "max-concurrent-downloads": 10,
-> "log-driver": "json-file",
-> "log-level": "warn",
-> "log-opts": {
-> "max-size": "10m",
-> "max-file": "3"
-> },
-> "data-root": "/var/lib/docker"
-> }
+> > "max-concurrent-downloads": 10,
+> > "log-driver": "json-file",
+> > "log-level": "warn",
+> > "log-opts": {
+> > "max-size": "10m",
+> > "max-file": "3"
+> > },
+> > "data-root": "/var/lib/docker"
+> > }
 
 ## 检查docker是否安装成功
 

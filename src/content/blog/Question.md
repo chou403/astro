@@ -1,7 +1,6 @@
 ---
 title: "Question"
 description: "项目中以及学习中碰到的问题记录"
-# pubDatetime: 'Dec 7 2023'
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---

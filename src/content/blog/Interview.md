@@ -1,7 +1,6 @@
 ---
 title: "Interview"
 description: "面试常问问题，八股文"
-# pubDatetime: 'Oct 21 2023'
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---
@@ -3243,9 +3242,9 @@ MySQL 慢查询的相关参数：
       >
       > for(int i = 0;i < 5;i++) {
       >
-      > ​ for(int j = 0;j < 1000;j++){
+      > for(int j = 0;j < 1000;j++){
       >
-      > ​ }
+      > }
       >
       > }
       >
@@ -3755,15 +3754,15 @@ mysql> show variables like '%innodb_doublewrite%';
 
      > for(user表行 uRow ：user 表) {
      >
-     > ​ for(order表行 oRow ：order 表) {
+     > for(order表行 oRow ：order 表) {
      >
-     > ​ if(uRow.id = oRow.user_id){
+     > if(uRow.id = oRow.user_id){
      >
-     > ​ return uRow;
+     > return uRow;
      >
-     > ​ }
+     > }
      >
-     > ​ }
+     > }
      >
      > }
 

@@ -1,7 +1,6 @@
 ---
 title: "Spring"
-description: "Spring、Spring Boot等知识记录"
-# pubDatetime: 'Dec 7 2023'
+description: "Spring等知识记录"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---

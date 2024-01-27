@@ -1,7 +1,6 @@
 ---
 title: "typora"
-description: "Typora 相关颜色&快捷键"
-# pubDatetime: 'Sep 22 2023'
+description: "Typora 相关内容"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---

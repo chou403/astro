@@ -1,7 +1,6 @@
 ---
 title: "ThreadPool"
 description: "线程池相关介绍与代码片段"
-# pubDatetime: 'Sep 22 2023'
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---

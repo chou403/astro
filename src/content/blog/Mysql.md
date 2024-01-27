@@ -1,7 +1,6 @@
 ---
 title: "Mysql"
-description: "Mysql深入学习"
-# pubDatetime: 'Sep 5 2023'
+description: "Mysql 基础介绍"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
 ---
