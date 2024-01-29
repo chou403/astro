@@ -21,7 +21,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
 <Layout>
   <Header />
   <main id="main-content">
-    <section id="hero">
+    <!-- <section id="hero">
       <h1>Mingalaba</h1>
       <a
         target="_blank"
@@ -64,11 +64,11 @@ const socialCount = SOCIALS.filter(social => social.active).length;
           </div>
         )
       }
-    </section>
+    </section> -->
 
     <Hr />
 
-    {
+    <!-- {
       featuredPosts.length > 0 && (
         <>
           <section id="featured">
@@ -86,7 +86,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
           <Hr />
         </>
       )
-    }
+    } -->
 
     <section id="recent-posts">
       <h2>Recent Posts</h2>
@@ -96,7 +96,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
             .filter(({ data }) => !data.featured)
             .map(
               ({ data, slug }, index) =>
-                index < 4 && (
+                index < 6 && (
                   <Card
                     href={SITE.base+`/posts/${slug}`}
                     frontmatter={data}
@@ -107,7 +107,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
         }
       </ul>
       <div class="all-posts-btn-wrapper">
-        <LinkButton href="/posts">
+        <LinkButton href={SITE.base+`/posts`}>
           All Posts
           <svg xmlns="http://www.w3.org/2000/svg"
             ><path

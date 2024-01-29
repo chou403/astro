@@ -3,6 +3,9 @@ title: "BlockingQueue"
 description: "阻塞队列"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - java
+  - queue
 ---
 
 # 阻塞队列

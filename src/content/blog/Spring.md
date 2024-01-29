@@ -3,6 +3,9 @@ title: "Spring"
 description: "Spring等知识记录"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - java
+  - spring
 ---
 
 # Spring

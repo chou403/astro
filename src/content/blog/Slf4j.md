@@ -3,6 +3,9 @@ title: "Slf4j"
 description: "Slf4j描述"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - java
+  - slf4j
 ---
 
 # Slf4j

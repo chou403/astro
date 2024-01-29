@@ -3,6 +3,8 @@ title: "Mysql"
 description: "Mysql 基础介绍"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - mysql
 ---
 
 # Mysql

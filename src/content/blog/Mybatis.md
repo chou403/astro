@@ -3,6 +3,9 @@ title: "Mybatis"
 description: "Mybatis应用与提升"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - java
+  - mybatis
 ---
 
 # Mybatis

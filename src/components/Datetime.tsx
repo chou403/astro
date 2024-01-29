@@ -55,9 +55,14 @@ const FormattedDatetime = ({ pubDatetime, modDatetime }: DatetimesProps) => {
   });
 
   const time = myDatetime.toLocaleTimeString(LOCALE.langTag, {
+    timeZone: "UTC",
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  console.log(myDatetime);
+  console.log(date);
+  console.log(time);
 
   return (
     <>

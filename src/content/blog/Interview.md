@@ -3,6 +3,9 @@ title: "Interview"
 description: "面试常问问题，八股文"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - java
+  - mysql
 ---
 
 # Java 中线程的状态

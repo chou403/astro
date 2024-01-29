@@ -1,8 +1,11 @@
 ---
 title: "mysqld_multi"
 description: "mysqld_multi 实现主从复制"
-pubDatetime: 2022-09-25T15:20:35Z
+pubDatetime: 2024-01-27T15:56:54Z
+modDatetime: 2024-01-29T13:18:54Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - mysql
 ---
 
 ### 前提
@@ -184,6 +187,12 @@ mysql -u root -p -S /opt/homebrew/opt/mysql/mysql_3306.sock
 
 ```bash
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '3306';
+```
+
+**关闭 mysql 服务器**
+
+```mysql
+mysqladmin -S /opt/homebrew/opt/mysql/mysql_3306.sock -uroot -p shutdown
 ```
 
 ### 日志文件

@@ -3,6 +3,8 @@ title: "Docker"
 description: "linux 安装 docker 以及使用"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - docker
 ---
 
 ## 前提安装DOCKER

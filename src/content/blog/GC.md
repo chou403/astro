@@ -3,6 +3,8 @@ title: "GC"
 description: "垃圾回收"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - java
 ---
 
 # GC

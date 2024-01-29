@@ -3,6 +3,9 @@ title: "MQ"
 description: "常用消息队列"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - java
+  - mq
 ---
 
 # MQ
