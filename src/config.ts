@@ -2,11 +2,11 @@ import type { Site, SocialObjects } from "./types";
 
 export const SITE: Site = {
   website: "https://chou401.github.io", // replace this with your deployed domain
-  base: "/astro-blog",
+  base: "/astro",
   // website: "https://astro-paper.pages.dev/", // replace this with your deployed domain
-  author: "Sat Naing",
-  desc: "A minimal, responsive and SEO-friendly Astro blog theme.",
-  title: "AstroBlog",
+  author: "chou401",
+  desc: "花易谢、雾易失、梦易逝、云易散",
+  title: "知道的越多，才知知道的越少",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerPage: 6,

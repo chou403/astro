@@ -1,5 +1,5 @@
 {
-  "name": "astro-blog",
+  "name": "astro",
   "version": "4.1.0",
   "scripts": {
     "dev": "astro dev",

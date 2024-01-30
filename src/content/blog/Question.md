@@ -3,6 +3,8 @@ title: "Question"
 description: "项目中以及学习中碰到的问题记录"
 pubDatetime: 2022-09-25T15:20:35Z
 heroImage: "/blog-placeholder-1.jpg"
+tags:
+  - questions
 ---
 
 ## 疑问
