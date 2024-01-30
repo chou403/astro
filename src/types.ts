@@ -2,7 +2,7 @@ import type socialIcons from "@assets/socialIcons";
 
 export type Site = {
   website: string;
-  // base: string;
+  base: string;
   author: string;
   desc: string;
   title: string;
