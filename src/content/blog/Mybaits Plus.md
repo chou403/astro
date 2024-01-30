@@ -2,7 +2,7 @@
 title: "Mybatis Plus"
 description: "Mybatis Plus 读写分离"
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-01-29T13:18:54Z
+modDatetime: 2024-01-29T18:00:54Z
 heroImage: "/blog-placeholder-1.jpg"
 tags:
   - java
@@ -20,6 +20,8 @@ MySQL：8.2.0
 Mybaits Plus：3.5.4.1
 
 Dynamic DataSource：4.1.3
+
+Gradle 8.4
 
 ...
 
@@ -316,21 +318,22 @@ dataSources:
   ds_0:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbc-url: jdbc:mysql://localhost:3306/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
+    jdbcUrl: jdbc:mysql://localhost:3306/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
     username: root
     password: 3306
   ds_1:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbc-url: jdbc:mysql://localhost:3307/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
+    jdbcUrl: jdbc:mysql://localhost:3307/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
     username: root
     password: 3307
   ds_2:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbc-url: jdbc:mysql://localhost:3308/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
+    jdbcUrl: jdbc:mysql://localhost:3308/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
     username: root
     password: 3308
+
 rules:
   - !READWRITE_SPLITTING
     dataSources:
@@ -347,4 +350,15 @@ rules:
   - !SINGLE
     tables:
       - "*.*"
+```
+
+**可能会出现的问题**
+Cause: javax.xml.bind.JAXBException: Implementation of JAXB-API has not been found on module path or classpath.
+JAXB API是java EE 的API，因此在java SE 9.0 中不再包含这个 Jar 包。java 9 中引入了模块的概念，默认情况下，Java SE中将不再包含java EE 的Jar包 。而在 java 6/7 / 8 时关于这个API 都是捆绑在一起的。
+jdk 版本较高，需要单独添加依赖
+
+```xml
+implementation 'com.sun.xml.bind:jaxb-core:2.3.0'
+implementation 'javax.xml.bind:jaxb-api:2.3.0'
+implementation 'com.sun.xml.bind:jaxb-impl:2.3.0'
 ```
