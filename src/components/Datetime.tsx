@@ -60,10 +60,6 @@ const FormattedDatetime = ({ pubDatetime, modDatetime }: DatetimesProps) => {
     minute: "2-digit",
   });
 
-  console.log(myDatetime);
-  console.log(date);
-  console.log(time);
-
   return (
     <>
       <time dateTime={myDatetime.toISOString()}>{date}</time>

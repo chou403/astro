@@ -1,11 +1,11 @@
 ---
 title: "MQ"
-description: "常用消息队列"
+description: "简述消息队列 & 常见的六种消息队列"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:37:00Z
 tags:
   - java
-  - mq
+  - queue
 ---
 
 # MQ
@@ -1500,7 +1500,7 @@ consumer.setMessageModel(MessageModel.CLUSTERING);
 
 RocketMq 使用轻量级的NameServer服务进行服务的协调和治理工作，NameServer多节点部署时相互独立互不干扰。每一个rocketMq服务节点（broker节点）启动时都会遍历配置的NameServer列表并建立长链接，broker节点每30秒向NameServer发送一次心跳信息、NameServer每10秒会检查一次连接的broker是否存活。消费者和生产者会随机选择一个NameServer建立长连接，通过定期轮训更新的方式获取最新的服务信息。架构简图如下：
 
-![img](https://img-blog.csdnimg.cn/b6c77636a91a422893e3be52a1cdb111.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16-20240130120749366.png)
 
 1. **NameServer**：启动，监听端口，等待producer，consumer，broker连接上来。
 2. **Broker**：启动，与nameserver保持长链接，定期向nameserver发送心跳信息，包含broker的ip，端口，当前broker上topic的信息。
@@ -1515,7 +1515,7 @@ RocketMQ 存储用的是**本地文件存储系统**，将所有topic的消息�
 
 Broker 存储结构如下：
 
-![img](https://img-blog.csdnimg.cn/4d4f6c0165fc40e1866af2f46d112a74.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16-20240130120801987.png)
 
 ##### 存储文件简介
 
@@ -1537,7 +1537,7 @@ Consumer 启动的时候会在 Topic，Consumer group 维度发生负载均衡�
 
 topic 在创建之处可以设置 comsumer queue数量。而 comsumer 在启动时会和comsumer queue绑定，这个绑定策略是咋样的？
 
-![img](https://img-blog.csdnimg.cn/0466d1dbc23440d4bffb60adb710bad1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16-20240130120814864.png)
 
 - **默认策略**：
   - queue 个数大于 Consumer个数， 那么 Consumer 会平均分配 queue，不够平均，会根据clientId排序来拿取余数
@@ -1622,7 +1622,7 @@ void * mmap(void *start, size_t length, int prot , int flags, int fd, off_t offs
 
 从磁盘拷贝到内核空间的页缓存 (page cache)，然后将用户空间的虚拟地址映射到内核的page cache，这样不需要再将页面从内核空间拷贝到用户空间了。
 
-![img](https://img-blog.csdnimg.cn/img_convert/6e9223b86e2fad24b14e5a31df1879e0.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/6e9223b86e2fad24b14e5a31df1879e0.png)
 
 简述上述过程
 
@@ -1655,7 +1655,7 @@ Broker针对上述的磁盘文件高性能读写机制做的一些优化：
 
 架构图如下：
 
-![img](https://img-blog.csdnimg.cn/6dda18d3001c4db5b2fc0f84f7a8ba88.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16.png)
 
 ##### 查缺补漏
 
@@ -1681,7 +1681,7 @@ ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
 
 其次，该系统调用，可以直接把内核缓冲区里的数据拷贝到 socket 缓冲区里，不再拷贝到用户态，这样就只有 2 次上下文切换，和 3 次数据拷贝。如下图：
 
-![img](https://img-blog.csdnimg.cn/img_convert/87c6530cba656a8139b6def9b0db570b.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/87c6530cba656a8139b6def9b0db570b.png)
 
 但是这还不是真正的零拷贝技术，如果网卡支持 SG-DMA（The Scatter-Gather Direct Memory Access）技术（和普通的 DMA 有所不同），我们可以进一步减少通过 CPU 把内核缓冲区里的数据拷贝到 socket 缓冲区的过程。
 
@@ -1699,7 +1699,7 @@ scatter-gather: on
 
 所以，这个过程之中，只进行了 2 次数据拷贝，如下图：
 
-![img](https://img-blog.csdnimg.cn/img_convert/971767ef19a202042cdefcd3be6b4fa7.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/971767ef19a202042cdefcd3be6b4fa7.png)
 
 这就是所谓的**零拷贝（Zero-copy）技术，因为我们没有在内存层面去拷贝数据，也就是说全程没有通过 CPU 来搬运数据，所有的数据都是通过 DMA 来进行传输的**。
 
@@ -1783,7 +1783,7 @@ sendfile 配置的具体意思:
 
 我们先来看看最初的例子，当调用 read 方法读取文件时，进程实际上会阻塞在 read 方法调用，因为要等待磁盘数据的返回，如下图：
 
-![img](https://img-blog.csdnimg.cn/img_convert/de0ebc5fe89fb2999683504f3cca815b.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/de0ebc5fe89fb2999683504f3cca815b.png)
 
 具体过程：
 
@@ -1793,7 +1793,7 @@ sendfile 配置的具体意思:
 
 对于阻塞的问题，可以用异步 I/O 来解决，它工作方式如下图：
 
-![img](https://img-blog.csdnimg.cn/img_convert/138296dc824bf3e5ab8576bdfb0be80b.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/138296dc824bf3e5ab8576bdfb0be80b.png)
 
 它把读操作分为两部分：
 

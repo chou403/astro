@@ -1,10 +1,11 @@
 ---
-title: "Jenkins"
-description: "Jenkins安装使用"
+title: "Jenkins 工具"
+description: "Jenkins 安装使用"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:35:00Z
 tags:
   - jenkins
+  - devops
 ---
 
 # 使用官方安装脚本

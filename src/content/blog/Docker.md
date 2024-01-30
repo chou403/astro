@@ -1,10 +1,11 @@
 ---
-title: "Docker"
+title: "Docker 容器"
 description: "linux 安装 docker 以及使用"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:25:50Z
 tags:
   - docker
+  - devops
 ---
 
 ## 前提安装DOCKER

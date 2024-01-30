@@ -1,8 +1,8 @@
 ---
 title: "Java SPI"
-description: "服务中 SPI 的应用"
+description: "简述 java spi"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:35:00Z
 tags:
   - java
 ---

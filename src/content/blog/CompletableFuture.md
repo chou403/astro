@@ -2,7 +2,7 @@
 title: "CompletableFuture"
 description: "CompletableFuture线程处理代码片段"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:24:35Z
 tags:
   - java
   - thread

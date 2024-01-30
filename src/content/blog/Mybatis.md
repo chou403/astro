@@ -1,8 +1,8 @@
 ---
-title: "Mybatis"
-description: "Mybatis应用与提升"
+title: "Mybatis 提升"
+description: "Mybatis 实现和重点底层源码分析"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:41:00Z
 tags:
   - java
   - mybatis

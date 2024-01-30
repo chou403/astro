@@ -1,8 +1,8 @@
 ---
-title: "Mysql"
-description: "Mysql 基础介绍"
+title: "Mysql "
+description: "Mysql 底层实现 & 性能优化"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:43:00Z
 tags:
   - mysql
 ---

@@ -1,8 +1,8 @@
 ---
 title: "Tools"
-description: "相关工具"
+description: "开发或者学习中用到的工具安装流程记录"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:46:00Z
 tags:
   - tool
 ---

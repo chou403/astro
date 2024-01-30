@@ -1,10 +1,11 @@
 ---
-title: "GC"
-description: "垃圾回收"
+title: "垃圾回收"
+description: "三种垃圾回收算法&三色标记算法&五种垃圾回收器及选择"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:28:25Z
 tags:
   - java
+  - gc
 ---
 
 # GC
@@ -934,8 +935,6 @@ ZGC一次垃圾回收周期中地址视图的切换过程：
   在第一次GC的时候，只是用了M0，在第二次GC的时候，就会用到M1，这两个标志位就是为了区分两次不同的垃圾回收的。
 
   在第一次GC完成和第二次GC开始的间隙，A对象又引用了一个新的对象F，如下图所示：
-
-  ![image-20230423165706646](C:/Users/Administrator/AppData/Roaming/Typora/typora-user-images/image-20230423165706646.png)
 
   因为是一个新创建的对象，所以指针状态为Remapped。
 

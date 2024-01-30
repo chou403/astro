@@ -1,12 +1,11 @@
 ---
 title: "Mybatis Plus"
-description: "Mybatis Plus 读写分离"
+description: "基于 Mybatis Plus 的三种实现读写分离方式"
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-01-29T18:00:54Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:40:00Z
 tags:
   - java
-  - mybatis-plus
+  - mybatisplus
 ---
 
 ### 使用 Dynamic DataSource

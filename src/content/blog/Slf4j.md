@@ -1,8 +1,8 @@
 ---
-title: "Slf4j"
+title: "Slf4j "
 description: "Slf4j描述"
 pubDatetime: 2022-09-25T15:20:35Z
-heroImage: "/blog-placeholder-1.jpg"
+modDatetime: 2024-01-30T12:44:00Z
 tags:
   - java
   - slf4j
