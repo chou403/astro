@@ -1,8 +1,8 @@
 import type { Site, SocialObjects } from "./types";
 
 export const SITE: Site = {
-  website: "https://chou401.github.io/", // replace this with your deployed domain
-  base: "/astro",
+  website: "https://chou401.github.io/astro/", // replace this with your deployed domain
+  // base: "/astro",
   // website: "https://astro-paper.pages.dev/", // replace this with your deployed domain
   author: "chou401",
   desc: "花易谢、雾易失、梦易逝、云易散",
