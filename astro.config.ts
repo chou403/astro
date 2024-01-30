@@ -9,7 +9,8 @@ import { SITE } from "./src/config";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
-  // base: SITE.base,
+  base: SITE.base,
+  trailingSlash: "ignore",
   build: {
     assets: "static",
     inlineStylesheets: "always",

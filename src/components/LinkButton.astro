@@ -1,4 +1,6 @@
 ---
+import { SITE } from "@config";
+
 export interface Props {
   href: string;
   className?: string;
@@ -22,7 +24,7 @@ const { href, className, ariaLabel, title, disabled = false } = Astro.props;
     </span>
   ) : (
     <a
-      {href}
+      href={SITE.base + href}
       class={`group inline-block hover:text-skin-accent ${className}`}
       aria-label={ariaLabel}
       title={title}
