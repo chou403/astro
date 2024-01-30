@@ -1,6 +1,6 @@
 # 介绍
 
-依赖于 [AstroPaper]（https://github.com/satnaing/astro-paper） 模版创建 Blog 记录相关内容。
+依赖于 [AstroPaper](https://github.com/satnaing/astro-paper) 模版创建 Blog 记录相关内容。
 
 ## 项目结构
 
@@ -33,7 +33,7 @@
 
 Astro 在 src/pages/ 目录中查找 '.astro' 或 '.md' 文件。每个页面都根据其文件名公开为路由。
 
-任何静态资产（如图像）都可以放在“public/”目录中。
+任何静态资产(如图像)都可以放在“public/”目录中。
 
 所有博客文章都存储在“src/content/blog”目录中。
 
@@ -41,26 +41,26 @@ Astro 在 src/pages/ 目录中查找 '.astro' 或 '.md' 文件。每个页面都
 
 文档可以以两种格式阅读：\_ _markdown_ 和 _blog post_。
 
-- 配置 - [markdown]（src/content/init-blog/how-to-configure-astropaper-theme.md） |[博客文章]（https://astro-paper.pages.dev/posts/how-to-configure-astropaper-theme/）
-- 添加帖子 - [markdown]（src/content/init-blog/adding-new-post.md） |[博客文章]（https://astro-paper.pages.dev/posts/adding-new-posts-in-astropaper-theme/）
-- 自定义配色方案 - [markdown]（src/content/init-blog/customizing-astropaper-theme-color-schemes.md） |[博客文章]（https://astro-paper.pages.dev/posts/customizing-astropaper-theme-color-schemes/）
-- 预定义配色方案 - [markdown]（src/content/init-blog/predefined-color-schemes.md） |[博客文章]（https://astro-paper.pages.dev/posts/predefined-color-schemes/）
+- 配置 - [markdown](src/content/init-blog/how-to-configure-astropaper-theme.md)
+- 添加帖子 - [markdown](src/content/init-blog/adding-new-post.md)
+- 自定义配色方案 - [markdown](src/content/init-blog/customizing-astropaper-theme-color-schemes.md)
+- 预定义配色方案 - [markdown](src/content/init-blog/predefined-color-schemes.md)
 
-> 对于 AstroPaper v1，请查看 [this branch]（https://github.com/satnaing/astro-paper/tree/astro-paper-v1） 和 [live URL]（https://astro-paper-v1.astro-paper.pages.dev/）
+> 对于 AstroPaper v1，请查看 [this branch](https://github.com/satnaing/astro-paper/tree/astro-paper-v1) 和 [live URL](https://astro-paper-v1.astro-paper.pages.dev/)
 
 ## 技术栈
 
-**主框架** - [Astro]（https://astro.build/）
-**类型检查** - [TypeScript]（https://www.typescriptlang.org/）
-**组件框架** - [ReactJS]（https://reactjs.org/）
-**样式** - [TailwindCSS]（https://tailwindcss.com/）
-**UI/UX** - [Figma]（https://figma.com）
-**模糊搜索** - [FuseJS]（https://fusejs.io/）
-**图标** - [Boxicons]（https://boxicons.com/） |[表格]（https://tabler-icons.io/）
-**代码格式** - [Prettier]（https://prettier.io/）
-**部署** - [Cloudflare Pages]（https://pages.cloudflare.com/）
-**关于页面中的插图** - [https://freesvgillustration.com]（https://freesvgillustration.com/）
-**Linting** - [ESLint]（https://eslint.org）
+- **主框架** - [Astro](https://astro.build/)
+- **类型检查** - [TypeScript](https://www.typescriptlang.org/)
+- **组件框架** - [ReactJS](https://reactjs.org/)
+- **样式** - [TailwindCSS](https://tailwindcss.com/)
+- **UI/UX** - [Figma](https://figma.com)
+- **模糊搜索** - [FuseJS](https://fusejs.io/)
+- **图标** - [Boxicons](https://boxicons.com/) |[表格](https://tabler-icons.io/)
+- **代码格式** - [Prettier](https://prettier.io/)
+- **部署** - [Cloudflare Pages](https://pages.cloudflare.com/)
+- **关于页面中的插图** - [https://freesvgillustration.com](https://freesvgillustration.com/)
+- **Linting** - [ESLint](https://eslint.org)
 
 ## 本地运行
 
