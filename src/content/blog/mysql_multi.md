@@ -2,7 +2,7 @@
 title: "mysqld_multi"
 description: "基于 MySQL 自带工具 mysqld_multi 实现主从复制"
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-01-30T12:42:00Z
+modDatetime: 2024-01-31T00:31:00Z
 tags:
   - mysql
 ---
@@ -85,10 +85,10 @@ server_id=3
 #### 安装实例 3306
 
 ```bash
-❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/data3306
+❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/3306/data
 2024-01-25T04:45:17.883145Z 0 [System] [MY-015017] [Server] MySQL Server Initialization - start.
 2024-01-25T04:45:17.889196Z 0 [System] [MY-013169] [Server] /opt/homebrew/Cellar/mysql/8.2.0_1/bin/mysqld (mysqld 8.2.0) initializing of server in progress as process 60393
-2024-01-25T04:45:17.895958Z 0 [Warning] [MY-010159] [Server] Setting lower_case_table_names=2 because file system for /opt/homebrew/opt/mysql/data/data3306/ is case insensitive
+2024-01-25T04:45:17.895958Z 0 [Warning] [MY-010159] [Server] Setting lower_case_table_names=2 because file system for /opt/homebrew/opt/mysql/data/3306/data is case insensitive
 2024-01-25T04:45:17.910343Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
 2024-01-25T04:45:18.038467Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
 2024-01-25T04:45:18.632405Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: j.10weTJs)iu
@@ -101,10 +101,10 @@ server_id=3
 #### 安装实例 3307
 
 ```bash
-❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/data3307
+❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/3307/data
 2024-01-25T04:46:02.653813Z 0 [System] [MY-015017] [Server] MySQL Server Initialization - start.
 2024-01-25T04:46:02.661065Z 0 [System] [MY-013169] [Server] /opt/homebrew/Cellar/mysql/8.2.0_1/bin/mysqld (mysqld 8.2.0) initializing of server in progress as process 62369
-2024-01-25T04:46:02.667029Z 0 [Warning] [MY-010159] [Server] Setting lower_case_table_names=2 because file system for /opt/homebrew/opt/mysql/data/data3307/ is case insensitive
+2024-01-25T04:46:02.667029Z 0 [Warning] [MY-010159] [Server] Setting lower_case_table_names=2 because file system for /opt/homebrew/opt/mysql/data/3307/data is case insensitive
 2024-01-25T04:46:02.679468Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
 2024-01-25T04:46:02.771801Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
 2024-01-25T04:46:03.385917Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: a#=MYe)L:8aj
@@ -117,10 +117,10 @@ server_id=3
 #### 安装实例 3308
 
 ```bash
-❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/data3308
+❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/3308/data
 2024-01-25T04:46:12.066014Z 0 [System] [MY-015017] [Server] MySQL Server Initialization - start.
 2024-01-25T04:46:12.067626Z 0 [System] [MY-013169] [Server] /opt/homebrew/Cellar/mysql/8.2.0_1/bin/mysqld (mysqld 8.2.0) initializing of server in progress as process 62774
-2024-01-25T04:46:12.069105Z 0 [Warning] [MY-010159] [Server] Setting lower_case_table_names=2 because file system for /opt/homebrew/opt/mysql/data/data3308/ is case insensitive
+2024-01-25T04:46:12.069105Z 0 [Warning] [MY-010159] [Server] Setting lower_case_table_names=2 because file system for /opt/homebrew/opt/mysql/data/3308/data is case insensitive
 2024-01-25T04:46:12.071151Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
 2024-01-25T04:46:12.171156Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
 2024-01-25T04:46:12.598694Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: HJgqw!Bi6Efb
@@ -185,7 +185,10 @@ mysql -u root -p -S /opt/homebrew/opt/mysql/mysql_3306.sock
 为了方便，我们将 3306 端口的服务器密码设置为 3306。同样方式更改其他两个。
 
 ```bash
+# 8.0 以下版本 密码模式 mysql_native_password
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '3306';
+# 8.0 以上版本 密码模式 caching_sha2_password
+ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '3306';
 ```
 
 **关闭 mysql 服务器**
@@ -345,6 +348,8 @@ binlog-do-db=boot
 binlog-ignore-db=mysql
 #主从复制的格式（mixed,statement,row，默认格式是statement。建议是设置为row，主从复制时数据更加能够统一）
 binlog_format=row
+#mysql8.0以上版本通过设置全局参数binlog_expire_logs_seconds修改binlog保存时间 以秒为单位；默认2592000 30天
+binlog_expire_logs_seconds=604800
 
 
 [mysqld3307]
@@ -363,6 +368,7 @@ replicate-do-db=boot
 binlog-ignore-db=mysql
 binlog_format=row
 read_only=ON
+binlog_expire_logs_seconds=604800
 
 
 [mysqld3308]
@@ -381,6 +387,7 @@ replicate-do-db=boot
 binlog-ignore-db=mysql
 binlog_format=row
 read_only=ON
+binlog_expire_logs_seconds=604800
 
 ```
 
@@ -426,13 +433,14 @@ Executed_Gtid_Set:
 设定从主库同步
 
 ```mysql
-mysql> change master to
-    -> MASTER_HOST='localhost',
-    -> MASTER_PORT=3306,
-    -> MASTER_USER='replication',
-    -> MASTER_PASSWORD='123456',
-    -> MASTER_LOG_FILE='mysql-bin.000008',
-    -> MASTER_LOG_POS=575;
+change master to
+    MASTER_HOST='localhost',
+    MASTER_PORT=3306,
+    MASTER_USER='replication',
+    MASTER_PASSWORD='123456',
+    MASTER_LOG_FILE='mysql-bin.000001',
+    MASTER_LOG_POS=1193,
+    GET_MASTER_PUBLIC_KEY=1;
 ```
 
 从库同步开关
@@ -510,7 +518,7 @@ Master_SSL_Verify_Server_Cert: No
 1 row in set, 1 warning (0.00 sec)
 ```
 
-**记录配置过程中可能出现的问题**
+### 记录配置过程中可能出现的问题
 
 **Replica failed to initialize applier metadata structure from the repository**
 
@@ -532,4 +540,25 @@ mysql 8.0之后默认的认证方式变为`caching_sha2_password`；
 
 ```mysql
 CHANGE MASTER TO GET_MASTER_PUBLIC_KEY=1;
+```
+
+**Plugin mysql_native_password reported: ''mysql_native_password' is deprecated and will be removed in a future release. Please use caching_sha2_password instead'**
+如果你的MySQL的用户还在使用mysql_native_password（密码插件）的认证方式，那么在MySQL更新到8.0.34后，每次数据库用户以mysql_native_password方式访问MySQL，日志就会输出mysql_native_password已经废弃，即将在未来版本移除，以caching_sha2_password替代。
+
+通过以下 sql 查询用户密码模式
+
+```mysql
+select user,host,plugin from mysql.user;
+```
+
+旧的数据库账号，除了 MySQL 自带的账户，通过 sql 来更新认证模式和密码 密码可以和旧密码一致
+
+```mysql
+ALTER USER '用户名'@'域' IDENTIFIED WITH caching_sha2_password BY '密码';
+```
+
+MySQL 自身的账户，可以通过以下 sql 更新到 mysql_native_password 模式
+
+```mysql
+update mysql.user set plugin='caching_sha2_password' where user = 'root';
 ```
