@@ -1,8 +1,8 @@
 ---
 title: "Mybatis Plus"
-description: "基于 Mybatis Plus 的三种实现读写分离方式"
+description: "基于 Mybatis Plus 的三种实现读写分离 & 分库分表"
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-01-30T12:40:00Z
+modDatetime: 2024-01-31T16:52:00Z
 tags:
   - java
   - mybatisplus
@@ -310,23 +310,38 @@ spring:
     url: jdbc:shardingsphere:classpath:sharding-config.yaml
 ```
 
-resources 文件夹添加 sharding-config.yaml
+resources 文件夹添加 sharding-config.yaml 配置读写分离
 
 ```yaml
+# 不配置则默认单机模式
+mode:
+  # 运行模式类型。可选配置：Standalone、Cluster
+  type: Standalone
+  # 持久化仓库配置
+  repository:
+    # 持久化仓库类型
+    type: JDBC
+# 数据源配置，可配置多个
 dataSources:
-  ds_0:
+  # 数据源名称
+  master_0:
+    # 数据源完整类名
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    # 数据库驱动类名，以数据库连接池自身配置为准
     driverClassName: com.mysql.cj.jdbc.Driver
+    # 数据库 URL 连接，以数据库连接池自身配置为准
     jdbcUrl: jdbc:mysql://localhost:3306/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
+    # 数据库用户名，以数据库连接池自身配置为准
     username: root
+    # 数据库密码，以数据库连接池自身配置为准
     password: 3306
-  ds_1:
+  slave_0:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcUrl: jdbc:mysql://localhost:3307/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
     username: root
     password: 3307
-  ds_2:
+  slave_1:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcUrl: jdbc:mysql://localhost:3308/boot?allowPublicKeyRetrieval=True&serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
@@ -336,28 +351,109 @@ dataSources:
 rules:
   - !READWRITE_SPLITTING
     dataSources:
-      readwrite_ds:
-        writeDataSourceName: ds_0
+      # 读写分离逻辑数据源名称
+      ds_0:
+        # 写库数据源名称
+        writeDataSourceName: master_0
+        # 读库数据源名称
         readDataSourceNames:
-          - ds_1
-          - ds_2
+          - slave_0
+          - slave_1
+        # 事务内读请求的路由策略，可选值：PRIMARY（路由至主库）、FIXED（同一事务内路由至固定数据源）、DYNAMIC（同一事务内路由至非固定数据源）。默认值：DYNAMIC
         transactionalReadQueryStrategy: PRIMARY
+        # 负载均衡算法名称
         loadBalancerName: random
+    # 负载均衡算法配置
     loadBalancers:
+      # 负载均衡算法名称
       random:
+        # 负载均衡算法类型
         type: RANDOM
+  # 单表规则
   - !SINGLE
     tables:
       - "*.*"
+# 日志输出
+props:
+  sql-show: true
 ```
 
-**可能会出现的问题**
+若需要实现数据库分表，sharding-config.yaml 文件中添加一下内容，若需要进一步分库，需要同时增加数据源配置
+
+```yaml
+- !SHARDING # 数据分片规则配置
+  tables:
+    # 逻辑表名称
+    sys_user:
+      # 由数据源名 + 表名组成
+      actualDataNodes: ds_0.sys_user_${0..1}
+      # 分表策略
+      tableStrategy:
+        standard:
+          # 分片列名称
+          shardingColumn: id
+          # 分片算法名称
+          shardingAlgorithmName: sys_user_inline
+      # 分库策略
+      #databaseStrategy:
+      #  standard:
+      #    shardingColumn: id
+      #    shardingAlgorithmName: database_inline
+
+      # 分布式序列策略
+      keyGenerateStrategy:
+        # 自增列名称，缺省表示不使用自增主键生成器
+        column: id
+        # 分布式序列算法名称
+        keyGeneratorName: snowflake
+  # 分片算法配置
+  shardingAlgorithms:
+    #database_inline:
+    #  type: INLINE
+    #  props:
+    #    algorithm-expression: ds_${id % 2}
+
+    # 分片算法名称
+    sys_user_inline:
+      # 分片算法类型
+      type: INLINE
+      # 分片算法属性配置
+      props:
+        algorithm-expression: sys_user_${id % 2}
+  # 分布式序列算法配置
+  keyGenerators:
+    # 分布式序列算法名称
+    snowflake:
+      # 分布式序列算法类型
+      type: SNOWFLAKE
+```
+
+### 可能会出现的问题
+
 Cause: javax.xml.bind.JAXBException: Implementation of JAXB-API has not been found on module path or classpath.
 JAXB API是java EE 的API，因此在java SE 9.0 中不再包含这个 Jar 包。java 9 中引入了模块的概念，默认情况下，Java SE中将不再包含java EE 的Jar包 。而在 java 6/7 / 8 时关于这个API 都是捆绑在一起的。
 jdk 版本较高，需要单独添加依赖
 
-```xml
+```yaml
 implementation 'com.sun.xml.bind:jaxb-core:2.3.0'
 implementation 'javax.xml.bind:jaxb-api:2.3.0'
 implementation 'com.sun.xml.bind:jaxb-impl:2.3.0'
+```
+
+Caused by: org.apache.ibatis.executor.ExecutorException: Error preparing statement. Cause: org.apache.shardingsphere.infra.exception.TableNotExistsException: Table or view `sys_user` does not exist.
+多数据源，表存在多个，无法识别单表。需添加单表设置。[参考内容](https://shardingsphere.apache.org/document/current/en/user-manual/shardingsphere-jdbc/yaml-config/rules/single/)
+
+```yaml
+- !SINGLE
+  tables:
+    - "*.*"
+```
+
+Caused by: com.github.pagehelper.PageException: When you use the PageHelper pagination plugin, you must set the helper property
+使用 mybatis 分页插件 pagehelper，在不指定方言（dialect）的情况下回直接报错，报错信息是使用 pagehelper 插件必须设置 helper 属性；
+application.yml 文件中添加
+
+```yml
+pagehelper:
+  helper-dialect: mysql
 ```
