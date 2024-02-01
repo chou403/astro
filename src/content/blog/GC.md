@@ -9,6 +9,8 @@ tags:
   - gc
 ---
 
+## Table of contents
+
 # GC
 
 ## 如何判断一个对象是否存活

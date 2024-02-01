@@ -8,6 +8,8 @@ tags:
   - lock
 ---
 
+## Table of contents
+
 # Java 中锁的分类
 
 1. **可重入锁、不可重入锁**

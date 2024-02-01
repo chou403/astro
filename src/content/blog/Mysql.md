@@ -8,6 +8,8 @@ tags:
   - mysql
 ---
 
+## Table of contents
+
 ## Mysql InnoDB
 
 MYSQL InnoDB二级索引存储主键值而不是存储行指针的优点与缺点。

@@ -7,6 +7,8 @@ tags:
   - java
 ---
 
+## Table of contents
+
 # Java SPI
 
 SPI: Service Provider Interface，它是从 Java6 开始引入的，是一种基于 Classloader 来发现并加载服务的机制。

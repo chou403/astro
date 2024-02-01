@@ -7,6 +7,10 @@ tags:
   - typora
 ---
 
+## Table of contents
+
+## typora 颜色
+
 | 颜色公式                                   | 颜色效果                                     |
 | ------------------------------------------ | -------------------------------------------- |
 | \textcolor{GreenYellow}{GreenYellow}       | $\textcolor{GreenYellow}{GreenYellow} $      |
@@ -79,7 +83,7 @@ tags:
 |                                            |                                              |
 |                                            |                                              |
 
-**mac 快捷键**
+## mac 快捷键
 
 一级标题：⌘1 (command + 1)
 二级标题：⌘2 (command + 2)

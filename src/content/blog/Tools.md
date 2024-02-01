@@ -7,6 +7,8 @@ tags:
   - tool
 ---
 
+## Table of contents
+
 # Homebrew
 
 mac 标准安装脚本

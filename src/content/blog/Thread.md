@@ -9,6 +9,8 @@ tags:
   - thread
 ---
 
+## Table of contents
+
 # Java 中线程的状态
 
 5 种状态一般是针对传统的线程状态来说（操作系统层面）
