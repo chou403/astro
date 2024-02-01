@@ -2,7 +2,7 @@
 title: "MQ"
 description: "简述消息队列 & 常见的六种消息队列"
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:37:00Z
+modDatetime: 2024-02-01T11:16:00Z
 tags:
   - java
   - queue
@@ -687,7 +687,7 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
 
 **一份完整的配置**
 
-```c
+```bash
 global
     log 127.0.0.1 local0 info
     maxconn 4096
@@ -753,13 +753,13 @@ listen admin_stats
 
 安装之前查看内核版本，根据内核版本选择编译参数
 
-```c
+```bash
 uname -r
 ```
 
 解压HAProxy，并安装：
 
-```c
+```bash
 tar xf haproxy-1.8.12.tar.gz
 cd haproxy-1.7.5
 make TARGET=linux2628 PREFIX=/usr/local/haproxy
@@ -768,7 +768,7 @@ make install PREFIX=/usr/local/haproxy
 
 安装成功之后，查看版本
 
-```c
+```bash
 /usr/local/haproxy/sbin/haproxy -v
 ```
 
@@ -776,7 +776,7 @@ make install PREFIX=/usr/local/haproxy
 
 配置启动文件，复制haproxy文件到/usr/sbin下 ，复制haproxy脚本，到/etc/init.d下
 
-```c
+```bash
 cp /usr/local/haproxy/sbin/haproxy /usr/sbin/
 cp ./examples/haproxy.init /etc/init.d/haproxy
 chmod 755 /etc/init.d/haproxy
@@ -784,20 +784,20 @@ chmod 755 /etc/init.d/haproxy
 
 创建系统账号
 
-```c
+```bash
 useradd -r haproxy
 ```
 
 创建配置文件
 
-```c
+```bash
 mkdir /etc/haproxy
 vi /etc/haproxy/haproxy.cfg
 ```
 
 更改配置文件
 
-```c
+```bash
 #全局配置
 global
     #设置日志
@@ -860,7 +860,7 @@ listen monitor
 
 **启动haproxy**
 
-```c
+```bash
 service haproxy start
 ```
 
@@ -872,7 +872,7 @@ Haproxy 解决集群 session 共享问题，二种方法保持客户端 session 
 
   配置指令： balance source。
 
-  ```c
+  ```bash
   backend htmpool
           mode http
           option redispatch
@@ -890,7 +890,7 @@ Haproxy 解决集群 session 共享问题，二种方法保持客户端 session 
 
   配置指令例举 cookie SESSION_COOKIE insert indirect nocache。
 
-  ```c
+  ```bash
   backend htmpool
           mode http
           option    redispatch
@@ -1827,7 +1827,7 @@ sendfile 配置的具体意思:
 
 在 nginx 中，我们可以用如下配置，来根据文件的大小来使用不同的方式：
 
-```cobol
+```bash
 location /video/ {
     sendfile on;
     aio on;
