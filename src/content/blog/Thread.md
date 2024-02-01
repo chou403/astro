@@ -118,8 +118,6 @@ Thread.sleep(1000);
 System.out.println(thread.getState());
 ```
 
-#
-
 # ThreadPool
 
 ![image-20230411174505779](https://github.com/chou401/pic-md/raw/master/img/image-20230411174505779.png)
