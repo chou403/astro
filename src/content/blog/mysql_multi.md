@@ -2,22 +2,24 @@
 title: "mysqld_multi"
 description: "基于 MySQL 自带工具 mysqld_multi 实现主从复制"
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-01-31T00:31:00Z
+modDatetime: 2024-02-01T15:26:00Z
 tags:
   - mysql
 ---
 
 ## Table of contents
 
-### 前提
+## 写在前面
 
-正常情况是准备需要主从个数的服务器，每个服务器都安装好 mysql，以及主库数据内容同步到从库中。
+正常情况是准备需要主从个数的服务器，每个服务器都安装好 mysql，主库数据内容同步到从库中。
 
-本次记录是在一台机器操作一主一从数据库服务。若多台服务，则将配置文件拆分配置即可。
+本次记录是在一台机器通过 `mysqld_multi` 操作一主两从数据库服务。若多台服务，则将配置文件拆分配置即可。
 
-本次安装使用了 HomeBrew，若用其他方式，更改成自己机器的路径即可。
+本次安装使用了 HomeBrew，若用其他方式，或者路径不一致，`/opt/homebrew/opt/mysql` 更改成自己的安装路径即可。
 
-### 配置文件
+## 配置文件
+
+安装 mysql
 
 ```bash
 brew install mysql
@@ -49,6 +51,7 @@ touch my.cnf
 
 ```bash
 [mysqld]
+# mysql 安装目录
 basedir=/opt/homebrew/opt/mysql
 
 [mysqld_multi]
@@ -59,8 +62,11 @@ log=/opt/homebrew/opt/mysql/data/mysql_multi.log
 [mysqld3306]
 mysqld=mysqld
 mysqladmin=mysqladmin
+# 数据库目录
 datadir=/opt/homebrew/opt/mysql/data/3306/data
+# 端口
 port=3306
+# socket 登录 mysqld_multi 启动自动生成 退出 自动删除
 socket=/opt/homebrew/opt/mysql/mysql_3306.sock
 server_id=1
 
@@ -82,9 +88,9 @@ server_id=3
 
 ```
 
-### 安装实例
+## 安装实例
 
-#### 安装实例 3306
+### 安装实例 3306
 
 ```bash
 ❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/3306/data
@@ -100,7 +106,7 @@ server_id=3
 
 记住 root 账户初始密码：j.10weTJs)iu
 
-#### 安装实例 3307
+### 安装实例 3307
 
 ```bash
 ❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/3307/data
@@ -116,7 +122,7 @@ server_id=3
 
 记住 root 账户初始密码：a#=MYe)L:8aj
 
-#### 安装实例 3308
+### 安装实例 3308
 
 ```bash
 ❯ mysqld --defaults-file=/opt/homebrew/etc/my.cnf --initialize --basedir=/opt/homebrew/opt/mysql/ --datadir=/opt/homebrew/opt/mysql/data/3308/data
@@ -132,9 +138,9 @@ server_id=3
 
 记住 root 账户初始密码：HJgqw!Bi6Efb
 
-### 查看多实例
+## 查看多实例
 
-使用mysqld_multi命令查看这些MySQL服务是否开启
+使用mysqld_multi命令查看这些MySQL服务是否开启。
 
 ```bash
 ❯ mysqld_multi --defaults-extra-file=/opt/homebrew/opt/mysql/my.cnf report
@@ -146,15 +152,15 @@ MySQL server from group: mysqld3307 is not running
 MySQL server from group: mysqld3308 is not running
 ```
 
-### 开启多实例
+## 开启多实例
 
-使用mysqld_multi命令开启实例
+使用mysqld_multi命令开启实例。
 
 ```bash
 ❯ mysqld_multi --defaults-extra-file=/opt/homebrew/opt/mysql/my.cnf start 3306,3307,3308
 ```
 
-再次查看多实例
+再次查看多实例。
 
 ```bash
 ❯ mysqld_multi --defaults-extra-file=/opt/homebrew/opt/mysql/my.cnf report
@@ -166,21 +172,21 @@ MySQL server from group: mysqld3307 is running
 MySQL server from group: mysqld3308 is running
 ```
 
-查看 mysql 任务线程
+查看 mysql 任务线程。
 
 ```bash
 ❯ ps aux | grep mysqld
 ```
 
-### socket方式登录
+## socket方式登录
 
-使用 socket 的方式登录，必须使用 -S 参数，并且在后面加上.sock 文件的位置，需要注意的是，之后每一次登录，都需要使用这种 -S 方式进行登录
+使用 socket 的方式登录，必须使用 -S 参数，并且在后面加上.sock 文件的位置，需要注意的是，之后每一次登录，都需要使用这种 -S 方式进行登录。
 
 ```bash
 mysql -u root -p -S /opt/homebrew/opt/mysql/mysql_3306.sock
 ```
 
-系统会提示输入密码，将上面记录的初始密码输入，进入 mysql 服务器
+系统会提示输入密码，将上面记录的初始密码输入，进入 mysql 服务器。
 
 **更改 root 的密码**
 
@@ -196,16 +202,16 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '3306';
 **关闭 mysql 服务器**
 
 ```mysql
-mysqladmin -S /opt/homebrew/opt/mysql/mysql_3306.sock -uroot -p shutdown
+mysqladmin -S /opt/homebrew/opt/mysql/mysql_3306.sock -uroot -p shutdown。
 ```
 
-### 日志文件
+## 日志文件
 
-#### MySQL启动日志在哪？
+### MySQL启动日志在哪？
 
 启动动日志记录了MySQL启动时的状态，如果你启动失败可以查看该日志，可以使用最普通的文本编辑器打开，根据ERROR信息进行必要的调整。由于我们的配置文件my.cnf指定了生成路径，该日志在MySQL服务启动后自动生成在你的mysql包内，全称为mysqld_multi.log。
 
-#### 二进制文件在哪？
+### 二进制文件在哪？
 
 二进制文件主要记录MySQL数据库的变化，包含了所有更新了数据或者潜在更新了数据（例如没有匹配任何一行的UPDATE）的语句；还包含了每个更新数据库的语句的执行时间信息，使用二进制日志的目的是最大可能的恢复数据库，因为二进制日志包含备份后进行的所有更新，而且二进制文件是主从复制的重要桥梁和关键所在。
 
@@ -213,22 +219,22 @@ mysqladmin -S /opt/homebrew/opt/mysql/mysql_3306.sock -uroot -p shutdown
 
 每次重启服务器，都会新生成一个二进制日志，后缀以.000001开始递增。
 
-#### 其它日志文件在哪？
+### 其它日志文件在哪？
 
-在配置文件中加上一行代码，就可以开启错误日志，当 mysql 需要记录错误发生时，就会保存在我们设置的路径上的日志中
+在配置文件中加上一行代码，就可以开启错误日志，当 mysql 需要记录错误发生时，就会保存在我们设置的路径上的日志中。
 
 ```bash
 log_error = /opt/homebrew/opt/mysql/data/3306/data/my_error.log
 ```
 
-如果我们需要开启通用查询日志，可以在 mysql 中使用命令开启
+如果我们需要开启通用查询日志，可以在 mysql 中使用命令开启。
 
 ```mysql
 mysql> set @@global.general_log = 1;
 Query OK, 0 rows affected (0.01 sec)
 ```
 
-执行成功之后，就会在 mysql/data/3306/data目录下新增一个.log 的日志文件
+执行成功之后，就会在 mysql/data/3306/data目录下新增一个.log 的日志文件。
 
 如果我们需要开启慢羊羊日志
 
@@ -237,9 +243,9 @@ mysql> set @@global.slow_query_log = 1;
 Query OK, 0 rows affected (0.01 sec)
 ```
 
-执行成功之后，就会在 mysql/data/3306/data目录下新增一个-slow.log 的日志文件
+执行成功之后，就会在 mysql/data/3306/data目录下新增一个-slow.log 的日志文件。
 
-### 多实例解耦
+## 多实例解耦
 
 在上文中，我们把若干个实例的配置信息放在同一个配置文件my.cnf中，如果若干个实例都是通过同一个配置文件启动，那么耦合性就太高了，试想一下，当我们同时开启了若干个实例，例如同时开启了3306，3307和3308MySQL服务，而在中途突然需要改变一下3306服务的配置，那么修改配置文件之后进行MySQL服务的重启，又因为服务重启是通过配置文件启动的，而其它实例的配置内容又在同一份文件中，那么有可能在对3306修改时造成对其它实例的影响。
 
@@ -247,9 +253,9 @@ Query OK, 0 rows affected (0.01 sec)
 
 直接删除原先的 mysql ，新建安装，将 my.cnf 内容拆成三个配置文件 3306.cnf、3307.cnf 和 3308.cnf。
 
-#### 配置文件
+### 配置文件
 
-3306.cnf 配置文件添加以下内容
+3306.cnf 配置文件添加以下内容：
 
 ```bash
 [mysqld]
@@ -269,7 +275,7 @@ socket=/opt/homebrew/opt/mysql/mysql_3306.sock
 server_id=1
 ```
 
-3307.cnf 配置文件添加以下内容
+3307.cnf 配置文件添加以下内容：
 
 ```bash
 [mysqld]
@@ -289,7 +295,7 @@ socket=/opt/homebrew/opt/mysql/mysql_3307.sock
 server_id=2
 ```
 
-3308.cnf 配置文件添加以下内容
+3308.cnf 配置文件添加以下内容：
 
 ```bash
 [mysqld]
@@ -311,9 +317,9 @@ server_id=3
 
 后面的操作流程一致，只是把上文中的单个配置文件启动，调整为三个配置文件启动。
 
-### 主从复制
+## 主从复制
 
-#### 配置文件
+### 配置文件
 
 主库配置开启 binlog 参数
 
@@ -395,9 +401,9 @@ binlog_expire_logs_seconds=604800
 
 设置完成并保存后记得重启服务。
 
-#### 同步账号
+### 同步账号
 
-##### 主库操作
+#### 主库操作
 
 主库创建从库同步账号
 
@@ -430,7 +436,7 @@ Executed_Gtid_Set:
 1 row in set, 1 warning (0.00 sec)
 ```
 
-##### 从库操作
+#### 从库操作
 
 设定从主库同步
 
@@ -440,8 +446,8 @@ change master to
     MASTER_PORT=3306,
     MASTER_USER='replication',
     MASTER_PASSWORD='123456',
-    MASTER_LOG_FILE='mysql-bin.000001',
-    MASTER_LOG_POS=1193,
+    MASTER_LOG_FILE='mysql-bin.000008',
+    MASTER_LOG_POS=575,
     GET_MASTER_PUBLIC_KEY=1;
 ```
 
@@ -520,7 +526,7 @@ Master_SSL_Verify_Server_Cert: No
 1 row in set, 1 warning (0.00 sec)
 ```
 
-### 记录配置过程中可能出现的问题
+## 记录配置过程中可能出现的问题
 
 **Replica failed to initialize applier metadata structure from the repository**
 
