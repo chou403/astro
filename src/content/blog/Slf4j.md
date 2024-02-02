@@ -10,7 +10,7 @@ tags:
 
 ## Table of contents
 
-# Slf4j
+## 简介
 
 SLF4J：全称是 Simple Logging Facade for Java，Java 的简单日志门面，是现在 Java 生态中最流行的一个门面日志框架。
 

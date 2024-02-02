@@ -10,8 +10,6 @@ tags:
 
 ## Table of contents
 
-# MQ
-
 ## 概述
 
 ![image-20230428172550591](https://github.com/chou401/pic-md/raw/master/img/image-20230428172550591.png)

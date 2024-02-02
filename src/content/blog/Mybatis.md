@@ -10,8 +10,6 @@ tags:
 
 ## Table of contents
 
-# Mybatis
-
 ## Mybatis使用
 
 ORM框架：Object Relational Mapping。用于实现面向对象编程语言里不同类型系统的数据之间的转换。

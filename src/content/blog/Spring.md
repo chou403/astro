@@ -10,8 +10,6 @@ tags:
 
 ## Table of contents
 
-# Spring
-
 ## 常见异常
 
 | 异常                                   | 描述                                                                                                                                                                                 |

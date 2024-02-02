@@ -9,7 +9,7 @@ tags:
 
 ## Table of contents
 
-# Homebrew
+## Homebrew
 
 mac 标准安装脚本
 
@@ -54,7 +54,7 @@ mac 卸载脚本
 >
 > brew search <包名>查询可用包
 
-# nvm
+## nvm
 
 nvm 安装命令，版本号可以从官方最新看到。
 
@@ -84,7 +84,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 ```
 
-# node
+## node
 
 ```bash
 nvm install node
@@ -105,7 +105,7 @@ node_mirror: https://npm.taobao.org/mirrors/node/
 npm_mirror: https://npm.taobao.org/mirrors/npm/
 ```
 
-# Navicat导出ncx解析数据库密码
+## Navicat导出ncx解析数据库密码
 
 网址：https://tool.lu/coderunner/
 
@@ -254,7 +254,7 @@ echo $decode."\n";
 ?>
 ```
 
-# oh-my-zsh
+## oh-my-zsh
 
 安装 oh-my-zsh（二选一），安装之前最好备份一下已有的配置文件，虽然目前 oh-my-zsh 会自动生成一个文件存放之前的配置。
 
@@ -367,7 +367,7 @@ Powerlevel10k 需要依赖 nerd font
 
 ![image-20230918224852566](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230918224852566.png)
 
-# vim 配置
+## vim 配置
 
 创建 .vimrc 配置文件
 
@@ -422,7 +422,7 @@ if has("autocmd")
 endif
 ```
 
-# redis
+## redis
 
 **执行安装命令**
 
@@ -521,7 +521,7 @@ alias redisstop='sudo launchctl stop io.redis.redis-server'
 source ~/.zshrc
 ```
 
-# kafka
+## kafka
 
 **mac安装kafka运行错误@@HOMEBREW_JAVA@@/bin/java: No such file or directory**
 

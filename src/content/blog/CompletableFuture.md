@@ -10,8 +10,6 @@ tags:
 
 ## Table of contents
 
-# CompletableFuture
-
 ## supplyAsync
 
 用来开启异步任务。

@@ -11,7 +11,7 @@ tags:
 
 ## Table of contents
 
-# Java 中线程的状态
+## Java 中线程的状态
 
 5 种状态一般是针对传统的线程状态来说（操作系统层面）
 
@@ -118,11 +118,11 @@ Thread.sleep(1000);
 System.out.println(thread.getState());
 ```
 
-# ThreadPool
+## ThreadPool
 
 ![image-20230411174505779](https://github.com/chou401/pic-md/raw/master/img/image-20230411174505779.png)
 
-## JDK 提供的线程池
+### JDK 提供的线程池
 
 **newFixedThreadPool**
 
@@ -215,7 +215,7 @@ public static ExecutorService newWorkStealingPool() {
 }
 ```
 
-## 核心参数
+### 核心参数
 
 为什么要自定义线程池， 首先 ThreadPoolExecutor 中，一种提供了 7 个参数，每个参数都是非常核心的属性，在线程池去执行任务时，每个参数都有决定性的作用。
 
@@ -264,7 +264,7 @@ public static ExecutorService newWorkStealingPool() {
   - DiscardOldestPolicy：当前拒绝策略在无法处理任务时,将队列中最早的任务丢掉，将当前**再次尝试**交给线程池处理
   - 自定义Policy：根据自己的任务，将任务扔到数据库，也可以做其他操作。
 
-## 线程池的状态
+### 线程池的状态
 
 线程池的5种状态：RUNNING、SHUTDOWN、STOP、TIDYING、TERMINATED。
 
@@ -315,7 +315,7 @@ private static int ctlOf(int rs, int wc) { return rs | wc; } // 得到上面提�
 
 ![image-20230411173800910](https://github.com/chou401/pic-md/raw/master/img/image-20230411173800910.png)
 
-## 线程池执行流程
+### 线程池执行流程
 
 ThreadPoolExecutor 的 **execute()** 是提任务到线程池的核心方法，很重要。
 
@@ -520,7 +520,7 @@ private void enqueue(E e) {
 }
 ```
 
-## Woker
+### Woker
 
 ```java
 private final class Worker
@@ -654,9 +654,9 @@ final void runWorker(Worker w) {
 }
 ```
 
-# 面试须知
+## 面试须知
 
-## Java 中如何停止线程
+### Java 中如何停止线程
 
 Java中有以下三种方法可以终止正在运行的线程：
 
@@ -780,7 +780,7 @@ while (!Thread.currentThread().isInterrupted()) {
 }
 ```
 
-## 守护线程和用户线程有什么区别
+### 守护线程和用户线程有什么区别
 
 - 用户（User）线程：运行在前台，执行具体的任务，如程序的主线程、连接网络的子线程等都是用户线程。
 - 守护（Darmon）线程：运行在后台，为其他前台线程服务。也可以说守护线程是JVM中非守护线程的“佣人”。一旦所有用户线程都结束运行，守护线程会随JVM一起结束工作。
@@ -794,7 +794,7 @@ main函数所在的线程就是一个用户线程，main函数启动的同时在
 3. 不是所有的任务都可以分配给守护线程来执行，比如读写操作或者计算逻辑。
 4. 守护（Darmon）线程中不能依靠 finally 块的内容来确保执行关闭或清理资源的逻辑。因为我们上面说过了一旦所有用户线程都结束运行，守护线程会随JVM一起结束工作，所有守护（Daemon）线程中的finally 语句块可能无法被执行。
 
-## Java 中 wait 和 sleep 方法的区别
+### Java 中 wait 和 sleep 方法的区别
 
 sleep 方法和 wait 方法都是用来将线程进入休眠状态的，并且 sleep 和 wait 方法都可以响应 interrupt 中断，也就是线程在休眠的过程中，如果收到中断信号，都可以进行响应并中断，且都可以抛出 InterruptedException 异常，那 sleep 和 wait 有什么区别呢？接下来，我们一起来看。
 
@@ -822,7 +822,7 @@ sleep 方法必须要传递一个超时时间的参数，且过了超时时间�
 
 sleep 和 wait 都可以让线程进入休眠状态，并且它们都可以响应 interrupt 中断，但二者的区别主要体现在：语法使用不同、所属类不同、唤醒方式不同、释放锁不同和线程进入的状态不同。
 
-## 并发编程的三大特性
+### 并发编程的三大特性
 
 **原子性**
 
@@ -973,7 +973,7 @@ Java 中的程序是乱序执行的。
 
   会在两个操作之间，添加上一道指令，这个指令就可以避免上下执行的其他指令进行重排。
 
-## 什么是 CAS？有什么优缺点
+### 什么是 CAS？有什么优缺点
 
 在高并发的业务场景下，线程安全问题是必须考虑的，在JDK5之前，可以通过synchronized或Lock来保证同步，从而达到线程安全的目的。但synchronized或Lock方案属于互斥锁的方案，比较重量级，加锁、释放锁都会引起性能损耗问题。
 
@@ -1293,7 +1293,7 @@ Java 中的引用类型分别为**强、软、弱、虚**。
 
 最后是虚引用，它不能单独使用，必须和引用队列联合使用。虚引用的主要作用是跟踪对系那个被垃圾回收的状态。例如：ReferenceQueue queue = new ReferenceQueue()；PhantomReference phantomRef = new PhantomReference(obj,queue)，不过在开发中，我们用的更多的还是强引用。
 
-## ThreadLocal 的内存泄漏问题
+### ThreadLocal 的内存泄漏问题
 
 **ThreadLocal 实现原理：**
 
@@ -1308,7 +1308,7 @@ Java 中的引用类型分别为**强、软、弱、虚**。
 - 如果 ThreadLocal 引用丢失，key 因为弱引用会被 GC 回收掉，如果同时线程还没有被回收，就会导致内存泄漏，内存中的 value 无法被回收，同时也无法被获取到。
 - 只需要在使用完毕 ThreadLocal 对象之后，及时的调用 remove 方法，移除 Entry 即可。
 
-## 线程池为何要构建空任务的非核心线程
+### 线程池为何要构建空任务的非核心线程
 
 ```java
 // 工作线程小于核心线程执行
@@ -1374,7 +1374,7 @@ private volatile boolean allowCoreThreadTimeOut;
 
 需要注意的是，过多的空任务可能会占用线程池的资源，导致性能下降。因此，在使用线程池时，应该确保任务的提交是有意义的，避免无谓的空任务提交。
 
-## 线程池使用完毕为何必须shutdown()
+### 线程池使用完毕为何必须shutdown()
 
 线程池里面复用的是线程资源，而线程是系统资源的一种。所以关闭线程池是为了正确地终止线程池的运行并释放相关资源。下面是关闭线程池的重要原因：
 
@@ -1438,7 +1438,7 @@ shutdownNow()是强制关闭线程池的方法，它会尝试立即停止正在�
 
 那么可以这样理解，我启动一个线程还指向Worker对象。那么worker对象也是不能被回收的，同时worker对象是线程池的内部类，就会出现内部类都不能被回收，那外部类整个线程池也不能被回收。
 
-## 线程池的核心参数到底如何设置
+### 线程池的核心参数到底如何设置
 
 **CPU 密集型和 IO 密集型**
 

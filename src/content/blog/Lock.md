@@ -10,7 +10,7 @@ tags:
 
 ## Table of contents
 
-# Java 中锁的分类
+## Java 中锁的分类
 
 1. **可重入锁、不可重入锁**
 
@@ -58,7 +58,7 @@ tags:
 
    **共享锁**：同一个时间点，当前共享锁可以被多个线程同时持有。
 
-# ReentrantLock
+## ReentrantLock
 
 实现加锁 lock() ----> 线程阻塞：
 
@@ -157,7 +157,7 @@ final Thread current=Thread.currentThread();
         }
 ```
 
-# synchronized 在 JDK1.6 的优化
+## synchronized 在 JDK1.6 的优化
 
 在JDK1.5 的时候 Doug lee 推出了 ReentrantLock，lock 的性能远高于 synchronized，所以 JDK1.6 的时候团队就对 synchronized 进行了大量的优化。
 
@@ -198,7 +198,7 @@ synchronized 就在 JDK1.6 做了锁升级的优化。
   - 如果自旋了一定的次数，没拿到锁，锁升级。
 - **重量级锁**：就是最传统的 synchronized 方式，拿不到锁资源，就挂起当前线程。（用户态&内核态）
 
-# synchronized 的实现原理
+## synchronized 的实现原理
 
 synchronized 是基于对象实现的。
 
@@ -246,7 +246,7 @@ Synchronized的语义底层是通过一个monitor的对象来完成，其实wait
 
 因此，这种依赖于操作系统互斥锁（Mutex Lock）所实现的锁我们称之为“重量级锁”。
 
-# ReentrantLock和synchronized的区别
+## ReentrantLock和synchronized的区别
 
 在 Java 中，常用的锁有两种：synchronized（内置锁）和 ReentrantLock（可重入锁）。
 
@@ -359,7 +359,7 @@ public ReentrantLock(boolean fair) {
 
 ![img](https://raw.githubusercontent.com/chou401/pic-md/master/v2-b76e76b03d158accc357568d8c360526_r.jpg)
 
-# ReentrantReadWriteLock的实现原理
+## ReentrantReadWriteLock的实现原理
 
 在很多场景下，我们用到的都是互斥锁，线程间相互竞争资源；但是有时候我们的场景会存在读多写少的情况，这个时候如果还是使用互斥锁，就会导致资源的浪费，为什么呢？
 
@@ -531,7 +531,7 @@ protected final boolean tryReleaseShared(int unused) {
 }
 ```
 
-# 死锁
+## 死锁
 
 **形成死锁的四个必要条件**
 
@@ -603,7 +603,7 @@ protected final boolean tryReleaseShared(int unused) {
 
      让一（多）个进程回退到足以回避死锁的地步，进程回退时自愿释放资源而不是被剥夺。要求系统保持进程的历史信息，设置还原点。
 
-# AQS
+## AQS
 
 AQS 就是 AbstractQueuedSynchronized 抽象类，AQS 其实就是 JUC 并发包下的一个基类，JUC 下的很多内容都是基于 AQS 实现了部分功能，比如 ReentrantLock、ThreadPoolExecutor、阻塞队列、CountDownLacth、Semaphore、CyclicBarrier等等都是基于 AQS 实现的。
 
@@ -628,9 +628,9 @@ static final class Node {
 }
 ```
 
-# 面试须知
+## 面试须知
 
-## AQS 唤醒节点时，为何从后往前找
+### AQS 唤醒节点时，为何从后往前找
 
 ```java
 private void unparkSuccessor(Node node) {
@@ -717,7 +717,7 @@ private Node enq(final Node node) {
 
 另一方面如果下一个节点时null（已经被GC ），如何找到下一个有效节点，也只能从后往前找了。
 
-## ConcurrentHashMap在1.8做了什么优化
+### ConcurrentHashMap在1.8做了什么优化
 
 JDK1.8 放弃了锁分段的做法，采用CAS和synchronized方式处理并发。以put操作为例，CAS方式确定key的数组下标，synchronized保证链表节点的同步效果。
 
@@ -739,7 +739,7 @@ JDK1.8 ConcurrentHashMap是**数组+链表**，或者**数组+红黑树**结构,
 
 线程安全，但是复合操作时，只保证弱一致性/最终一致性。
 
-## ConcurrentHashMap 的散列算法
+### ConcurrentHashMap 的散列算法
 
 当需要向 ConcurrentHashMap 中写入数据时，会根据 key 的 hashcode 来确定当前数据要放在数组的哪一个索引位置上。
 
@@ -917,7 +917,7 @@ else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
 
 可以看到，在计算当前 Node 具体存放的索引位置时，使用了 n-1，n 代表数组长度，即这个索引位置是通过数组长度-1 与通过 spread() 方法返回的哈希值与运算计算出的，当数组长度为 2^n 时，可以最大程度的避免哈希冲突，因此有这个要求，就算给 ConcurrentHashMap 传入的大小不是 2^n，ConcurrentHashMap 也会计算出大于该数的最小 2^n，赋值给 n。
 
-## ConcurrentHashMap 初始化流程
+### ConcurrentHashMap 初始化流程
 
 数组是懒加载的，第一次执行put()方法的时候才会进行初始化。
 
@@ -978,7 +978,7 @@ sizeCtl 是数组在初始化和扩容操作时一个控制变量，它的不同
 
 基于一个while循环，先去判断数组初始化了没有，如果没有，会再次比较sizeCtl的情况，如果正在初始化，则会通过Thread.yield()让出CPU资源，如果没有初始化，则会通过CAS的方式修改sizeCtl的值为-1，修改过后还会再次判断数组是否被初始化了（DCL，以免在当前线程修改sizeCtl的值的时候，已经有别的线程对当前数组完成了初始化），如果当前数组仍然没有被初始化，才会真正开始初始化。
 
-## ConcurrentHashMap 扩容流程
+### ConcurrentHashMap 扩容流程
 
 主要有三种方式会触发扩容
 
@@ -1313,7 +1313,7 @@ sizeCtl 是数组在初始化和扩容操作时一个控制变量，它的不同
 
 3. 执行 addCount() 操作时，如果当前元素个数达到了扩容阈值，也会进行扩容。
 
-## ConcurrentHashMap 读取数据流程
+### ConcurrentHashMap 读取数据流程
 
 ConcurrentHashMap 的数据查询都是以 get() 方法为入口的。
 
@@ -1362,7 +1362,7 @@ public V get(Object key) {
 }
 ```
 
-## ConcurrentHashMap 计数器的实现
+### ConcurrentHashMap 计数器的实现
 
 计数器是用来统计 ConcurrentHashMap 的元素个数的，通过 addCount() 方法是吸纳，可以看到 addCount() 方法中有两个重要的对象：CounterCell[] 数组和 baseCount 变量。
 

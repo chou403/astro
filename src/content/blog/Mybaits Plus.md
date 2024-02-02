@@ -10,9 +10,9 @@ tags:
 
 ## Table of contents
 
-### 使用 Dynamic DataSource
+## 使用 Dynamic DataSource
 
-#### 系统版本介绍
+### 系统版本介绍
 
 SpringBoot：3.1.4
 
@@ -26,7 +26,7 @@ Gradle 8.4
 
 ...
 
-#### 依赖引用
+### 依赖引用
 
 ```xml
 com.mysql:mysql-connector-j:8.2.0
@@ -34,7 +34,7 @@ com.baomidou:mybatis-plus-boot-starter:3.5.4.1
 com.baomidou:dynamic-datasource-spring-boot3-starter:4.1.3
 ```
 
-#### 配置数据源
+### 配置数据源
 
 ```yaml
 spring:
@@ -57,7 +57,7 @@ spring:
           password: 3308
 ```
 
-#### 切换数据源
+### 切换数据源
 
 使用 @DS 切换数据源，@DS可以注解在方法上或类上，**同时存在就近原则，方法上注解优先于类上注解**。
 
@@ -86,11 +86,11 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-### 使用AOP 判断方法名方式
+## 使用AOP 判断方法名方式
 
 采用 AOP的方式，通过方法名判断，方法名中有 get、select 开头的则连接 slave，其他的则连接 master 数据库。
 
-#### 配置数据源
+### 配置数据源
 
 ```yaml
 spring:
@@ -109,7 +109,7 @@ spring:
       password: 3308
 ```
 
-#### 数据源枚举
+### 数据源枚举
 
 ```java
 public @interface Writer {
@@ -122,7 +122,7 @@ public enum ReadsAndWrite {
 }
 ```
 
-#### 数据源选择规则类
+### 数据源选择规则类
 
 ```java
 public class ReadWriteSeparationRule {
@@ -162,7 +162,7 @@ public class ReadWriteSeparationRule {
 }
 ```
 
-#### 数据源路由类
+### 数据源路由类
 
 ```java
 public class ReadWriteRoutingDataSource extends AbstractRoutingDataSource {
@@ -176,7 +176,7 @@ public class ReadWriteRoutingDataSource extends AbstractRoutingDataSource {
 
 ```
 
-#### 数据源配置类
+### 数据源配置类
 
 ```java
 @Slf4j
@@ -218,7 +218,7 @@ public class DataSourceConfig {
 }
 ```
 
-#### MybatisPlus 配置类
+### MybatisPlus 配置类
 
 MybatisPlus 配置类中添加一下内容
 
@@ -253,7 +253,7 @@ public class MybatisPlusConfig {
 }
 ```
 
-#### 读写节点选择
+### 读写节点选择
 
 以上内容都准备结束，最后就是通过 aop 获取请求方法名，根据方法名分配方法读或写操作。
 
@@ -295,7 +295,7 @@ public class ReadWriteDataSourceAop {
 }
 ```
 
-### 使用shardingsphere jdbc
+## 使用shardingsphere jdbc
 
 依赖
 
@@ -430,7 +430,7 @@ props:
       type: SNOWFLAKE
 ```
 
-### 可能会出现的问题
+## 可能会出现的问题
 
 Cause: javax.xml.bind.JAXBException: Implementation of JAXB-API has not been found on module path or classpath.
 JAXB API是java EE 的API，因此在java SE 9.0 中不再包含这个 Jar 包。java 9 中引入了模块的概念，默认情况下，Java SE中将不再包含java EE 的Jar包 。而在 java 6/7 / 8 时关于这个API 都是捆绑在一起的。

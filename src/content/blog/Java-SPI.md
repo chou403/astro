@@ -9,7 +9,7 @@ tags:
 
 ## Table of contents
 
-# Java SPI
+## Java SPI
 
 SPI: Service Provider Interface，它是从 Java6 开始引入的，是一种基于 Classloader 来发现并加载服务的机制。
 
@@ -19,11 +19,11 @@ SPI: Service Provider Interface，它是从 Java6 开始引入的，是一种基
 - Service Provider：是 Service 接口的一个实现类
 - ServiceLoader：是 SPI 机制中的核心组件，负责在运行时发现并加载 Service Provider
 
-## 运行流程
+### 运行流程
 
 ![image-20230821143535836](https://github.com/chou401/pic-md/raw/master/image-20230821143535836.png)
 
-## 三大规范要素
+### 三大规范要素
 
 - 规范的配置文件
   - 文件路径：必须在 jar 包中 META-INF/services 目录下
@@ -36,7 +36,7 @@ SPI: Service Provider Interface，它是从 Java6 开始引入的，是一种基
   - 方式二：将 jar 包安装到 jre 的扩展目录中
   - 方式三：自定义一个 ClassLoader
 
-## Java SPI 与 SpringBoot 自动配置
+### Java SPI 与 SpringBoot 自动配置
 
 ![image-20230821154836454](https://github.com/chou401/pic-md/raw/master/image-20230821154836454.png)
 

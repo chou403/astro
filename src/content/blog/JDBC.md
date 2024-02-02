@@ -10,8 +10,6 @@ tags:
 
 ## Table of contents
 
-# JDBC
-
 ## 事务
 
 事务（Transaction）：一般是指要做的或所做的事情。

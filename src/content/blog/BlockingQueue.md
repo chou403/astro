@@ -10,7 +10,7 @@ tags:
 
 ## Table of contents
 
-# 阻塞队列
+## 阻塞队列
 
 先进先出（FIFO）的数据结构，与普通队列不同的是，他支持两个附加操作，即阻塞添加和阻塞删除方法。
 
@@ -23,7 +23,7 @@ tags:
 
 - 阻塞队列不用手动控制什么时候该被阻塞，什么时候该被唤醒，简化了操作。
 
-## BlockingQueue
+### BlockingQueue
 
 根据插入和取出两种类型的操作，具体分为下面一些类型：
 
@@ -53,7 +53,7 @@ tags:
 > - take：会响应中断，会一直阻塞直到取得元素或当前线程中断。
 > - poll：会响应中断，会阻塞，阻塞时间参照方法里参数timeout.timeUnit，当阻塞时间到了还没取得元素会返回null。
 
-## ArrayBlockingQueue
+### ArrayBlockingQueue
 
 - 数据结构：静态数组，容量固定必须指定长度，没有扩容机制，没有元素的下标位置null占位。
 
@@ -306,7 +306,7 @@ void removeAt(final int removeIndex) {
 }
 ```
 
-## LinkedBlockingQueue
+### LinkedBlockingQueue
 
 由**链表**构成的**有界**阻塞队列，需要注意的是虽然是有界的，但是其默认大小是Integer.MAX_VALUE，高达21亿，一般情况下内存早爆了（在线程池中ThreadPoolExecutor有体现）。
 
@@ -329,7 +329,7 @@ void removeAt(final int removeIndex) {
 - 删除元素时两个锁一起加。
 - 先进先出。
 
-## PriorityBlockingQueue
+### PriorityBlockingQueue
 
 支持优先级排序的无界阻塞队列。
 
@@ -345,11 +345,11 @@ void removeAt(final int removeIndex) {
   - 自上而下堆化。
   - 为空则阻塞。
 
-## DelayQueue
+### DelayQueue
 
 支持优先级的延迟无界阻塞队列。
 
-## SynchronousQueue
+### SynchronousQueue
 
 单个元素的阻塞队列，队列中只有一个元素，如果想插入多个，必须等队列元素取出后，才能插入，只能有一个“坑位”，用一个插一个。
 
@@ -374,7 +374,7 @@ void removeAt(final int removeIndex) {
 - 公平模式：TransferQueue，队尾匹配，队头出队，先进先出。
 - 非公平模式：TransferStack，栈顶匹配，栈顶出栈，后进先出。
 
-## LinkedTransferQueue
+### LinkedTransferQueue
 
 由链表构成的无界阻塞队列。
 
@@ -384,11 +384,11 @@ void removeAt(final int removeIndex) {
 - 可以自己控制放元素需要阻塞线程，比如使用四个添加元素的方法就不会阻塞线程，只入队元素，使用transfer()会阻塞线程。
 - 取元素与SynchronousQueue基本一样，都会阻塞等待有新的元素进入被匹配到。
 
-## LinkedBlockingDeque
+### LinkedBlockingDeque
 
 由链表构成的双向阻塞队列。
 
-## LinkedBlockingQueue和ArrayBlockingQueue区别
+### LinkedBlockingQueue和ArrayBlockingQueue区别
 
 1. 队列大小不同：
 

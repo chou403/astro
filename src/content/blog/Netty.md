@@ -9,8 +9,6 @@ tags:
 
 ## Table of contents
 
-# Netty
-
 ## BIO（Blocking IO）
 
 ![image-20230313103444295](https://github.com/chou401/pic-md/raw/master/img/image-20230313103444295.png)
