@@ -1272,7 +1272,7 @@ Kafka的ISR的管理最终都会反馈到Zookeeper节点上。具体位置为：
 - 该目录下znode只有在有相关操作时才会存在，操作结束时会将其删除
 - /admin/reassign_partitions用于将一些Partition分配到不同的broker集合上。对于每个待重新分配的Partition，Kafka会在该znode上存储其所有的Replica和相应的Broker id。该znode由管理进程创建并且一旦重新分配成功它将会被自动移除。
 
-##### broker
+##### HA broker
 
 - 即/brokers/ids/[brokerId]）存储“活着”的broker信息。
 - topic注册信息（/brokers/topics/[topic]），存储该topic的所有partition的所有replica所在的broker id，第一个replica即为preferred replica，对一个给定的partition，它在同一个broker上最多只有一个replica,因此broker id可作为replica id。
