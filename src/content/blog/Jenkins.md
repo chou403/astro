@@ -12,7 +12,7 @@ tags:
 
 ## 使用官方安装脚本
 
-> curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+> curl -fsSL <https://get.docker.com> | bash -s docker --mirror Aliyun
 
 ## 安装jenkins
 
@@ -29,7 +29,7 @@ tags:
 > -v /var/jenkins_mount:/var/jenkins_mount 意义： /var/jenkins_home目录为容器jenkins工作目录，我们将硬盘上的一个目录挂载到这个位置，方便后续更新镜像后继续使用原来的工作目录。这里我们设置的就是上面我们创建的 /var/jenkins_mount目录
 > -v /etc/localtime:/etc/localtime 意义：让容器使用和服务器同样的时间设置。
 > -v /root/apache-maven-3.6.3:/usr/local/maven 意义：挂载本地maven，前面是服务器上的，后面是挂载到容器上的目录
-> 　–name myjenkins 意义：给容器起一个别名
+> –name myjenkins 意义：给容器起一个别名
 
 ## 交互式启动后切换到后台
 
@@ -43,11 +43,11 @@ tags:
 
 ## 下载仓库
 
-> wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat/jenkins.repo
+> wget -O /etc/yum.repos.d/jenkins.repo <https://pkg.jenkins.io/redhat/jenkins.repo>
 
 ## 导入密钥
 
-> rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+> rpm --import <https://pkg.jenkins.io/redhat/jenkins.io.key>
 
 ## 如果安装过程中提示公钥尚未安装 可以使用 --nogpgcheck 跳过检查
 
@@ -117,7 +117,7 @@ tags:
 
 ## 修改更新地址
 
-> https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
+> <https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json>
 
 ## 中文插件安装
 

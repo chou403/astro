@@ -42,7 +42,7 @@ tags:
 
 在数据库操作中，为了有效保证并发读取数据的正确性，提出的事务隔离级别。
 
-**JDBC定义了五种事务隔离级别**
+### JDBC定义了五种事务隔离级别
 
 - TRANSACTION_READ_UNCOMMITTED：允许脏读、不可重复读和幻读。
 
@@ -71,7 +71,7 @@ tags:
 
 - **幻读（Phantom read）**：类似与不可重复读类似。它发生在一个事务（T1）读取了几行数据，接着另一个并发事务（T2）插入了一些数据时。在随后的查询中，第一个事物（T1）就会发现对了一些根本不存在的记录，就好像是发生幻觉。称为幻读。
 
-**不可重复读和幻读的区别**
+### 不可重复读和幻读的区别
 
 不可重复读的重点是修改，幻读的中单在于新增或者删除。
 
@@ -79,14 +79,14 @@ tags:
 
 JDBC的事务管理操作需要通过java.sql.Connection接口来设置。
 
-**隔离级别**
+### 隔离级别
 
-| static int | [TRANSACTION_NONE](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_NONE) 指示不支持事务的常量。                                                          |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| static int | [ TRANSACTION_READ_COMMITTED](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_READ_COMMITTED) 一个常数表示防止脏读; 可能会发生不可重复的读取和幻像读取。 |
-| static int | [ TRANSACTION_READ_UNCOMMITTED](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_READ_UNCOMMITTED) 一个常量表示可能会发生脏读，不可重复读和幻读。         |
-| static int | [ TRANSACTION_REPEATABLE_READ](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_REPEATABLE_READ) 一个常量表示防止了脏读和不可重复读; 可以发生幻读。       |
-| static int | [TRANSACTION_SERIALIZABLE](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_SERIALIZABLE) 一个常数表示防止脏读，不可重复读和幻读。                        |
+| static int | [TRANSACTION_NONE](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_NONE) 指示不支持事务的常量。                                                         |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| static int | [TRANSACTION_READ_COMMITTED](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_READ_COMMITTED) 一个常数表示防止脏读; 可能会发生不可重复的读取和幻像读取。 |
+| static int | [TRANSACTION_READ_UNCOMMITTED](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_READ_UNCOMMITTED) 一个常量表示可能会发生脏读，不可重复读和幻读。         |
+| static int | [TRANSACTION_REPEATABLE_READ](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_REPEATABLE_READ) 一个常量表示防止了脏读和不可重复读; 可以发生幻读。       |
+| static int | [TRANSACTION_SERIALIZABLE](https://blog.csdn.net/weixin_49576031/article/details/121632045#TRANSACTION_SERIALIZABLE) 一个常数表示防止脏读，不可重复读和幻读。                       |
 
 | Modifier and Type       | Constant Field                                                                                                               | Value |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----- |

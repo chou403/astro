@@ -188,7 +188,7 @@ mysql -u root -p -S /opt/homebrew/opt/mysql/mysql_3306.sock
 
 系统会提示输入密码，将上面记录的初始密码输入，进入 mysql 服务器。
 
-**更改 root 的密码**
+### 更改 root 的密码
 
 为了方便，我们将 3306 端口的服务器密码设置为 3306。同样方式更改其他两个。
 
@@ -199,7 +199,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '3306';
 ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '3306';
 ```
 
-**关闭 mysql 服务器**
+### 关闭 mysql 服务器
 
 ```mysql
 mysqladmin -S /opt/homebrew/opt/mysql/mysql_3306.sock -uroot -p shutdown。
@@ -253,7 +253,7 @@ Query OK, 0 rows affected (0.01 sec)
 
 直接删除原先的 mysql ，新建安装，将 my.cnf 内容拆成三个配置文件 3306.cnf、3307.cnf 和 3308.cnf。
 
-### 配置文件
+### 多实例配置文件
 
 3306.cnf 配置文件添加以下内容：
 
@@ -319,7 +319,7 @@ server_id=3
 
 ## 主从复制
 
-### 配置文件
+### 主从复制配置文件
 
 主库配置开启 binlog 参数
 
@@ -526,8 +526,9 @@ Master_SSL_Verify_Server_Cert: No
 1 row in set, 1 warning (0.00 sec)
 ```
 
-## 记录配置过程中可能出现的问题
+## 问题
 
+记录配置过程中可能出现的问题
 **Replica failed to initialize applier metadata structure from the repository**
 
 ```mysql

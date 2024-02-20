@@ -19,11 +19,11 @@ tags:
 ## 配置源
 
 > sudo yum-config-manager \
->  --add-repo \
->  https://download.docker.com/linux/centos/docker-ce.repo
+> --add-repo \
+> <https://download.docker.com/linux/centos/docker-ce.repo>
 > sudo yum-config-manager \
->  --add-repo \
->  http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+> --add-repo \
+> <http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo>
 
 ## 因为更新了源所以要更新yum缓存
 
@@ -42,10 +42,10 @@ tags:
 > {
 > "registry-mirrors": [
 >
-> > "https://registry.docker-cn.com",
-> > "http://hub-mirror.c.163.com",
-> > "https://docker.mirrors.ustc.edu.cn",
-> > "https://kfwkfulq.mirror.aliyuncs.com"
+> > "<https://registry.docker-cn.com>",
+> > "<http://hub-mirror.c.163.com>",
+> > "<https://docker.mirrors.ustc.edu.cn>",
+> > "<https://kfwkfulq.mirror.aliyuncs.com>"
 > > ],
 > > "max-concurrent-downloads": 10,
 > > "log-driver": "json-file",
@@ -161,7 +161,7 @@ tags:
 
 > curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 >
-> curl -L "http://ithltt.com/files/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+> curl -L "<http://ithltt.com/files/docker-compose-linux-x86_64>" -o /usr/local/bin/docker-compose
 
 ## 授权
 
@@ -207,7 +207,7 @@ tags:
 
 > docker cp /home/demo 容器ID:容器目录
 
-## 查看容器日志
+## 查看指定容器日志
 
 > docker logs -f 容器ID
 
@@ -215,7 +215,7 @@ tags:
 
 > docker exec -it 容器ID bash
 
-## 停止容器
+## 停止指定容器
 
 > docker stop 容器ID
 
@@ -271,7 +271,7 @@ tags:
 > docker build -t 镜像名:版本号 .
 > docker build -t 镜像名:版本号 - < /path/DockerFile(文件绝对路径, 脚本中不能使用相对路径!!)
 
-#### 本地构建 helloworldapp 镜像文件
+### 本地构建 helloworldapp 镜像文件
 
 > docker build -t helloworldapp .
 
@@ -305,7 +305,7 @@ tags:
 > 格式:
 > MAINTAINER <name>
 > 实例:
-> MAINTAINER wangsh3@yonyou.com
+> MAINTAINER <xxx@aaaa.com>
 
 ## 构建时候执行的命令
 
@@ -375,13 +375,13 @@ tags:
 
 ## 下载Nginx 并解压
 
-> ADD http://nginx.org/download/nginx-1.23.3.tar.gz /usr/local/
+> ADD <http://nginx.org/download/nginx-1.23.3.tar.gz> /usr/local/
 
 ## 下载企业linux支持库(因为该网站无法直接下载)
 
-> ## https://mirrors.tuna.tsinghua.edu.cn/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm
+> ## <https://mirrors.tuna.tsinghua.edu.cn/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm>
 >
-> ADD http://10.180.1.177/linux/package/rpm/epel-release-7-14.noarch.rpm /usr/local/
+> ADD <http://10.180.1.177/linux/package/rpm/epel-release-7-14.noarch.rpm> /usr/local/
 
 ## RUN 执行以下命令
 
@@ -396,7 +396,7 @@ tags:
 ## 调整URL列表
 
 > RUN sed -i 's/mirrorlist/##mirrorlist/g' /etc/yum.repos.d/CentOS-_
-> RUN sed -i 's|##baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-_
+> RUN sed -i 's|##baseurl=<http://mirror.centos.org|baseurl=http://vault.centos.org|g>' /etc/yum.repos.d/CentOS-_
 
 ## 重新生成缓存
 
@@ -431,9 +431,7 @@ tags:
 
 > CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]
 
-#
-
-# 使用docker-compose批量管理容器
+## 使用docker-compose批量管理容器
 
 docker-compose.yml
 
@@ -498,12 +496,12 @@ docker-compose.yml
 > 8070:8080
 > environment:
 
-# 指定时区
+## 指定时区
 
 > TZ: Asia/Shanghai
 > volumes:
 
-# 数据卷映射
+## 数据卷映射
 
 > /docker_tomcat/webapps:/usr/local/tomcat/webapps
 >
@@ -542,16 +540,16 @@ docker-compose.yml
 > 82:80
 > environment:
 
-# 指定时区
+## 指定时区
 
 > TZ: Asia/Shanghai
 > volumes:
 
-# 数据卷映射
+## 数据卷映射
 
 > /docker_nginx/logs:/usr/local/nginx/logs
 
-# 微服务镜像
+## 微服务镜像
 
 > FROM openjdk:8-jdk-alpine
 > ARG JAR_FILE
@@ -559,10 +557,10 @@ docker-compose.yml
 > EXPOSE 10086
 > ENTRYPOINT ["java","-jar","/app.jar"]
 
-# 编译镜像
+## 编译镜像
 
 > docker build --build-arg JAR_FILE=xxx.jar -t ServiceName:Version
 
-# 启动镜像
+## 启动镜像
 
 > docker run -di -p 10086:10086 ServiceName:Version

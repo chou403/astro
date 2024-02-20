@@ -182,5 +182,3 @@ public static void main(String[] args) {
     SmallTool.print(String.format("%s,小白坐车回家", bus.join()));
 }
 ```
-
-#

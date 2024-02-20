@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
 采用 AOP的方式，通过方法名判断，方法名中有 get、select 开头的则连接 slave，其他的则连接 master 数据库。
 
-### 配置数据源
+### AOP 配置数据源
 
 ```yaml
 spring:

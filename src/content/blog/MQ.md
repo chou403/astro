@@ -43,18 +43,18 @@ tags:
 
 以上实际是消息队列的两种消息模式，点对点或发布订阅模式。
 
-**消息队列的缺点**
+### 消息队列的缺点
 
 - 降低系统的可用性：系统引入的外部依赖越多，越容易挂掉。
 - 系统复杂度提高：使用MQ后可能需要保证消息没有被重复消费、处理消息丢失的情况、保证消息传递的顺序性等等问题。
 - 一致性问题：A系统处理完了直接返回成功了，但问题是：要是B、C、D三个系统那里，B和D两个系统写库成功了，结果C系统写库失败了，就造成了数据不一致了。
 
-**如何保证消息队列的顺序性**
+### 如何保证消息队列的顺序性
 
 - 生产者有序的情况下，单线程消费来保证消息的顺序性。
 - 生产者无序的情况下，对消息进行编号，消费者处理时根据编号判断顺序。多个消费者，可以考虑增加分布式锁。
 
-**如何保证消息不被重复消费/如何保证消息的幂等性**
+### 如何保证消息不被重复消费/如何保证消息的幂等性
 
 - 生产者发送每条数据的时候，里面添加一个全局唯一的id，消费者消费到消息后，先根据消息id去redis中查询，如果redis不存在，就处理消息，然后将消息id写入redis。如果redis中存在，说明消息已经消费过，就不用处理。
 - 基于数据库的唯一键，保证重复数据不会重复插入。因为有唯一键的约束，所以重复数据只会插入报错，不会导致数据库中出现脏数据。
@@ -91,7 +91,7 @@ AMQP，即Advanced Message Queuing Protocol（高级消息队列协议），一�
 
 #### JMS
 
-##### 简介
+##### JMS 简介
 
 JMS即Java消息服务（Java Message Service）应用程序接口，是一个Java平台中关于面向消息中间件（MOM）的API，用于在两个应用程序之间，或分布式系统中发送消息，进行异步通信。Java消息服务是一个与具体平台无关的API，绝大多数MOM提供商都对JMS提供支持（百度百科给出的概述）。我们可以简单的理解：两个应用程序之间需要进行通信，我们使用一个JMS服务，进行中间的转发，通过JMS 的使用，我们可以解除两个程序之间的耦合。
 
@@ -114,7 +114,7 @@ JMS具有两种通信模式：
 
 在JMS API出现之前，大部分产品使用“点对点”和“发布/订阅”中的任一方式来进行消息通讯。JMS定义了这两种消息发送模型的规范，它们相互独立。任何JMS的提供者可以实现其中的一种或两种模型，这是它们自己的选择。JMS规范提供了通用接口保证我们基于JMS API编写的程序适用于任何一种模型。
 
-**Point-to-Point Messaging Domain（点对点通信模型）**
+###### Point-to-Point Messaging Domain（点对点通信模型）
 
 - 在点对点通信模式中，应用程序由消息队列，发送方，接收方组成。每个消息都被发送到一个特定的队列，接收者从队列中获取消息。队列保留着消息，直到他们被消费或超时
 
@@ -124,7 +124,7 @@ JMS具有两种通信模式：
   - 发送方不管是否在发送消息，接收方都可以从消息队列中去到消息（The receiver can fetch message whether it is running or not when the sender sends the message）
   - 接收方在接收完消息之后，需要向消息队列应答成功
 
-**Publish/Subscribe Messaging Domain（发布/订阅通信模型）**
+###### Publish/Subscribe Messaging Domain（发布/订阅通信模型）
 
 - 在发布/订阅消息模型中，发布者发布一个消息，该消息通过topic传递给所有的客户端。该模式下，发布者与订阅者都是匿名的，即发布者与订阅者都不知道对方是谁。并且可以动态的发布与订阅Topic。Topic主要用于保存和传递消息，且会一直保存消息直到消息被传递给客户端。
 - **特点**
@@ -346,7 +346,7 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
 
   然后发送一条消息，RoutingKey 为 “key1.key2.key3.key4”，那么根据 “.” 将这个路由键分为了四个部分，此条路由键将会匹配：
 
-  1. key1.key2.key3._：成功匹配，因为 _ 可以代表一个部分。
+  1. key1.key2.key3.*：成功匹配，因为*可以代表一个部分。
   2. key1.#：成功匹配，因为 可以代表0或多个部分。
   3. _.key3._.key4：成功匹配，因为第一和第三部分分别为key1和key3，且为四个部分，刚好匹配。
   4. #.key3.key4：成功匹配，#可以代表多个部分，正好匹配中了key1和key2。
@@ -362,7 +362,7 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
   - x-match = all：表示所有的键值对都匹配才能接收到消息。
   - x-match = any：表示只要有键值对匹配就能接收到消息。
 
-![](https://github.com/chou401/pic-md/raw/master/img/image-20230523095354400.png)
+![image-20230523095354400](https://github.com/chou401/pic-md/raw/master/img/image-20230523095354400.png)
 
 #### 镜像队列
 
@@ -431,7 +431,7 @@ RabbitMQ 以队列维度提供高可用的解决方案——镜像队列。
 
 ##### 配置参数
 
-**镜像策略**
+###### 镜像策略
 
 | **ha-mode** | **ha-params** | **结果**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ----------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -439,14 +439,14 @@ RabbitMQ 以队列维度提供高可用的解决方案——镜像队列。
 | all         | 不设置        | 队列跨集群中的所有节点镜像。当一个新节点被添加到集群中时，队列将被镜像到该节点。这个设置非常保守。建议设置的副本值为大多数节点`N / 2 + 1`。镜像到所有节点会给所有集群节点带来额外的负担，包括网络I/O、磁盘I/O和磁盘空间的使用。                                                                                                                                                                                                                                                                                                                                                   |
 | nodes       | 节点名称      | 队列被镜像到节点名中列出的节点。节点名是在rabbitmqctl cluster_status中出现的Erlang节点名；它们的形式通常是“rabbit@hostname”。如果这些节点名中有任何一个不是集群的一部分，则不构成错误。如果在声明队列时列表中的节点都不在线，则将在声明客户机连接的节点上创建队列。                                                                                                                                                                                                                                                                                                               |
 
-**新镜像同步策略**
+###### 新镜像同步策略
 
 | **ha-sync-mode** | **说明**                                                                                                                                                                                                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | manual           | 这是默认模式。新队列镜像将不接收现有消息，它只接收新消息。一旦使用者耗尽了仅存在于主服务器上的消息，新的队列镜像将随着时间的推移成为主服务器的精确副本。如果主队列在所有未同步的消息耗尽之前失败，则这些消息将丢失。您可以手动完全同步队列，详情请参阅未同步的镜像部分。 |
 | automatic        | 当新镜像加入时，队列将自动同步。值得重申的是，队列同步是一个阻塞操作。如果队列很小，或者您在RabbitMQ节点和ha-sync-batch-size之间有一个快速的网络，那么这是一个很好的选择。                                                                                               |
 
-**从节点晋升策略**
+###### 从节点晋升策略
 
 镜像队列主节点出现故障时，最老的从节点会被提升为新的主节点。如果新提升为主节点的这个副本与原有的主节点并未完成数据的同步，那么就会出现数据的丢失，而实际应用中，出现数据丢失可能会导致出现严重后果。
 
@@ -458,10 +458,9 @@ rabbitmq 提供了 ha-promote-on-shutdown，ha-promote-on-failure 两个参数�
 | always                                           | 无论什么情况下从节点都将被提升为主节点         |
 
 > 这里要注意的是ha-promote-on-failure设置为always，插拔网线模拟网络异常的两个测试场景：当网络恢复后，其中一个会重新变为mirror，具体是哪个变为mirror，受cluster_partition_handling处理策略的影响。
-
 > 例如两台节点A，B组成集群，并且cluster_partition_handling设置为autoheal，队列的master位于节点A上，具有全量数据，mirror位于节点B上，并且还未完成消息的同步，此时出现网络异常，网络异常后两个节点交互决策：如果节点A节点成为赢家，此时B节点内部会重启，这样数据全部保留不会丢失；相反如果B节点成为赢家，A需要重启，那么由于ha-prromote-on-failure设置为always，B节点上的mirror提升为master，这样就出现了数据丢失。
 
-**主队列选择策略**
+###### 主队列选择策略
 
 RabbitMQ中的每个队列都有一个主队列。该节点称为队列主服务器。所有队列操作首先经过主队列，然后复制到镜像。这对于保证消息的FIFO排序是必要的。
 
@@ -511,14 +510,14 @@ RabbitMQ中的每个队列都有一个主队列。该节点称为队列主服务
 
 ##### HAProxy实现负载均衡
 
-**简介**
+###### HAProxy 简介
 
 1. HAProxy 是一款提供高可用性、负载均衡以及基于TCP（第四层）和HTTP（第七层）应用的代理软件，支持虚拟主机，它是免费、快速并且可靠的一种解决方案。 HAProxy特别适用于那些负载特大的web站点，这些站点通常又需要会话保持或七层处理。HAProxy运行在时下的硬件上，完全可以支持数以万计的 并发连接。并且它的运行模式使得它可以很简单安全的整合进您当前的架构中， 同时可以保护你的web服务器不被暴露到网络上。
 2. HAProxy 实现了一种事件驱动、单一进程模型，此模型支持非常大的并发连接数。多进程或多线程模型受内存限制 、系统调度器限制以及无处不在的锁限制，很少能处理数千并发连接。事件驱动模型因为在有更好的资源和时间管理的用户端(User-Space) 实现所有这些任务，所以没有这些问题。此模型的弊端是，在多核系统上，这些程序通常扩展性较差。这就是为什么他们必须进行优化以 使每个CPU时间片(Cycle)做更多的工作。
 3. HAProxy 支持连接拒绝 : 因为维护一个连接的打开的开销是很低的，有时我们很需要限制攻击蠕虫（attack bots），也就是说限制它们的连接打开从而限制它们的危害。 这个已经为一个陷于小型DDoS攻击的网站开发了而且已经拯救了很多站点，这个优点也是其它负载均衡器没有的。
 4. HAProxy 支持全透明代理（已具备硬件防火墙的典型特点）: 可以用客户端IP地址或者任何其他地址来连接后端服务器，这个特性仅在 Linux 2.4/2.6内核打了cttproxy补丁后才可以使用，这个特性也使得为某特殊服务器处理部分流量同时又不修改服务器的地址成为可能。
 
-**四层负载均衡与七层负载均衡**
+###### 四层负载均衡与七层负载均衡
 
 - **四层负载均衡**
 
@@ -530,7 +529,7 @@ RabbitMQ中的每个队列都有一个主队列。该节点称为队列主服务
 
   对比四层负载均衡和七层负载均衡运行的整个过程，可以看出，在七层负载均衡模式下， 负载均衡器与客户端及后端的服务器会分别建立一次 TCP 连接，而在四层负载均衡模式下， 仅建立一次 TCP 连接。由此可知，七层负载均衡对负载均衡设备的要求更高，而七层负载均衡的处理能力也必然低于四层模式的负载均衡。
 
-**HAProxy配置详解**
+###### HAProxy配置详解
 
 HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有些部分并不是必须的， 可以根据需要选择相应的部分进行配置。
 
@@ -628,15 +627,15 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
 
       <table>
       <tr>
-      	<td>name</td>
-      	<td colspan="2">为后端真实服务器指定一个内部名称，随便定义一个即可。</td>
+        <td>name</td>
+        <td colspan="2">为后端真实服务器指定一个内部名称，随便定义一个即可。</td>
       </tr>
       <tr>
-      	<td>address</td>
-      	<td colspan="2">后端真实服务器的 IP 地址或主机名。</td>
+        <td>address</td>
+        <td colspan="2">后端真实服务器的 IP 地址或主机名。</td>
       </tr>
       <tr>
-      	<td>port</td>
+        <td>port</td>
         <td colspan="2">指定连接请求发往真实服务器时的目标端口。在未设定时，将使用客户端请求时的同一端口。</td>
       </tr>
         <td rowspan="8">[params*]</td>
@@ -644,31 +643,31 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
       </tr>
       </tr>
         <td>check</td>
-      	<td>表示启用对此后端服务器执行健康状态检查。</td>
+        <td>表示启用对此后端服务器执行健康状态检查。</td>
       </tr>
       </tr>
         <td>inter</td>
-      	<td>设置健康检查的时间间隔，单位为毫秒。</td>
+        <td>设置健康检查的时间间隔，单位为毫秒。</td>
       </tr>
       </tr>
         <td>rise</td>
-      	<td>设置从故障状态转化为正常状态需要成功检查的次数，例如：“rise：2”表示两次检查正确就认为此服务可用。</td>
+        <td>设置从故障状态转化为正常状态需要成功检查的次数，例如：“rise：2”表示两次检查正确就认为此服务可用。</td>
       </tr>
       </tr>
         <td>fall</td>
-      	<td>设置后端服务器从正常状态转换为不可用状态需要检查的次数，例如：“fall：3”表示三次检查失败就认为此服务器不可用。</td>
+        <td>设置后端服务器从正常状态转换为不可用状态需要检查的次数，例如：“fall：3”表示三次检查失败就认为此服务器不可用。</td>
       </tr>
       </tr>
         <td>cookie</td>
-      	<td>为指定的后端服务器设置 cookie 值，此处指定的值将在请求入站时被检查，第一次为此值挑选的后端服务器将在后续的请求中一直被选中，其目的在于实现持久连接的功能。上面的“cookie server1” 表示 web1 的 serverid 为 server1。同理，“cookie server2” 表示 web2 的 serverid 为 server2。</td>
+        <td>为指定的后端服务器设置 cookie 值，此处指定的值将在请求入站时被检查，第一次为此值挑选的后端服务器将在后续的请求中一直被选中，其目的在于实现持久连接的功能。上面的“cookie server1” 表示 web1 的 serverid 为 server1。同理，“cookie server2” 表示 web2 的 serverid 为 server2。</td>
       </tr>
       </tr>
         <td>weight</td>
-      	<td>设置后端真实服务器的权重，默认为 1，最大值为 256。设置为 0 表示不参与负载均衡。</td>
+        <td>设置后端真实服务器的权重，默认为 1，最大值为 256。设置为 0 表示不参与负载均衡。</td>
       </tr>
       </tr>
         <td>backup</td>
-      	<td>设置后端真实服务器的备份服务器，仅仅在后端真实服务器均不可用时才会启用。</td>
+        <td>设置后端真实服务器的备份服务器，仅仅在后端真实服务器均不可用时才会启用。</td>
       </tr>
       </table>
 
@@ -679,13 +678,13 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
   这个部分通过listen 关键字定义了一个名为“admin_stats”的实例，其实就是定义了一个 HAProxy 的监控页面，每个选项的含义如下：
 
   - stats refresh：设置 HAProxy 监控统计页面自动刷新的时间。
-  - stats uri：设置 HAProxy 监控统计页面的URL 路径，可随意指定。例如、指定“stats uri /haproxy-status”，就可以过 http://IP:9188/haproxy-status 查看。
+  - stats uri：设置 HAProxy 监控统计页面的URL 路径，可随意指定。例如、指定“stats uri /haproxy-status”，就可以过 <http://IP:9188/haproxy-status> 查看。
   - stats realm：设置登录 HAProxy 统计页面时密码框上的文本提示信息。
   - stats auth：设置登录 HAProxy 统计页面的用户名和密码。用户名和密码通过冒号分割。可为监控页面设置多个用户名和密码，每行一个。
   - stats hide-version：用来隐藏统计页面上 HAProxy 的版本信息。
   - stats admin if TRUE：通过设置此选项，可以在监控页面上手工启用或禁用后端真实服务器，仅在 haproxy1.4.9 以后版本有效。
 
-**一份完整的配置**
+###### 一份完整的配置
 
 ```bash
 global
@@ -705,34 +704,34 @@ defaults
     timeout check 5s
 frontend www
     bind *:80
-    mode	http
-    option	httplog
-    option	forwardfor
-    option	httpclose
-    log	global
-    #acl host_www	hdr_dom(host)	-i	www.zb.com
-    #acl host_img	hdr_dom(host)	-i	img.zb.com
+    mode  http
+    option  httplog
+    option  forwardfor
+    option  httpclose
+    log global
+    #acl host_www hdr_dom(host) -i www.zb.com
+    #acl host_img hdr_dom(host) -i img.zb.com
 
-    #use_backend htmpool	if	host_www
-    #use_backend imgpool	if	host_img
-    default_backend	htmpool
+    #use_backend htmpool if host_www
+    #use_backend imgpool if host_img
+    default_backend htmpool
 backend htmpool
     mode http
-    option	redispatch
-    option	abortonclose
-    balance  static-rr
-    cookie	SERVERID
-    option	httpchk GET /index.jsp
-    server	237server 192.168.81.237:8080 cookie server1 weight 6 check inter 2000 rise 2 fall 3
-    server	iivey234 192.168.81.234:8080 cookie server2 weight 3 check inter 2000 rise 2 fall 3
+    option redispatch
+    option abortonclose
+    balance static-rr
+    cookie SERVERID
+    option httpchk GET /index.jsp
+    server 237server 192.168.81.237:8080 cookie server1 weight 6 check inter 2000 rise 2 fall 3
+    server iivey234 192.168.81.234:8080 cookie server2 weight 3 check inter 2000 rise 2 fall 3
 backend imgpool
-    mode		http
-    option	redispatch
-    option	abortonclose
-     balance  static-rr
-    cookie  SERVERID
-    option	httpchk GET /index.jsp
-    server	host236 192.168.81.236:8080 cookie server1 weight 6 check inter 2000 rise 2 fall 3
+    mode http
+    option redispatch
+    option abortonclose
+    balance static-rr
+    cookie SERVERID
+    option httpchk GET /index.jsp
+    server host236 192.168.81.236:8080 cookie server1 weight 6 check inter 2000 rise 2 fall 3
 
 listen admin_stats
     bind 0.0.0.0:9188
@@ -747,7 +746,7 @@ listen admin_stats
 
 ```
 
-**安装HAProxy**
+##### 安装HAProxy
 
 下载HAProxy相关版本，这里下载haproxy-1.8.12.tar.gz，之后准备安装。
 
@@ -772,7 +771,7 @@ make install PREFIX=/usr/local/haproxy
 /usr/local/haproxy/sbin/haproxy -v
 ```
 
-**配置HAProxy**
+##### 配置HAProxy
 
 配置启动文件，复制haproxy文件到/usr/sbin下 ，复制haproxy脚本，到/etc/init.d下
 
@@ -858,7 +857,7 @@ listen monitor
         stats refresh 5s
 ```
 
-**启动haproxy**
+##### 启动haproxy
 
 ```bash
 service haproxy start
@@ -914,7 +913,7 @@ Apache 称 Apollo 为最快、最强健的 STOMP（简单“流”文本定向�
 
 ### Kafka
 
-#### 简介
+#### Kafka 简介
 
 ##### Kafka是什么
 
@@ -926,7 +925,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 一个消息系统负责将数据从一个应用传递到另外一个应用，应用只需关注于数据，无需关注数据在两个或多个应用间是如何传递的。分布式消息传递基于可靠的消息队列，在客户端应用和消息系统之间异步传递消息。有两种主要的消息传递模式：**点对点传递模式、发布-订阅模式。大部分的消息系统选用发布-订阅模式**。**Kafka就是一种发布-订阅模式**。
 
-**点对点消息传递模式**
+###### 点对点消息传递模式
 
 在点对点消息系统中，消息持久化到一个队列中。此时，将有一个或多个消费者消费队列中的数据。但是一条消息只能被消费一次。当一个消费者消费了队列中的某条数据之后，该条数据则从消息队列中删除。该模式即使有多个消费者同时消费数据，也能保证数据处理的顺序。这种架构描述示意图如下：
 
@@ -934,7 +933,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 **生产者发送一条消息到queue，只有一个消费者能收到**。
 
-**发布-订阅消息传递模式**
+###### 发布-订阅消息传递模式
 
 在发布-订阅消息系统中，消息被持久化到一个topic中。与点对点消息系统不同的是，消费者可以订阅一个或多个topic，消费者可以消费该topic中所有的数据，同一条数据可以被多个消费者消费，数据被消费后不会立马删除。在发布-订阅消息系统中，消息的生产者称为发布者，消费者称为订阅者。该模式的示例图如下：
 
@@ -1070,7 +1069,7 @@ Producer发送消息到broker时，会根据Paritition机制选择将其存储�
 
 在发送一条消息时，可以指定这条消息的key，Producer根据这个key和Partition机制来判断应该将这条消息发送到哪个Partition。Paritition机制可以通过指定Producer的paritition.class这一参数来指定，该class必须实现kafka.producer.Partitioner接口。
 
-##### Consumer Group
+##### Consumer Group 消费群体
 
 使用Consumer high level API时，同一Topic的一条消息只能被同一个Consumer Group内的一个Consumer消费，但多个Consumer Group可同时消费这一消息。
 
@@ -1112,7 +1111,7 @@ producer端设置`request.required.acks`。
 - **request.required.acks = 1（默认）**：发送一条消息，当leader partition写入成功以后，才算写入成功。不过这种方式也有丢数据的可能。
 - **request.required.acks = -1/all**：需要ISR列表里面，所有 replica 都写完以后，这条消息才算写入成功。这才是 ISR 的正确应用场景，可靠性最高。
 
-**ISR 的最坏情况**
+###### ISR 的最坏情况
 
 排除所有 replica 全部故障，ISR 的最坏情况就是 ISR 中只剩 leader 自己一个了。退化成 ack=1 的情况了，甚至还不如 ack=1。ack=1，说的是 producer 不等服务器完全同步完 ISR，只要 leader 写入成功就行了，但是可没说不进行同步了。该有的同步过程还是会进行的，但凡能同步，kafka 肯定会同步的，而 ack=1 的最坏情况，也是 ISR 只剩下 leader 了。坏疽话说，producer 为了提高吞吐量，没等 ISR 全部同步，但是心里还是希望接口同步完成的。而这种 leader 孤家寡人的最坏情况，书上说“退化成 ack=1”，不足以说明问题的严重性。
 
@@ -1135,21 +1134,21 @@ kafka服务端中min.insync.replicas。 如果我们不设置的话，默认这�
 
 ##### 高可用的由来
 
-**为何需要Replication**
+###### 为何需要Replication
 
 - Kafka在0.8以前的版本中，是没有Replication的，一旦某一个Broker宕机，则其上所有的Partition数据都不可被消费，这与Kafka数据持久性及Delivery Guarantee的设计目标相悖。同时Producer都不能再将数据存于这些Partition中。
 - 如果Producer使用同步模式则Producer会在尝试重新发送message.send.max.retries（默认值为3）次后抛出Exception，用户可以选择停止发送后续数据也可选择继续选择发送。而前者会造成数据的阻塞，后者会造成本应发往该Broker的数据的丢失。
 - 如果Producer使用异步模式，则Producer会尝试重新发送message.send.max.retries（默认值为3）次后记录该异常并继续发送后续数据，这会造成数据丢失并且用户只能通过日志发现该问题。同时，Kafka的Producer并未对异步模式提供callback接口。
 - 由此可见，在没有Replication的情况下，一旦某机器宕机或者某个Broker停止工作则会造成整个系统的可用性降低。随着集群规模的增加，整个集群中出现该类异常的几率大大增加，因此对于生产系统而言Replication机制的引入非常重要。
 
-**Leader Election（选举机制）**
+###### Leader Election（选举机制）
 
 - 引入Replication之后，同一个Partition可能会有多个Replica，而这时需要在这些Replication之间选出一个Leader，Producer和Consumer只与这个Leader交互，其它Replica作为Follower从Leader中复制数据。
 - 因为需要保证同一个Partition的多个Replica之间的数据一致性（其中一个宕机后其它Replica必须要能继续服务并且即不能造成数据重复也不能造成数据丢失）。如果没有一个Leader，所有Replica都可同时读/写数据，那就需要保证多个Replica之间互相（N×N条通路）同步数据，数据的一致性和有序性非常难保证，大大增加了Replication实现的复杂性，同时也增加了出现异常的几率。而引入Leader后，只有Leader负责数据读写，Follower只向Leader顺序Fetch数据（N条通路），系统更加简单且高效。
 
 ##### Kafka HA设计解析
 
-**如何将所有Replica均匀分布到整个集群**
+###### 如何将所有Replica均匀分布到整个集群
 
 为了更好的做负载均衡，Kafka尽量将所有的Partition均匀分配到整个集群上。一个典型的部署方式是一个Topic的Partition数量大于Broker的数量。同时为了提高Kafka的容错能力，也需要将同一个Partition的Replica尽量分散到不同的机器。实际上，如果所有的Replica都在同一个Broker上，那一旦该Broker宕机，该Partition的所有Replica都无法工作，也就达不到HA的效果。同时，如果某个Broker宕机了，需要保证它上面的负载可以被均匀的分配到其它幸存的所有Broker上。
 
@@ -1159,11 +1158,11 @@ Kafka分配Replica的算法如下：
 2. 将第i个Partition分配到第（i mod n）个Broker上。
 3. 将第i个Partition的第j个Replica分配到第（(i + j) mode n）个Broker上。
 
-**Data Replication（副本策略）**
+###### Data Replication（副本策略）
 
 Kafka的高可靠性的保障来源于其健壮的副本（replication）策略。
 
-**1.消息传递同步策略**
+1.消息传递同步策略
 
 Producer在发布消息到某个Partition时，先通过ZooKeeper找到该Partition的Leader，然后无论该Topic的Replication Factor为多少，Producer只将该消息发送到该Partition的Leader。Leader会将该消息写入其本地Log。每个Follower都从Leader pull数据。这种方式上，Follower存储的数据顺序与Leader保持一致。Follower在收到该消息并写入其Log后，向Leader发送ACK。一旦Leader收到了ISR中的所有Replica的ACK，该消息就被认为已经commit了，Leader将增加HW并且向Producer发送ACK。
 
@@ -1175,7 +1174,7 @@ Kafka Replication的数据流如下图所示：
 
 ![image-20230703112926417](https://github.com/chou401/pic-md/raw/master/image-20230703112926417.png)
 
-**2.ACK前需要保证有多少个备份**
+2.ACK前需要保证有多少个备份
 
 对于Kafka而言，定义一个Broker是否“活着”包含两个条件：
 
@@ -1188,7 +1187,7 @@ Kafka的复制机制既不是完全的同步复制，也不是单纯的异步复
 
 需要说明的是，Kafka只解决fail/recover，不处理“Byzantine”（“拜占庭”）问题。一条消息只有被ISR里的所有Follower都从Leader复制过去才会被认为已提交。这样就避免了部分数据被写进了Leader，还没来得及被任何Follower复制就宕机了，而造成数据丢失（Consumer无法消费这些数据）。而对于Producer而言，它可以选择是否等待消息commit，这可以通过request.required.acks来设置。这种机制确保了只要ISR有一个或以上的Follower，一条被commit的消息就不会丢失。
 
-**3.Leader Election算法**
+3.Leader Election算法
 
 Leader选举本质上是一个分布式锁，有两种方式实现基于ZooKeeper的分布式锁：
 
@@ -1201,7 +1200,7 @@ Kafka在ZooKeeper中动态维护了一个ISR（in-sync replicas），这个ISR�
 
 虽然Majority Vote与ISR相比有不需等待最慢的Broker这一优势，但是Kafka作者认为Kafka可以通过Producer选择是否被commit阻塞来改善这一问题，并且节省下来的Replica和磁盘使得ISR模式仍然值得。
 
-**4.如何处理所有Replica都不工作**
+4.如何处理所有Replica都不工作
 
 在ISR中至少有一个follower时，Kafka可以确保已经commit的数据不丢失，但如果某个Partition的所有Replica都宕机了，就无法保证数据不丢失了。这种情况下有两种可行的方案：
 
@@ -1210,7 +1209,7 @@ Kafka在ZooKeeper中动态维护了一个ISR（in-sync replicas），这个ISR�
 
 这就需要在可用性和一致性当中作出一个简单的折衷。如果一定要等待ISR中的Replica“活”过来，那不可用的时间就可能会相对较长。而且如果ISR中的所有Replica都无法“活”过来了，或者数据都丢失了，这个Partition将永远不可用。选择第一个“活”过来的Replica作为Leader，而这个Replica不是ISR中的Replica，那即使它并不保证已经包含了所有已commit的消息，它也会成为Leader而作为consumer的数据源（前文有说明，所有读写都由Leader完成）。Kafka0.8.\*使用了第二种方式。根据Kafka的文档，在以后的版本中，Kafka支持用户通过配置选择这两种方式中的一种，从而根据不同的使用场景选择高可用性还是强一致性。
 
-**5.选举Leader**
+5.选举Leader
 
 最简单最直观的方案是，所有Follower都在ZooKeeper上设置一个Watch，一旦Leader宕机，其对应的ephemeral znode会自动删除，此时所有Follower都尝试创建该节点，而创建成功者（ZooKeeper保证只有一个能创建成功）即是新的Leader，其它Replica即为Follower。
 
@@ -1235,7 +1234,7 @@ kafka 中为了防止 log 文件过大导致数据定位效率低下而采取了
 
 ![image-20230703112608060](https://github.com/chou401/pic-md/raw/master/image-20230703112608060.png)
 
-**ISR和AR**
+###### ISR和AR
 
 ISR (In-Sync Replicas)，这个是指副本同步队列。副本数对Kafka的吞吐率是有一定的影响，但极大的增强了可用性。默认情况下Kafka的replica数量为1，即每个partition都有一个唯一的leader，为了确保消息的可靠性，通常应用中将其值(由broker的参数offsets.topic.replication.factor指定)大小设置为大于1，比如3。 所有的副本（replicas）统称为Assigned Replicas，即AR。ISR是AR中的一个子集，由leader维护ISR列表，follower从leader同步数据有一些延迟（包括延迟时间replica.lag.time.max.ms和延迟条数replica.lag.max.messages两个维度, 从 0.9.0.0 版本后中只支持replica.lag.time.max.ms这个维度），任意一个超过阈值都会把follower剔除出ISR, 存入OSR（Outof-Sync Replicas）列表，新加入的follower也会先存放在OSR中。**AR=ISR+OSR**。
 
@@ -1245,7 +1244,7 @@ ISR (In-Sync Replicas)，这个是指副本同步队列。副本数对Kafka的�
 
 replica.lag.max.messages表示当前某个副本落后leader的消息数量超过了这个参数的值，那么leader就会把follower从ISR中删除。假设设置replica.lag.max.messages=4，那么如果producer一次传送至broker的消息数量都小于4条时，因为在leader接受到producer发送的消息之后而follower副本开始拉取这些消息之前，follower落后leader的消息数不会超过4条消息，故此没有follower移出ISR，所以这时候replica.lag.max.message的设置似乎是合理的。但是producer发起瞬时高峰流量，producer一次发送的消息超过4条时，也就是超过replica.lag.max.messages，此时follower都会被认为是与leader副本不同步了，从而被踢出了ISR。但实际上这些follower都是存活状态的且没有性能问题。那么在之后追上leader,并被重新加入了ISR。于是就会出现它们不断地剔出ISR然后重新回归ISR，这无疑增加了无谓的性能损耗。而且这个参数是broker全局的。设置太大了，影响真正“落后”follower的移除；设置的太小了，导致follower的频繁进出。无法给定一个合适的replica.lag.max.messages的值，故此，新版本的Kafka移除了这个参数。
 
-**HW和LEO**
+###### HW和LEO
 
 上面有简单说到HW是HighWatermark的缩写，是指consumer能够看到的此partition的位置；而LEO是LogEndOffset的缩写，表示每个partition的log最后一条Message的位置。也就是，我们取一个partition对应的ISR中最小的LEO作为HW，consumer最多只能消费到HW所在的位置。**消费者能消费的数据 = [LW，HW）**。
 
@@ -1523,7 +1522,7 @@ Broker 存储结构如下：
 - **Consumer queue**：消息消费队列（也是个文件），可以根据消费者数量设置多个，一个Topic 下的某个 Queue，每个文件约 5.72M，由 30w 条数据组成；ConsumeQueue 存储的条目是固定大小，只会存储 8 字节的 commitlog 物理偏移量，4 字节的消息长度和 8 字节 Tag 的哈希值，固定 20 字节；消费者是先从 ConsumeQueue 来得到消息真实的物理地址，然后再去 CommitLog 获取消息。
 - **IndexFile**：索引文件，是额外提供查找消息的手段，通过 Key 或者时间区间来查询对应的消息。
 
-**整个流程简介**
+###### 整个流程简介
 
 Producer 使用轮询的方式分别向每个 Queue 中发送消息。
 
@@ -1560,7 +1559,7 @@ RocketMQ 采用一个 consumer 绑定一个或者多个 Queue 模式，假如某
 
 RocketMQ 底层对 commitLog、consumeQueue 之类的磁盘文件的读写操作都采用了 mmap 技术。
 
-**传统 IO**
+###### 传统 IO
 
 传统 I/O 的工作方式是，数据读取和写入是从用户空间到内核空间来回复制，而内核空间的数据是通过操作系统层面的 I/O 接口从磁盘读取或写入。
 
@@ -1598,7 +1597,7 @@ wirte() 写请求 和 read()，需要先写入用户缓存区，然后通过系�
 
 因为文件传输的应用场景中，在用户空间我们并不会对数据「再加工」，所以数据实际上可以不用搬运到用户空间，因此**用户的缓冲区是没有必要存在的**。
 
-**Mmap（内存映射）**
+###### Mmap（内存映射）
 
 `read()` 系统调用的过程中会把内核缓冲区的数据拷贝到用户的缓冲区里，于是为了减少这一步开销，我们可以用 `mmap()` 替换 `read()` 系统调用函数。
 
@@ -1607,7 +1606,7 @@ wirte() 写请求 和 read()，需要先写入用户缓存区，然后通过系�
 > 注意，这里用户空间（虚拟地址）不是直接映射到文件磁盘地址，而是文件对应的 page cache，用户虚拟地址一般是和用户内存地址「映射」的，如果使用内存映射技术，则用户虚拟地址可以和内核内存地址「映射」。
 > 根据维基百科给出的定义：在大多数操作系统中，映射的内存区域实际上是内核的page cache，这意味着不需要在用户空间创建副本。多个进程之间也可以通过同时映射 page cache，来进行进程通信）
 
-**mmap() 函数简介**
+###### mmap() 函数简介
 
 ```java
 void * mmap(void *start, size_t length, int prot , int flags, int fd, off_t offset)
@@ -1637,11 +1636,11 @@ mmap() 将用户虚拟地址映射内核缓存区（内存物理地址）后，�
 
 但这还不是最理想的零拷贝，因为仍然需要通过 CPU 把内核缓冲区的数据拷贝到 socket 缓冲区里，而且仍然需要 4 次上下文切换，因为系统调用还是 2 次。
 
-**pageCache**
+###### pageCache
 
 在传统IO过程中，其中第一步都是先需要先把磁盘文件数据拷贝「内核缓冲区」里，这个「内核缓冲区」实际上是**磁盘高速缓存（PageCache）**。
 
-**预映射机制 + 文件预热机制**
+预映射机制 + 文件预热机制
 
 Broker针对上述的磁盘文件高性能读写机制做的一些优化：
 
@@ -1659,12 +1658,12 @@ Broker针对上述的磁盘文件高性能读写机制做的一些优化：
 
 ##### 查缺补漏
 
-**消息的全局顺序和局部顺序**
+###### 消息的全局顺序和局部顺序
 
 - **全局顺序**：一个 Topic 一个队列，Producer 和 Consuemr 的并发都为一。
 - **局部顺序**：某个队列消息是顺序的。
 
-**零拷贝（Zero-copy）**
+###### 零拷贝（Zero-copy）
 
 sendfile：
 
@@ -1707,7 +1706,7 @@ scatter-gather: on
 
 所以，总体来看，**零拷贝技术可以把文件传输的性能提高至少一倍以上**。
 
-**使用零拷贝技术的项目**
+###### 使用零拷贝技术的项目
 
 事实上，Kafka 这个开源项目，就利用了「零拷贝」技术，从而大幅提升了 I/O 的吞吐率，这也是 Kafka 在处理海量数据为什么这么快的原因之一。
 
@@ -1864,7 +1863,7 @@ Kafka 和 Nginx 都有实现零拷贝技术，这将大大提高文件传输的�
 
 ![img](https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMTE0MTk1MDMzNTA5?x-oss-process=image/format,png)
 
-**什么事mmap？**
+**什么是mmap？**
 
 mmap是操作这些设备的一种方法，所谓操作设备，比如IO端口（点亮一个LED）、LCD控制器、磁盘控制器，实际上就是往设备的物理地址读写数据。
 

@@ -124,7 +124,7 @@ System.out.println(thread.getState());
 
 ### JDK 提供的线程池
 
-**newFixedThreadPool**
+#### newFixedThreadPool
 
 这个线程的特点是线程数是固定的。
 
@@ -140,7 +140,7 @@ public static ExecutorService newFixedThreadPool(int nThreads) {
 
 构建好当前线程池后，线程个数已经固定好（线程是懒加载，在构建之初，线程并没有构建出来，而是随着任务的提交才会将线程在线程池中构建出来）。如果线程没有构建，线程会待着任务执行被创建和执行。如果线程都已经构建好了，此时任务会被放到 LinkedBlockingQueue 无界队列中存放，等待线程从 LinkedBlockingQueue 中去 take 出去，然后执行。
 
-**newSingleThreadExecutor**
+#### newSingleThreadExecutor
 
 单例线程池，该线程池只有一个工作线程在处理任务，如果业务是顺序消费们可以采用该线程池。
 
@@ -170,7 +170,7 @@ private static class FinalizableDelegatedExecutorService
 
 如果业务中涉及了顺序消费，可以采用 newSingleThreadExecutor。
 
-**newCachedThreadPool**
+#### newCachedThreadPool
 
 缓存线程池，corePoolSize为0，当第一次提交任务到线程池时，会直接构建一个工作线程，Integer.MAX_VALUE：意味着线程数量可以无限大，keepAliveTime为60S，60秒内没有任务进来，意味着线程空闲时间超过60S就会被杀死；如果在等待60秒期间有任务进来，他会再次拿到这个任务去执行，特点是：任务只要提交到该线程池就必然有工作线程处理。
 
@@ -184,7 +184,7 @@ public static ExecutorService newCachedThreadPool() {
 }
 ```
 
-**newScheduledThreadPool**
+#### newScheduledThreadPool
 
 定时线程池，创建一个定时线程池，即按一定的周期执行任务，即定时任务，或者设置定时时间，延迟执行任务，由于该线程池是继承ThreadPoolExecutor，所以本质上还是ThreadPoolExecutor线程池，只不过是在原来的基础上添加了定时功能，其原理是基于DelayQueue实现延迟执行，周期性执行，任务执行完毕，再次扔会到阻塞队列。
 
@@ -202,7 +202,7 @@ public ScheduledThreadPoolExecutor(int corePoolSize,
 }
 ```
 
-**newWorkStealingPool**
+#### newWorkStealingPool
 
 newWorkStealingPool简单翻译是**任务窃取**线程池。和别的4种不同，它用的是ForkJoinPool。使用ForkJoinPool的好处是，把1个任务拆分成多个“**小任务**”，把这些“**小任务**”分发到多个线程上执行。这些“**小任务**”都执行完成后，再将结果**合并**。之前的线程池中，多个线程共有一个阻塞队列，而newWorkStealingPool 中每一个线程都有一个自己的队列。当线程发现自己的队列没有任务了，就会到别的线程的队列里获取任务执行。可以简单理解为”**窃取**“。一般是自己的本地队列采取LIFO(后进先出)，窃取时采用FIFO(先进先出)，一个从头开始执行，一个从尾部开始执行，由于偷取的动作十分快速，会大量降低这种冲突，也是一种优化方式。
 
@@ -223,7 +223,7 @@ public static ExecutorService newWorkStealingPool() {
 
 自定义构建线程池，可以细粒度的控制线程池，去管理内存的属性，并且针对一些参数的设置可能更好的在后期排查问题。
 
-**自定义线程池七大参数**
+#### 自定义线程池七大参数
 
 - **int corePoolSize**
 
@@ -321,71 +321,71 @@ ThreadPoolExecutor 的 **execute()** 是提任务到线程池的核心方法，�
 
 ```java
 public void execute(Runnable command) {
-  	// 提交的任务不能为 null
-    if (command == null)
-        throw new NullPointerException();
-    /*
-     * Proceed in 3 steps:
-     *
-     * 1. If fewer than corePoolSize threads are running, try to
-     * start a new thread with the given command as its first
-     * task.  The call to addWorker atomically checks runState and
-     * workerCount, and so prevents false alarms that would add
-     * threads when it shouldn't, by returning false.
-     *
-     * 2. If a task can be successfully queued, then we still need
-     * to double-check whether we should have added a thread
-     * (because existing ones died since last checking) or that
-     * the pool shut down since entry into this method. So we
-     * recheck state and if necessary roll back the enqueuing if
-     * stopped, or start a new thread if there are none.
-     *
-     * 3. If we cannot queue task, then we try to add a new
-     * thread.  If it fails, we know we are shut down or saturated
-     * and so reject the task.
-     */
-  	// 获取核心线程 ctl，用于后面的判断
-    int c = ctl.get();
-  	// 如果工作线程个数小于核心线程数
-  	// 满足要求，添加核心工作线程
-    if (workerCountOf(c) < corePoolSize) {
-      	// addWorker(任务，是核心线程吗)
-      	// addWorker返回 true，代表添加工作线程成功
-      	// addWorker返回 false，代表添加工作线程失败
-      	// addWorker中会基于线程池状态，以及工作线程个数做判断，查看能否添加工作线程
-        if (addWorker(command, true))
-          	// 工作线程构建出来了，任务也交给 command 去处理了
-            return;
-      	// 说明线程池状态或者是工作线程个数发生了变化，导致添加失败，重新获取一次 ctl
-        c = ctl.get();
-    }
-  	// 添加核心工作线程失败，调用一下
-  	// 判断线程池状态是否是 RUNNING，如果是，正常基于阻塞队列的 offer 方法，将任务添加到阻塞队列
-    if (isRunning(c) && workQueue.offer(command)) {
-      	// 如果任务添加到阻塞队列成功，走 if 内部
-      	// 如果任务在扔到阻塞队列之前，线程池状态突然改变了
-      	// 重新获取 ctl
-        int recheck = ctl.get();
-      	// 如果线程池的状态不是 RUNNING，将任务从阻塞队列中移除
-        if (! isRunning(recheck) && remove(command))
-          	// 并且直接拒绝策略
-            reject(command);
-      	// 在这，说明阻塞队列有我刚刚放进去的任务
-      	// 查看一下工作线程数是不是 0 个
-      	// 如果工作线程为 0 个，需要添加一个非核心工作线程去处理阻塞队列中的任务
-      	// 发生这种情况有两种：
-      	// 1.构建线程池时，核心线程数为 0 个
-      	// 2.即便有核心线程，可以设置核心线程也允许超时，设置 allowCoreThreadTimeOut 为 true，代表核心线程也可以关闭
-        else if (workerCountOf(recheck) == 0)
-          	// 为了避免阻塞队列中的任务饥饿，添加一个非核心工作线程去处理
-            addWorker(null, false);
-    }
-  	// 任务添加到阻塞队列失败
-  	// 构建一个非核心工作线程
-  	// 如果添加非核心工作线程成功，直接完事
-    else if (!addWorker(command, false))
-      	// 添加失败，执行拒绝策略
-        reject(command);
+  // 提交的任务不能为 null
+  if (command == null)
+    throw new NullPointerException();
+  /*
+    * Proceed in 3 steps:
+    *
+    * 1. If fewer than corePoolSize threads are running, try to
+    * start a new thread with the given command as its first
+    * task.  The call to addWorker atomically checks runState and
+    * workerCount, and so prevents false alarms that would add
+    * threads when it shouldn't, by returning false.
+    *
+    * 2. If a task can be successfully queued, then we still need
+    * to double-check whether we should have added a thread
+    * (because existing ones died since last checking) or that
+    * the pool shut down since entry into this method. So we
+    * recheck state and if necessary roll back the enqueuing if
+    * stopped, or start a new thread if there are none.
+    *
+    * 3. If we cannot queue task, then we try to add a new
+    * thread.  If it fails, we know we are shut down or saturated
+    * and so reject the task.
+    */
+  // 获取核心线程 ctl，用于后面的判断
+  int c = ctl.get();
+  // 如果工作线程个数小于核心线程数
+  // 满足要求，添加核心工作线程
+  if (workerCountOf(c) < corePoolSize) {
+    // addWorker(任务，是核心线程吗)
+    // addWorker返回 true，代表添加工作线程成功
+    // addWorker返回 false，代表添加工作线程失败
+    // addWorker中会基于线程池状态，以及工作线程个数做判断，查看能否添加工作线程
+    if (addWorker(command, true))
+        // 工作线程构建出来了，任务也交给 command 去处理了
+        return;
+    // 说明线程池状态或者是工作线程个数发生了变化，导致添加失败，重新获取一次 ctl
+    c = ctl.get();
+  }
+  // 添加核心工作线程失败，调用一下
+  // 判断线程池状态是否是 RUNNING，如果是，正常基于阻塞队列的 offer 方法，将任务添加到阻塞队列
+  if (isRunning(c) && workQueue.offer(command)) {
+    // 如果任务添加到阻塞队列成功，走 if 内部
+    // 如果任务在扔到阻塞队列之前，线程池状态突然改变了
+    // 重新获取 ctl
+    int recheck = ctl.get();
+    // 如果线程池的状态不是 RUNNING，将任务从阻塞队列中移除
+    if (! isRunning(recheck) && remove(command))
+      // 并且直接拒绝策略
+      reject(command);
+    // 在这，说明阻塞队列有我刚刚放进去的任务
+    // 查看一下工作线程数是不是 0 个
+    // 如果工作线程为 0 个，需要添加一个非核心工作线程去处理阻塞队列中的任务
+    // 发生这种情况有两种：
+    // 1.构建线程池时，核心线程数为 0 个
+    // 2.即便有核心线程，可以设置核心线程也允许超时，设置 allowCoreThreadTimeOut 为 true，代表核心线程也可以关闭
+    else if (workerCountOf(recheck) == 0)
+      // 为了避免阻塞队列中的任务饥饿，添加一个非核心工作线程去处理
+      addWorker(null, false);
+  }
+  // 任务添加到阻塞队列失败
+  // 构建一个非核心工作线程
+  // 如果添加非核心工作线程成功，直接完事
+  else if (!addWorker(command, false))
+    // 添加失败，执行拒绝策略
+    reject(command);
 }
 ```
 
@@ -400,86 +400,86 @@ public void execute(Runnable command) {
 
 ```java
 private boolean addWorker(Runnable firstTask, boolean core) {
-    retry:
-  	// 循环检查状态
-    for (int c = ctl.get();;) {
-        // Check if queue empty only if necessary.
-      	// 检查线程池的运行状态是否 shutdown，任务队列是否为空等状态是否正常
-        if (runStateAtLeast(c, SHUTDOWN)
-            && (runStateAtLeast(c, STOP)
-                || firstTask != null
-                || workQueue.isEmpty()))
-            return false;
+  retry:
+  // 循环检查状态
+  for (int c = ctl.get();;) {
+    // Check if queue empty only if necessary.
+    // 检查线程池的运行状态是否 shutdown，任务队列是否为空等状态是否正常
+    if (runStateAtLeast(c, SHUTDOWN)
+      && (runStateAtLeast(c, STOP)
+        || firstTask != null
+        || workQueue.isEmpty()))
+      return false;
 
-      	// 循环更新状态，和线程数量的更新，都是使用 CAS 的模式更新
-        for (;;) {
-          	// 检查运行的线程数是否超标
-            if (workerCountOf(c)
-                >= ((core ? corePoolSize : maximumPoolSize) & COUNT_MASK))
-                return false;
-          	// CAS 方式更新线程数量
-            if (compareAndIncrementWorkerCount(c))
-              	// 更新成功后直接跳转到方法第一行，并且不在进入这些 for 循环中
-              	// 因为状态啥的已经更新成功了
-                break retry;
-            c = ctl.get();  // Re-read ctl
-          	// 如果 CAS 增加线程数失败，检查下状态是否还是和之前一样
-            if (runStateAtLeast(c, SHUTDOWN))
-              	// 不一样了，会跳转到第一行，并会重新进入 for 循环中走一遍流程
-                continue retry;
-            // else CAS failed due to workerCount change; retry inner loop
-        }
+    // 循环更新状态，和线程数量的更新，都是使用 CAS 的模式更新
+    for (;;) {
+      // 检查运行的线程数是否超标
+      if (workerCountOf(c)
+        >= ((core ? corePoolSize : maximumPoolSize) & COUNT_MASK))
+        return false;
+      // CAS 方式更新线程数量
+      if (compareAndIncrementWorkerCount(c))
+        // 更新成功后直接跳转到方法第一行，并且不在进入这些 for 循环中
+        // 因为状态啥的已经更新成功了
+        break retry;
+      c = ctl.get();  // Re-read ctl
+      // 如果 CAS 增加线程数失败，检查下状态是否还是和之前一样
+      if (runStateAtLeast(c, SHUTDOWN))
+        // 不一样了，会跳转到第一行，并会重新进入 for 循环中走一遍流程
+        continue retry;
+      // else CAS failed due to workerCount change; retry inner loop
     }
+  }
 
-    boolean workerStarted = false;
-    boolean workerAdded = false;
-    Worker w = null;
-    try {
-      	// 新建一个 worker，内部包含线程
-        w = new Worker(firstTask);
-      	// 获取内部的线程对象
-        final Thread t = w.thread;
-        if (t != null) {
-          	// 加锁，锁定
-            final ReentrantLock mainLock = this.mainLock;
-            mainLock.lock();
-            try {
-                // Recheck while holding lock.
-                // Back out on ThreadFactory failure or if
-                // shut down before lock acquired.
-                int c = ctl.get();
+  boolean workerStarted = false;
+  boolean workerAdded = false;
+  Worker w = null;
+  try {
+    // 新建一个 worker，内部包含线程
+    w = new Worker(firstTask);
+    // 获取内部的线程对象
+    final Thread t = w.thread;
+    if (t != null) {
+      // 加锁，锁定
+      final ReentrantLock mainLock = this.mainLock;
+      mainLock.lock();
+      try {
+        // Recheck while holding lock.
+        // Back out on ThreadFactory failure or if
+        // shut down before lock acquired.
+        int c = ctl.get();
 
-              	// 二次检查线程池的状态
-                if (isRunning(c) ||
-                    (runStateLessThan(c, STOP) && firstTask == null)) {
-                  	// 池的状态没有问题，检查线程是否存活
-                    if (t.getState() != Thread.State.NEW)
-                        throw new IllegalThreadStateException();
-                  	// worker 放入池的 hashset 中
-                    workers.add(w);
-                    workerAdded = true;
-                    int s = workers.size();
-                  	// 并将 worker 的数量赋予池中的 largestPoolSize 成员变量
-                    if (s > largestPoolSize)
-                        largestPoolSize = s;
-                }
-            } finally {
-                mainLock.unlock();
-            }
-          	// worker 创建成功并加入 workers 成功
-            if (workerAdded) {
-              	// 启动线程
-                t.start();
-              	// 修改状态
-                workerStarted = true;
-            }
+        // 二次检查线程池的状态
+        if (isRunning(c) ||
+          (runStateLessThan(c, STOP) && firstTask == null)) {
+          // 池的状态没有问题，检查线程是否存活
+          if (t.getState() != Thread.State.NEW)
+            throw new IllegalThreadStateException();
+          // worker 放入池的 hashset 中
+          workers.add(w);
+          workerAdded = true;
+          int s = workers.size();
+          // 并将 worker 的数量赋予池中的 largestPoolSize 成员变量
+          if (s > largestPoolSize)
+            largestPoolSize = s;
         }
-    } finally {
-        if (! workerStarted)
-          	// 启动线程失败，进行失败处理
-            addWorkerFailed(w);
+      } finally {
+        mainLock.unlock();
+      }
+      // worker 创建成功并加入 workers 成功
+      if (workerAdded) {
+        // 启动线程
+        t.start();
+        // 修改状态
+        workerStarted = true;
+      }
     }
-    return workerStarted;
+  } finally {
+    if (! workerStarted)
+      // 启动线程失败，进行失败处理
+      addWorkerFailed(w);
+  }
+  return workerStarted;
 }
 ```
 
@@ -664,7 +664,7 @@ Java中有以下三种方法可以终止正在运行的线程：
 2. 使用 stop() 方法强行终止线程，但是不推荐使用这个方法，该方法已被弃用。这个方法会导致一些清理性的工作得不到完成，如文件，数据库等的关闭，以及数据不一致的问题。
 3. 使用 interrupt() 方法中断线程。这个方法会在当前线程中打一个停止的标记，并不是真的停止线程。因此需要在线程中判断是否被中断，并增加相应的中断处理代码。如果线程在 sleep() 或 wait() 等操作时被中断，会抛出 InterruptedException 异常。
 
-**使用标记位中止线程**
+#### 使用标记位中止线程
 
 使用退出标志，使线程正常退出，也就是当 run() 方法完成后线程中止，是一种比较简单而安全的方法。这种方法需要在循环中检查标志位是否为 true，如果为 false，则跳出循环，结束线程。这样可以保证线程的资源正确释放，不会导致数据不一致或其他异常问题。
 
@@ -698,7 +698,7 @@ public static void main(String[] args) {
 
 这种方法的优点是简单易懂，缺点是需要在循环中不断检查标志位，可能会影响性能。另外，如果线程在 sleep() 或 wait() 等操作时被设置为退出标志，它也不会立即响应，而是要等到阻塞状态结束后才能检查标志位并退出。
 
-**使用 stop() 方法强行终止线程**
+#### 使用 stop() 方法强行终止线程
 
 使用 stop() 方法强行终止线程，是一种不推荐使用的方法，因为它会导致一些严重的问题。stop() 方法会立即终止线程，不管它是否在执行一些重要的操作，如关闭文件，释放锁，更新数据库等。这样会导致资源泄露，数据不一致，或者其他异常错误。
 
@@ -735,7 +735,7 @@ public static void main(String[] args) {
 
 这种方法的缺点是很明显的，如果在关闭文件之前调用了 stop() 方法，那么文件就不会被正确关闭，可能会造成数据丢失或损坏。而且，stop() 方法会抛出 ThreadDeath 异常，如果没有捕获处理这个异常，那么它会向上层传递，可能会影响其他线程或程序的正常运行 。因此，使用 stop() 方法强行终止线程是一种**非常危险而不负责任**的做法，应该尽量避免使用。
 
-**使用interrupt() 方法中断线程**
+#### 使用interrupt() 方法中断线程
 
 `Thread.interrupt()`它能帮助我们在一个线程中断另一个线程。尽管它被命名为“interrupt”，但实际上它并不会立即停止一个线程的执行，而是设置一个中断标志，表示这个线程已经被中断。它的具体行为取决于被中断线程当前的状态以及如何响应中断。
 
@@ -787,7 +787,7 @@ while (!Thread.currentThread().isInterrupted()) {
 
 main函数所在的线程就是一个用户线程，main函数启动的同时在JVM内部同时启动了好多守护线程，比如垃圾回收线程。比较明显的区别之一就是用户线程结束，JVM退出，不管这个时候有没有守护线程运行。而守护线程不会影响JVM的退出。
 
-**注意事项**
+#### 注意事项
 
 1. setDaemon（true）必须在start（）方法前执行，否则会抛出 IllegalThreadStateException 异常。
 2. 在守护线程中产生的新线程也是守护线程。
@@ -798,25 +798,25 @@ main函数所在的线程就是一个用户线程，main函数启动的同时在
 
 sleep 方法和 wait 方法都是用来将线程进入休眠状态的，并且 sleep 和 wait 方法都可以响应 interrupt 中断，也就是线程在休眠的过程中，如果收到中断信号，都可以进行响应并中断，且都可以抛出 InterruptedException 异常，那 sleep 和 wait 有什么区别呢？接下来，我们一起来看。
 
-**区别一：语法使用不同**
+#### 区别一：语法使用不同
 
-wait 方法必须配合`synchronized `一起使用，不然在运行时就会抛出 IllegalMonitorStateException 的异常。wait 方法会将持有锁的线程从owner 扔到 WaitSet 集合中，这个操作是在修改 ObjectMonitor 对象，如果没有持有 synchronized 锁的话，是无法操作 ObjectMonitor 对象的。
+wait 方法必须配合`synchronized`一起使用，不然在运行时就会抛出 IllegalMonitorStateException 的异常。wait 方法会将持有锁的线程从owner 扔到 WaitSet 集合中，这个操作是在修改 ObjectMonitor 对象，如果没有持有 synchronized 锁的话，是无法操作 ObjectMonitor 对象的。
 
 而 sleep 可以单独使用，无需配合 synchronized 一起使用。
 
-**区别二：所属类不同**
+#### 区别二：所属类不同
 
 wait 方法属于 Object 类的方法，而 sleep 属于 Thread 类的方法
 
-**区别三：唤醒方式不同**
+#### 区别三：唤醒方式不同
 
 sleep 方法必须要传递一个超时时间的参数，且过了超时时间之后，线程会自动唤醒。而 wait 方法可以不传递任何参数，不传递任何参数时表示永久休眠，直到另一个线程调用了 notify 或 notifyAll 之后，休眠的线程才能被唤醒。也就是说 **sleep 方法具有主动唤醒功能，而不传递任何参数的 wait 方法只能被动的被唤醒**。
 
-**区别四：释放锁资源不同**
+#### 区别四：释放锁资源不同
 
 **wait 方法会主动的释放锁，而 sleep 方法则不会**。
 
-**区别五：线程进入状态不同**
+#### 区别五：线程进入状态不同
 
 调用 sleep 方法线程会进入 TIMED_WAITING 有时限等待状态，而调用无参数的 wait 方法，线程会进入 WAITING 无时限等待状态**。**
 
@@ -824,7 +824,7 @@ sleep 和 wait 都可以让线程进入休眠状态，并且它们都可以响�
 
 ### 并发编程的三大特性
 
-**原子性**
+#### 原子性
 
 JMM（Java Memory Model）。不同的硬件和不同的操作系统在内存上的操作有一定差异的，Java 为了解决相同代码在不同操作系统上出现的各种问题，用 JMM 屏蔽掉各种硬件和操作系统带来的差异。让 Java 的并发编程可以做到跨平台。
 
@@ -850,7 +850,7 @@ JMM 规定所有变量都会存储在主内存中，在操作的时候，需要�
 
   ThreadLocal 保证原子性的操作，是不让多线程去操作临界资源，让每个线程去操作属于自己的数据。
 
-**可见性**
+#### 可见性
 
 可见性问题是基于 CPU 位置出现的，CPU 处理速度非常快，相对 CPU 来说，去主内存获取数据这个事情太慢了，CPU 就提供了 L1、L2、L3 的三级缓存，每次去主内存拿完数据后，就会存储到 CPU 的三级缓存，每次去三级缓存中取数据，效率肯定会提升。
 
@@ -894,7 +894,7 @@ JMM 规定所有变量都会存储在主内存中，在操作的时候，需要�
 
   final 修饰的属性已经不允许再次被写了，而 volatile 是保证每次读写操作去内存中读取，并且 volatile 会影响一定的性能，就不需要同时修饰。
 
-**有序性**
+#### 有序性
 
 所谓有序性是指程序代码在执行过程中先后顺序，由于 Java 在编译器以及运行期的优化，导致了代码的执行顺序未必就是开发者编写代码的顺序，比如
 
@@ -979,7 +979,7 @@ Java 中的程序是乱序执行的。
 
 而在某些场景下，我们是可以通过JUC提供的CAS机制实现无锁的解决方案，或者说是它基于类似于乐观锁的方案，来达到非阻塞同步的方式保证线程安全。
 
-**什么是 CAS**
+#### 什么是 CAS
 
 `CAS`是`Compare And Swap`的缩写，直译就是**比较并交换**。CAS是现代CPU广泛支持的一种对内存中的共享数据进行操作的一种特殊指令，这个指令会对内存中的共享数据做原子的读写操作。其作用是让CPU比较内存中某个值是否和预期的值相同，如果相同则将这个值更新为新值，不相同则不做更新。
 
@@ -987,7 +987,7 @@ Java 中的程序是乱序执行的。
 
 Java中大量使用了CAS机制来实现多线程下数据更新的原子化操作，比如AtomicInteger、CurrentHashMap当中都有CAS的应用。但Java中并没有直接实现CAS，CAS相关的实现是借助`C/C++`调用CPU指令来实现的，效率很高，但Java代码需通过JNI才能调用。比如，Unsafe类提供的CAS方法（如compareAndSwapXXX）底层实现即为CPU指令cmpxchg。
 
-**CAS 的基本流程**
+#### CAS 的基本流程
 
 ![image-20230825103445318](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230825103445318.png)
 
@@ -999,7 +999,7 @@ Java中大量使用了CAS机制来实现多线程下数据更新的原子化操�
 
 在上述路程中，我们可以很清晰的看到乐观锁的思路，而且这期间并没有使用到锁。因此，相对于synchronized等悲观锁的实现，效率要高非常多。
 
-**基于 CAS 的 AtomicInteger 使用**
+#### 基于 CAS 的 AtomicInteger 使用
 
 关于CAS的实现，最经典最常用的当属AtomicInteger了，我们马上就来看一下AtomicInteger是如何利用CAS实现原子性操作的。为了形成更新鲜明的对比，先来看一下如果不使用CAS机制，想实现线程安全我们通常如何处理。
 
@@ -1033,11 +1033,11 @@ public class ThreadSafeTest {
 
 之所以可以如此安全、便捷地来实现安全操作，便是由于AtomicInteger类采用了CAS机制。下面，我们就来了解一下AtomicInteger的功能及源码实现。
 
-**CAS 的 AtomicInteger 类**
+#### CAS 的 AtomicInteger 类
 
 `AtomicInteger`是java.util.concurrent.atomic 包下的一个原子类，该包下还有`AtomicBoolean`, `AtomicLong`,`AtomicLongArray`, `AtomicReference`等原子类，主要用于在高并发环境下，保证线程安全。
 
-**AtomicInteger常用API**
+#### AtomicInteger常用API
 
 ```java
 public final int get()：获取当前的值
@@ -1050,7 +1050,7 @@ void lazySet(int newValue): 最终会设置成newValue,使用lazySet设置值后
 
 上述方法中，getAndXXX格式的方法都实现了原子操作。具体的使用方法参考上面的addAndGet案例即可。
 
-**AtomicInteger 核心源码**
+#### AtomicInteger 核心源码
 
 ```java
 public class AtomicInteger extends Number implements java.io.Serializable {
@@ -1094,11 +1094,11 @@ public class AtomicInteger extends Number implements java.io.Serializable {
 
 通过源码可以看出， `AtomicInteger` 底层是通过**volatile**变量和CAS两者相结合来保证更新数据的原子性。其中关于Unsafe类对CAS的实现，我们下面详细介绍。
 
-**CAS 的工作原理**
+#### CAS 的工作原理
 
 CAS的实现原理简单来说就是由**Unsafe类**和其中的**自旋锁**来完成的，下面针对源代码来看一下这两块的内容。
 
-**Unsafe 类**
+##### Unsafe 类
 
 在AtomicInteger核心源码中，已经看到CAS的实现是通过Unsafe类来完成的，先来了解一下Unsafe类的作用。
 
@@ -1110,7 +1110,7 @@ Unsafe里关于对象字段访问的方法把对象布局抽象出来，它提�
 
 Unsafe类的功能主要分为内存操作、CAS、Class相关、对象操作、数组相关、内存屏障、系统相关、线程调度等功能。这里我们只需要知道其功能即可，方便理解CAS的实现，注意不建议在日常开发中使用。
 
-**Unsafe 和 CAS**
+##### Unsafe 和 CAS
 
 AtomicInteger调用了Unsafe#getAndAddInt方法：
 
@@ -1148,9 +1148,9 @@ getAndAddInt方法中，首先把当前对象主内存中的值赋给val5，然�
 
 这里我们可以看到CAS实现的一个缺点：内部使用**自旋**的方式进行**CAS**更新（while循环进行CAS更新，如果更新失败，则循环再次重试）。如果长时间都不成功的话，就会造成CPU极大的开销。
 
-另外，Unsafe类还支持了其他的CAS方法，比如`compareAndSwapObject`、` compareAndSwapInt`、`compareAndSwapLong`。
+另外，Unsafe类还支持了其他的CAS方法，比如`compareAndSwapObject`、`compareAndSwapInt`、`compareAndSwapLong`。
 
-**CAS 的缺点**
+#### CAS 的缺点
 
 `CAS`高效地实现了原子性操作，但在以下三方面还存在着一些缺点：
 
@@ -1160,15 +1160,15 @@ getAndAddInt方法中，首先把当前对象主内存中的值赋给val5，然�
 
 下面就这个三个问题详细讨论一下。
 
-**循环时间长开销大**
+##### 循环时间长开销大
 
 在分析Unsafe源代码的时候我们已经提到，在Unsafe的实现中使用了自旋锁的机制。在该环节如果`CAS`操作失败，就需要循环进行`CAS`操作(do while循环同时将期望值更新为最新的)，如果长时间都不成功的话，那么会造成CPU极大的开销。如果JVM能支持处理器提供的pause指令那么效率会有一定的提升。
 
-**只能保证一个共享变量的原子操作**
+##### 只能保证一个共享变量的原子操作
 
 在最初的实例中，可以看出是针对一个共享变量使用了CAS机制，可以保证原子性操作。但如果存在多个共享变量，或一整个代码块的逻辑需要保证线程安全，CAS就无法保证原子性操作了，此时就需要考虑采用加锁方式（悲观锁）保证原子性，或者有一个取巧的办法，把多个共享变量合并成一个共享变量进行`CAS`操作。
 
-**ABA问题**
+##### ABA问题
 
 虽然使用CAS可以实现非阻塞式的原子性操作，但是会产生ABA问题，ABA问题出现的基本流程：
 
@@ -1185,13 +1185,13 @@ ABA问题的解决思路就是使用版本号：在变量前面追加上版本�
 
 另外，从Java 1.5开始，JDK的Atomic包里提供了一个类AtomicStampedReference来解决ABA问题。这个类的compareAndSet方法的作用是首先检查当前引用是否等于预期引用，并且检查当前标志是否等于预期标志，如果全部相等，则以原子方式将该引用和该标志的值设置为给定的更新值。
 
-**@Contended 注解有什么用**
+### @Contended 注解有什么用
 
 @Contended是[Java](https://so.csdn.net/so/search?q=Java&spm=1001.2101.3001.7020) 8中引入的一个注解，用于减少多线程环境下的“伪共享”现象，以提高程序的性能。
 
 要理解@Contended的作用，首先要了解一下什么是伪共享（False Sharing）。
 
-**什么是伪共享**
+#### 什么是伪共享
 
 伪共享（False Sharing）是多线程环境中的一种现象，涉及到CPU的缓存机制和缓存行（Cache Line）。
 
@@ -1221,7 +1221,7 @@ public class Foo {
 
 需要注意的是，@Contended是JDK的内部API，它在Java 8中引入，但在默认情况下是不开放的，要使用需要添加JVM参数-XX:-RestrictContended，并且在编译时需要使用--add-exports java.base/jdk.internal.vm.annotation=ALL-UNNAMED。此外，过度使用@Contended可能会浪费内存，因为它会导致大量的内存空间被用作填充以保持字段间的距离。所以在使用时需要谨慎权衡内存和性能的考虑。
 
-**简单案例**
+#### 简单案例
 
 在Java 8及以上版本中，@Contended注解是属于jdk的内部API，因此在正常情况下使用时需要打开开关-XX:-RestrictContended才能正常使用。同时需要注意的是，@Contended在JDK 9以后的版本中可能无法正常工作，因为JDK 9开始禁止使用Sun的内部API。
 
@@ -1281,21 +1281,9 @@ public class ContendedExample {
 
 @Contended 注解，就是将一个缓存行的后面 7 个位置，填充上 7 个没有意义的数据。
 
-**Java 中的四种引用类型**
-
-Java 中的引用类型分别为**强、软、弱、虚**。
-
-在 Java 中最常见的就是强引用，把一个对系那个赋给一个引用变量，这个引用变量就是一个强引用。当一个对象被强引用变量引用时，它始终处于可达状态，它是不可能被垃圾回收机制回收的，即使该对象以后永远都不会被用到 JVM 也不会回收。因此强引用时造成 Java 内存泄漏的主要原因之一。例如：Object obj = new Object()。
-
-其次是软引用，对于只有软引用的对象来说，当系统内存足够时它不会被回收，当系统内存空间不足时它会被回收。软引用通话吃那个用在对内存敏感的程序中，作为缓存使用。例如：SoftRefenence softRef = new SoftRefenence()。
-
-然后是弱引用，它比较引用的生存期更短，对于只有弱引用的对象来说，只要垃圾回收机制已运行，不管 JVM 的内存空间是否足够，总会回收该对象占用的内存。可以解决内存泄漏的问题，ThreadLocal 就是基于弱引用解决内存泄漏的问题。例如：WeakRefenence weakRef = new WeakRefenence()。
-
-最后是虚引用，它不能单独使用，必须和引用队列联合使用。虚引用的主要作用是跟踪对系那个被垃圾回收的状态。例如：ReferenceQueue queue = new ReferenceQueue()；PhantomReference phantomRef = new PhantomReference(obj,queue)，不过在开发中，我们用的更多的还是强引用。
-
 ### ThreadLocal 的内存泄漏问题
 
-**ThreadLocal 实现原理：**
+#### ThreadLocal 实现原理
 
 - 每个 Thread 中都存储着一个成员变量，ThreadLocalMap
 - ThreadLocal 本身不存储数据，像是一个工具类，基于 ThreadLocal 去操作 ThreadLocalMap
@@ -1303,7 +1291,7 @@ Java 中的引用类型分别为**强、软、弱、虚**。
 - 每个现有都自己独立的 ThreadLocalMap，再基于 ThreadLocal 对象本身作为 key，对 value 进行存取
 - ThreadLocalMap 的 key 是一个弱引用，弱引用的特点是，即便有若医用，再 GC 时，也必须被回收。这里是为了在 ThreadLocal 对象失去引用后，如果 key 的引用是强引用，会导致 ThreadLocal 对象无法被回收。
 
-**ThreadLocal 内存泄漏问题**
+#### ThreadLocal 内存泄漏原因
 
 - 如果 ThreadLocal 引用丢失，key 因为弱引用会被 GC 回收掉，如果同时线程还没有被回收，就会导致内存泄漏，内存中的 value 无法被回收，同时也无法被获取到。
 - 只需要在使用完毕 ThreadLocal 对象之后，及时的调用 remove 方法，移除 Entry 即可。
@@ -1313,20 +1301,20 @@ Java 中的引用类型分别为**强、软、弱、虚**。
 ```java
 // 工作线程小于核心线程执行
 if (workerCountOf(c) < corePoolSize) {
-    if (addWorker(command, true))
-        return;
-    c = ctl.get();
+  if (addWorker(command, true))
+    return;
+  c = ctl.get();
 }
 if (isRunning(c) && workQueue.offer(command)) {
-    int recheck = ctl.get();
-    if (! isRunning(recheck) && remove(command))
-        reject(command);
-    else if (workerCountOf(recheck) == 0)
-      	// 添加空任务
-        addWorker(null, false);
+  int recheck = ctl.get();
+  if (! isRunning(recheck) && remove(command))
+    reject(command);
+  else if (workerCountOf(recheck) == 0)
+    // 添加空任务
+    addWorker(null, false);
 }
 else if (!addWorker(command, false))
-    reject(command);
+  reject(command);
 ```
 
 若是核心线程数设置的为0，我们第一次执行addWorker时，就会因为核心线程和工作线程都是0，不会执行第一块标红的区域，而是会执行第二块，而第二块是直接将任务添加到阻塞队列里面，此时是没有工作线程的，那阻塞队列里的任务由谁执行呢？所以在线程池的状态正常的情况下会添加一个空任务用于执行阻塞队列中的任务。
@@ -1359,7 +1347,7 @@ private volatile boolean allowCoreThreadTimeOut;
 
 需要注意的是，空任务并不会占用实际的计算资源，因此它们不会对系统的整体性能产生负面影响。但是，在使用线程池时，确保任务的提交是有意义且合理的，避免无谓的空任务提交。
 
-**空任务**
+#### 空任务
 
 空任务（Empty Task）指的是在线程池中提交的一个任务，其执行过程中不需要执行任何实际的操作或逻辑。空任务本身不包含需要执行的代码，或者说它的执行代码为空或者只是一个空的循环。
 
@@ -1398,21 +1386,21 @@ private volatile boolean allowCoreThreadTimeOut;
 
 ```java
 public void shutdown() {
-    final ReentrantLock mainLock = this.mainLock;
-    mainLock.lock();
-    try {
-      	// 权限检查
-        checkShutdownAccess();
-      	// 设置当前线程池状态为 SHUTDOWN，如果已经是这个状态直接返回
-        advanceRunState(SHUTDOWN);
-      	// 设置中断标准
-        interruptIdleWorkers();
-        onShutdown(); // hook for ScheduledThreadPoolExecutor
-    } finally {
-        mainLock.unlock();
-    }
-  	// 尝试将状态变为 TERMINATED
-    tryTerminate();
+  final ReentrantLock mainLock = this.mainLock;
+  mainLock.lock();
+  try {
+    // 权限检查
+    checkShutdownAccess();
+    // 设置当前线程池状态为 SHUTDOWN，如果已经是这个状态直接返回
+    advanceRunState(SHUTDOWN);
+    // 设置中断标准
+    interruptIdleWorkers();
+    onShutdown(); // hook for ScheduledThreadPoolExecutor
+  } finally {
+    mainLock.unlock();
+  }
+  // 尝试将状态变为 TERMINATED
+  tryTerminate();
 }
 ```
 
@@ -1428,7 +1416,7 @@ shutdownNow()是强制关闭线程池的方法，它会尝试立即停止正在�
 
 需要注意的是，调用shutdownNow()会抛出InterruptedException异常，需要进行异常处理。并且，在使用shutdownNow()强制关闭线程池时，需要确保所有任务都能够正常停止，否则可能会导致任务数据丢失或其他问题。
 
-**为何必须 shutdown()**
+为何必须 shutdown()？
 
 首先，线程池执行线程时也是通过Thread对象的start()来启动线程，这种方式的线程本身就会占用一个虚拟机栈，而虚拟机栈在JVM中属于GC Roots。
 
@@ -1440,7 +1428,7 @@ shutdownNow()是强制关闭线程池的方法，它会尝试立即停止正在�
 
 ### 线程池的核心参数到底如何设置
 
-**CPU 密集型和 IO 密集型**
+#### CPU 密集型和 IO 密集型
 
 线程任务可以分为 CPU 密集型和 IO 密集型。（平时开发基本上都是 IO 密集型任务）
 
@@ -1450,7 +1438,7 @@ IO 密集型的任务的特点是涉及到网络（调用三方接口）、磁�
 
 CPU 密集型尽量配置少的线程，核心线程配置：CPU 核数。而 IO 线程池应配置多的线程，核心线程配置：CPU 核数\*2.这里 IO 密集型还有一种情况是线程易阻塞型，需要计算阻塞系数，核心线程配置：CPU 核数/1-阻塞系数（0.8-0.9 之间）。
 
-**设计规则**
+#### 设计规则
 
 线程池的使用难度不大，难度在于线程池的参数并不好配置。主要难点在于任务类型无法控制，比如任务有 CPU 密集型、IO 密集型、混合型。因为 IO 我们无法直接控制，所以很多时间按照一些书上提供的一些方法，是无法解决问题的。想调试出一个符合当前任务情况的核心参数，最好的方式就是测试。需要将项目部署到测试环境或者是沙箱环境中，结果各种压测得到一个相对符合的参数。如果每次修改项目都需要重新部署，成本太高了，此时可以实现一个动态监控以及修改线程池的方案。
 

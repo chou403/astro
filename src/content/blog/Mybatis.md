@@ -342,7 +342,7 @@ public ResultSetWrapper(ResultSet rs, Configuration configuration) throws SQLExc
 }
 ```
 
-**spring整合mybatis 实现**
+### spring整合mybatis 实现
 
 ```java
 @Autowired
@@ -574,7 +574,7 @@ public class DegreeApplication {}
 ```java
 void registerBeanDefinitions(AnnotationAttributes annoAttrs, BeanDefinitionRegistry registry) {
         ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
-	...
+    ...
 }
 ```
 
@@ -583,7 +583,7 @@ mybaits 2.0.6 以上版本 是通过另一个Bean MapperScannerConfigurer 实现
 ```java
 void registerBeanDefinitions(AnnotationMetadata annoMeta, AnnotationAttributes annoAttrs, BeanDefinitionRegistry registry, String beanName) {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(MapperScannerConfigurer.class);
-	...
+    ...
 }
 ```
 

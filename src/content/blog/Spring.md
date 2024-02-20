@@ -125,7 +125,7 @@ JarLauncher叫做jar包启动器，当我们运行java -jar 的时候就会找�
 
 这个插件在打包时候就会把jar启动器添加进去。
 
-**java -jar 做了什么**
+### java -jar 做了什么
 
 > 官网对java -jar的解释如下：
 >
@@ -135,7 +135,7 @@ JarLauncher叫做jar包启动器，当我们运行java -jar 的时候就会找�
 
 由此可见：当使用java -jar 启动springboot jar包时是去找Manifast.MF文件中的Main-Class指定的类来启动项目。
 
-**JarLauncher的执行流程**
+### JarLauncher的执行流程
 
 > org.springframework.boot.loader.JarLauncher#main
 > org.springframework.boot.loader.Launcher#launch(java.lang.String[])
@@ -147,9 +147,9 @@ JarLauncher叫做jar包启动器，当我们运行java -jar 的时候就会找�
 
 ```xml
 <dependency>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-loader</artifactId>
-	<version>2.1.16.RELEASE</version>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-loader</artifactId>
+  <version>2.1.16.RELEASE</version>
 </dependency>
 ```
 
@@ -171,28 +171,28 @@ import org.springframework.boot.loader.archive.Archive;
  */
 public class JarLauncher extends ExecutableArchiveLauncher {
 
-	static final String BOOT_INF_CLASSES = "BOOT-INF/classes/";
+  static final String BOOT_INF_CLASSES = "BOOT-INF/classes/";
 
-	static final String BOOT_INF_LIB = "BOOT-INF/lib/";
+  static final String BOOT_INF_LIB = "BOOT-INF/lib/";
 
-	public JarLauncher() {
-	}
+  public JarLauncher() {
+  }
 
-	protected JarLauncher(Archive archive) {
-		super(archive);
-	}
+  protected JarLauncher(Archive archive) {
+    super(archive);
+  }
 
-	@Override
-	protected boolean isNestedArchive(Archive.Entry entry) {
-		if (entry.isDirectory()) {
-			return entry.getName().equals(BOOT_INF_CLASSES);
-		}
-		return entry.getName().startsWith(BOOT_INF_LIB);
-	}
-	//main方法入口， 构造JarLauncher，然后调用它的launch方法。参数是控制台传递的
-	public static void main(String[] args) throws Exception {
-		new JarLauncher().launch(args);
-	}
+  @Override
+  protected boolean isNestedArchive(Archive.Entry entry) {
+    if (entry.isDirectory()) {
+      return entry.getName().equals(BOOT_INF_CLASSES);
+    }
+    return entry.getName().startsWith(BOOT_INF_LIB);
+  }
+  //main方法入口， 构造JarLauncher，然后调用它的launch方法。参数是控制台传递的
+  public static void main(String[] args) throws Exception {
+    new JarLauncher().launch(args);
+  }
 
 }
 ```
@@ -203,33 +203,33 @@ public class JarLauncher extends ExecutableArchiveLauncher {
 /**
  * Base class for launchers that can start an application with a fully configured
  * classpath backed by one or more {@link Archive}s.
- *	启动器的基类，可以用一个或多个{@link Archive}支持的完整配置的类路径启动应用程序。
+ * 启动器的基类，可以用一个或多个{@link Archive}支持的完整配置的类路径启动应用程序。
  * @author Phillip Webb
  * @author Dave Syer
  * @since 1.0.0
  */
 public abstract class Launcher {
 
-	/**
-	 * Launch the application. This method is the initial entry point that should be
-	 * called by a subclass {@code public static void main(String[] args)} method.
-	 * 启动应用程序。这个方法是一个初始入口点，它应该被子类{@code public static void main(String[] args)}方法调用。
-	 * @param args the incoming arguments
-	 * @throws Exception if the application fails to launch
-	 */
-	protected void launch(String[] args) throws Exception {
-		//在系统属性中设置注册了自定义的URL处理器：org.springframework.boot.loader.jar.Handler。如果URL中没有指定处理器，会去系统属性中查询
-		JarFile.registerUrlProtocolHandler();
-		// getClassPathArchives方法在会去找lib目录下对应的第三方依赖JarFileArchive，同时也会项目自身的JarFileArchive
+  /**
+   * Launch the application. This method is the initial entry point that should be
+   * called by a subclass {@code public static void main(String[] args)} method.
+   * 启动应用程序。这个方法是一个初始入口点，它应该被子类{@code public static void main(String[] args)}方法调用。
+   * @param args the incoming arguments
+   * @throws Exception if the application fails to launch
+   */
+  protected void launch(String[] args) throws Exception {
+    //在系统属性中设置注册了自定义的URL处理器：org.springframework.boot.loader.jar.Handler。如果URL中没有指定处理器，会去系统属性中查询
+    JarFile.registerUrlProtocolHandler();
+    // getClassPathArchives方法在会去找lib目录下对应的第三方依赖JarFileArchive，同时也会项目自身的JarFileArchive
         // 根据getClassPathArchives得到的JarFileArchive集合去创建类加载器ClassLoader。这里会构造一个LaunchedURLClassLoader类加载器，这个类加载器继承URLClassLoader，并使用这些JarFileArchive集合的URL构造成URLClassPath
         // LaunchedURLClassLoader类加载器的父类加载器是当前执行类JarLauncher的类加载器
-		ClassLoader classLoader = createClassLoader(getClassPathArchives());
-		// getMainClass方法会去项目自身的Archive中的Manifest中找出key为Start-Class的类
-		// 调用重载方法launch
-		launch(args, getMainClass(), classLoader);
-	}
-	......
-	......
+    ClassLoader classLoader = createClassLoader(getClassPathArchives());
+    // getMainClass方法会去项目自身的Archive中的Manifest中找出key为Start-Class的类
+    // 调用重载方法launch
+    launch(args, getMainClass(), classLoader);
+  }
+  ......
+  ......
 }
 ```
 
@@ -245,43 +245,43 @@ public abstract class Launcher {
  */
 public abstract class ExecutableArchiveLauncher extends Launcher {
 
-	private final Archive archive;
+  private final Archive archive;
 
-	public ExecutableArchiveLauncher() {
-		try {
-			this.archive = createArchive();
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
-	}
+  public ExecutableArchiveLauncher() {
+    try {
+      this.archive = createArchive();
+    }
+    catch (Exception ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
 
-	protected ExecutableArchiveLauncher(Archive archive) {
-		this.archive = archive;
-	}
+  protected ExecutableArchiveLauncher(Archive archive) {
+    this.archive = archive;
+  }
 
-	protected final Archive getArchive() {
-		return this.archive;
-	}
+  protected final Archive getArchive() {
+    return this.archive;
+  }
 
-	@Override
-	protected String getMainClass() throws Exception {
-		//跟代码this.archive.getManifest()发现对应的是org.springframework.boot.loader.archive.JarFileArchive#getManifest
-		//继续跟进入org.springframework.boot.loader.jar.JarFile#getManifest
-		//最后org.springframework.boot.loader.jar.JarFile#getManifest对应的是META-INF/MANIFEST.MF文件的内容
-		Manifest manifest = this.archive.getManifest();
-		String mainClass = null;
-		if (manifest != null) {
-			//获取META-INF/MANIFEST.MF文件内容中的Start-Class，这才是我们自己写的启动类
-			mainClass = manifest.getMainAttributes().getValue("Start-Class");
-		}
-		if (mainClass == null) {
-			throw new IllegalStateException("No 'Start-Class' manifest entry specified in " + this);
-		}
-		return mainClass;
-	}
-	......
-	......
+  @Override
+  protected String getMainClass() throws Exception {
+    //跟代码this.archive.getManifest()发现对应的是org.springframework.boot.loader.archive.JarFileArchive#getManifest
+    //继续跟进入org.springframework.boot.loader.jar.JarFile#getManifest
+    //最后org.springframework.boot.loader.jar.JarFile#getManifest对应的是META-INF/MANIFEST.MF文件的内容
+    Manifest manifest = this.archive.getManifest();
+    String mainClass = null;
+    if (manifest != null) {
+      //获取META-INF/MANIFEST.MF文件内容中的Start-Class，这才是我们自己写的启动类
+      mainClass = manifest.getMainAttributes().getValue("Start-Class");
+    }
+    if (mainClass == null) {
+      throw new IllegalStateException("No 'Start-Class' manifest entry specified in " + this);
+    }
+    return mainClass;
+  }
+  ......
+  ......
 }
 ```
 
@@ -299,12 +299,12 @@ public abstract class ExecutableArchiveLauncher extends Launcher {
  * @throws Exception if the launch fails
  */
 protected void launch(String[] args, String mainClass, ClassLoader classLoader) throws Exception {
-	Thread.currentThread().setContextClassLoader(classLoader);
-	createMainMethodRunner(mainClass, args, classLoader).run();
+  Thread.currentThread().setContextClassLoader(classLoader);
+  createMainMethodRunner(mainClass, args, classLoader).run();
 }
 ```
 
-**org.springframework.boot.loader.Launcher#createMainMethodRunner**
+**createMainMethodRunner 方法**：org.springframework.boot.loader.Launcher#createMainMethodRunner
 
 ```java
 /**
@@ -315,7 +315,7 @@ protected void launch(String[] args, String mainClass, ClassLoader classLoader) 
  * @return the main method runner
  */
 protected MainMethodRunner createMainMethodRunner(String mainClass, String[] args, ClassLoader classLoader) {
-	return new MainMethodRunner(mainClass, args);
+  return new MainMethodRunner(mainClass, args);
 }
 ```
 
@@ -332,25 +332,25 @@ protected MainMethodRunner createMainMethodRunner(String mainClass, String[] arg
  */
 public class MainMethodRunner {
 
-	private final String mainClassName;
+  private final String mainClassName;
 
-	private final String[] args;
+  private final String[] args;
 
-	/**
-	 * Create a new {@link MainMethodRunner} instance.
-	 * @param mainClass the main class
-	 * @param args incoming arguments
-	 */
-	public MainMethodRunner(String mainClass, String[] args) {
-		this.mainClassName = mainClass;
-		this.args = (args != null) ? args.clone() : null;
-	}
+  /**
+   * Create a new {@link MainMethodRunner} instance.
+   * @param mainClass the main class
+   * @param args incoming arguments
+   */
+  public MainMethodRunner(String mainClass, String[] args) {
+    this.mainClassName = mainClass;
+    this.args = (args != null) ? args.clone() : null;
+  }
 
-	public void run() throws Exception {
-		Class<?> mainClass = Thread.currentThread().getContextClassLoader().loadClass(this.mainClassName);
-		Method mainMethod = mainClass.getDeclaredMethod("main", String[].class);
-		mainMethod.invoke(null, new Object[] { this.args });
-	}
+  public void run() throws Exception {
+    Class<?> mainClass = Thread.currentThread().getContextClassLoader().loadClass(this.mainClassName);
+    Method mainMethod = mainClass.getDeclaredMethod("main", String[].class);
+    mainMethod.invoke(null, new Object[] { this.args });
+  }
 
 }
 ```
@@ -359,7 +359,7 @@ public class MainMethodRunner {
 
 ![img](https://raw.githubusercontent.com/chou401/pic-md/master/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0VmbHlpbmdz,size_16,color_FFFFFF,t_70.png)
 
-**使用依赖包common**
+#### 使用依赖包common
 
 common 执行mvn install时，会报错提示 Unable to find a single main class。spring boot项目使用maven打包，如果没有做配置的话，会自动寻找签名是public static void main(String[] args)的方法。common 只是一个服务工程，本来就不会存在启动入口。
 
@@ -375,7 +375,7 @@ common 执行mvn install时，会报错提示 Unable to find a single main class
 </plugin>
 ```
 
-**jar启动器的作用**
+#### jar启动器的作用
 
 当我们使用java -jar的时候 JarLauncher 会将BOOT-INF/classes下的类文件和BOOT-INF/lib下依赖的jar包加载到classpath下，最后调用META-INF下的MANIFEST.MF文件的Start-Class属性来完成应用程序的启动。
 
@@ -438,32 +438,32 @@ import org.springframework.context.annotation.Conditional;
 @Documented
 @Conditional({OnPropertyCondition.class})
 public @interface ConditionalOnProperty {
-  	/**
-     * 该属性与下面的 name 属性不可同时使用，
-     * 当value所对应配置文件中的值为false时，注入不生效，不为fasle注入生效
-     * value有多个值时，只要有一个值对应为false,则注入不成功
-     */
-    String[] value() default {};
+  /**
+   * 该属性与下面的 name 属性不可同时使用，
+   * 当value所对应配置文件中的值为false时，注入不生效，不为fasle注入生效
+   * value有多个值时，只要有一个值对应为false,则注入不成功
+   */
+  String[] value() default {};
 
-  	/**
-     * 配置文件中key的前缀，可与value 或 name 组合使用
-     */
-    String prefix() default "";
+  /**
+   * 配置文件中key的前缀，可与value 或 name 组合使用
+   */
+  String prefix() default "";
 
-  	/**
-     * 与 value 作用一致
-     */
-    String[] name() default {};
+  /**
+   * 与 value 作用一致
+   */
+  String[] name() default {};
 
-  	/**
-     * 与value 或 name 组合使用，只有当value 或 name 对应的值与havingValue的值相同时，注入生效
-     */
-    String havingValue() default "";
+  /**
+   * 与value 或 name 组合使用，只有当value 或 name 对应的值与havingValue的值相同时，注入生效
+   */
+  String havingValue() default "";
 
-  	/**
-     * 该属性为true时，配置文件中缺少对应的value或name的对应的属性值，也会注入成功
-     */
-    boolean matchIfMissing() default false;
+  /**
+   * 该属性为true时，配置文件中缺少对应的value或name的对应的属性值，也会注入成功
+   */
+  boolean matchIfMissing() default false;
 }
 ```
 
@@ -533,41 +533,41 @@ public class ConditionalOnPropertyTest {
 
 ```java
 public class A {
-	public A() {
-		System.out.println("...A");
-	}
+  public A() {
+    System.out.println("...A");
+  }
 }
 
 public class B {
-	public B(A a) {
-		System.out.println("...B");
-	}
+  public B(A a) {
+    System.out.println("...B");
+  }
 }
 
 @Configuration
 @ComponentScan("com.xsn.configurationtest")
 public class MyConfigurationConfig {
 
-	@Bean
-	public A a() {
-		return new A();
-	}
+  @Bean
+  public A a() {
+    return new A();
+  }
 
-	@Bean
-	public B b() {
-		return new B(a());
-	}
+  @Bean
+  public B b() {
+    return new B(a());
+  }
 }
 
 public static void main(String[] args) {
-	AnnotationConfigApplicationContext ac =
-			new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
+  AnnotationConfigApplicationContext ac =
+      new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
 
-	A a = ac.getBean(A.class);
-	System.out.println(a);
+  A a = ac.getBean(A.class);
+  System.out.println(a);
 
-	B b = ac.getBean(B.class);
-	System.out.println(b);
+  B b = ac.getBean(B.class);
+  System.out.println(b);
 
 }
 
@@ -599,11 +599,11 @@ LITE配置类（注释掉 @Configuration）：
 
 ```java
 public static void main(String[] args) {
-	AnnotationConfigApplicationContext ac =
-			new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
+    AnnotationConfigApplicationContext ac =
+        new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
 
-	MyConfigurationConfig myConfigurationConfig = ac.getBean(MyConfigurationConfig.class);
-	System.out.println(myConfigurationConfig);
+    MyConfigurationConfig myConfigurationConfig = ac.getBean(MyConfigurationConfig.class);
+  System.out.println(myConfigurationConfig);
 
 }
 
@@ -636,18 +636,18 @@ public static void main(String[] args) {
 @Documented
 public @interface Import {
 
-	Class<?>[] value();
+  Class<?>[] value();
 
 }
 ```
 
-**配置类**
+##### 配置类
 
 ```java
 public class C {
-	public C() {
-		System.out.println("...c");
-	}
+  public C() {
+    System.out.println("...c");
+  }
 }
 
 @Configuration
@@ -658,11 +658,11 @@ public class MyConfigurationConfig {
 }
 
 public static void main(String[] args) {
-	AnnotationConfigApplicationContext ac =
-			new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
+  AnnotationConfigApplicationContext ac =
+      new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
 
-	C c = ac.getBean(C.class);
-	System.out.println(c);
+  C c = ac.getBean(C.class);
+  System.out.println(c);
 }
 
 结果：
@@ -686,11 +686,11 @@ public class MyConfigurationConfig {
 }
 
 public static void main(String[] args) {
-	AnnotationConfigApplicationContext ac =
-			new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
+  AnnotationConfigApplicationContext ac =
+      new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
 
-	C c = ac.getBean(C.class);
-	System.out.println(c);
+  C c = ac.getBean(C.class);
+  System.out.println(c);
 }
 
 结果：
@@ -704,14 +704,14 @@ com.xsn.configurationtest.C@71ba6d4e
 ```java
 public interface ImportSelector {
 
-	// 返回要 Import 的配置类名
-	String[] selectImports(AnnotationMetadata importingClassMetadata);
+  // 返回要 Import 的配置类名
+  String[] selectImports(AnnotationMetadata importingClassMetadata);
 
-	// 允许提供一个 Predicate 过滤 selectImports 方法对应的类
-	@Nullable
-	default Predicate<String> getExclusionFilter() {
-		return null;
-	}
+  // 允许提供一个 Predicate 过滤 selectImports 方法对应的类
+  @Nullable
+  default Predicate<String> getExclusionFilter() {
+    return null;
+  }
 
 }
 ```
@@ -721,17 +721,17 @@ public interface ImportSelector {
 ```java
 public class MyImportSelector implements ImportSelector {
 
-	@Override
-	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
-		StandardAnnotationMetadata standardAnnotationMetadata
-				= (StandardAnnotationMetadata) importingClassMetadata;
-		return new String[]{"com.xsn.configurationtest.C"};
-	}
+  @Override
+  public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+    StandardAnnotationMetadata standardAnnotationMetadata
+        = (StandardAnnotationMetadata) importingClassMetadata;
+    return new String[]{"com.xsn.configurationtest.C"};
+  }
 
-	@Override
-	public Predicate<String> getExclusionFilter() {
-		return null;
-	}
+  @Override
+  public Predicate<String> getExclusionFilter() {
+    return null;
+  }
 }
 
 @Configuration
@@ -742,11 +742,11 @@ public class MyConfigurationConfig {
 }
 
 public static void main(String[] args) {
-	AnnotationConfigApplicationContext ac =
-			new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
+  AnnotationConfigApplicationContext ac =
+      new AnnotationConfigApplicationContext(MyConfigurationConfig.class);
 
-	C c = ac.getBean(C.class);
-	System.out.println(c);
+  C c = ac.getBean(C.class);
+  System.out.println(c);
 }
 
 结果：
@@ -764,15 +764,15 @@ com.xsn.configurationtest.C@5ab956d7
 ```java
 public interface ImportBeanDefinitionRegistrar {
 
-	// 基于 AnnotationMetadata BeanDefinitionRegistry 注册对应的 BeanDefinition
-	default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry,
-			BeanNameGenerator importBeanNameGenerator) {
+  // 基于 AnnotationMetadata BeanDefinitionRegistry 注册对应的 BeanDefinition
+  default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry,
+      BeanNameGenerator importBeanNameGenerator) {
 
-		registerBeanDefinitions(importingClassMetadata, registry);
-	}
+    registerBeanDefinitions(importingClassMetadata, registry);
+  }
 
-	default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-	}
+  default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+  }
 
 }
 ```
@@ -896,7 +896,7 @@ SpringBoot的自动装配依赖于注解，所以我们先来看一下注解的�
 
 自动装配还是利用了SpringFactoriesLoader来加载META-INF/spring.factoires文件里所有配置的EnableAutoConfgruation，它会经过exclude和filter等操作，最终确定要装配的类。
 
-**1.一切的开始都源于@SpringBootApplication，它是一个组合注解**
+一切的开始都源于@SpringBootApplication，它是一个组合注解
 
 除了元注解之外，关注这三个注解：
 
@@ -909,7 +909,7 @@ SpringBoot的自动装配依赖于注解，所以我们先来看一下注解的�
 - @SpringBootConfiguration该注解的作用是用来指定扫描路径的，如果不指定特定的扫描路径的话，扫描的路径是当前修饰的类所在的包及其子包。
 - @SpringBootConfiguration这个注解的本质其实是@Configuration注解。
 
-**2.看来这个@EnableAutoConfiguration不简单**
+看来这个@EnableAutoConfiguration不简单
 
 ```java
 @Import(AutoConfigurationImportSelector.class)
@@ -917,7 +917,7 @@ SpringBoot的自动装配依赖于注解，所以我们先来看一下注解的�
 
 它的内部主要是使用@import注解导入一个选择器。
 
-**3.那么我们看看这个AutoConfigurationImportSelector类**
+那么我们看看这个AutoConfigurationImportSelector类
 
 上文提到继承ImportSelector接口的类，需要重写 selectImports( )，那我们就看看这个方法
 
@@ -934,33 +934,33 @@ SpringBoot的自动装配依赖于注解，所以我们先来看一下注解的�
 
 该方法其实也没说啥，现在的重心就放在getAutoConfigurationEntry()中。
 
-**4.getAutoConfigurationEntry()**
+getAutoConfigurationEntry()
 
 ```java
 protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
-    if (!isEnabled(annotationMetadata)) {
-        return EMPTY_ENTRY;
-    }　　　　　
-    AnnotationAttributes attributes = getAttributes(annotationMetadata);
-  	//获取候选配置信息,加载的是当前项目的classpath目录下的所有的 spring.factories 文件中的 key 为
-  	//org.springframework.boot.autoconfigure.EnableAutoConfiguration 的信息。
-  	//点进去通过"SpringFactoriesLoader"进行加载
- 		List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
-    // removeDuplicates方法的作用是 移除同名的
-    configurations = removeDuplicates(configurations);
-    // 获取我们配置的 exclude 信息
-    // 比如：@SpringBootApplication(exclude = {RabbitAutoConfiguration.class}) ,显示的指定不要加载那个配置类
-    Set<String> exclusions = getExclusions(annotationMetadata, attributes);
-    checkExcludedClasses(configurations, exclusions);
-    configurations.removeAll(exclusions);
-    // filter的作用是 过滤掉咱们不需要使用的配置类。
-    configurations = getConfigurationClassFilter().filter(configurations);
-    fireAutoConfigurationImportEvents(configurations, exclusions);
-    return new AutoConfigurationEntry(configurations, exclusions);
+  if (!isEnabled(annotationMetadata)) {
+      return EMPTY_ENTRY;
+  }　　　　　
+  AnnotationAttributes attributes = getAttributes(annotationMetadata);
+  //获取候选配置信息,加载的是当前项目的classpath目录下的所有的 spring.factories 文件中的 key 为
+  //org.springframework.boot.autoconfigure.EnableAutoConfiguration 的信息。
+  //点进去通过"SpringFactoriesLoader"进行加载
+  List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+  // removeDuplicates方法的作用是 移除同名的
+  configurations = removeDuplicates(configurations);
+  // 获取我们配置的 exclude 信息
+  // 比如：@SpringBootApplication(exclude = {RabbitAutoConfiguration.class}) ,显示的指定不要加载那个配置类
+  Set<String> exclusions = getExclusions(annotationMetadata, attributes);
+  checkExcludedClasses(configurations, exclusions);
+  configurations.removeAll(exclusions);
+  // filter的作用是 过滤掉咱们不需要使用的配置类。
+  configurations = getConfigurationClassFilter().filter(configurations);
+  fireAutoConfigurationImportEvents(configurations, exclusions);
+  return new AutoConfigurationEntry(configurations, exclusions);
 }
 ```
 
-**5.前面几个都好理解，现在我们主要看看filter()，是怎么移除不需要的类**
+前面几个都好理解，现在我们主要看看filter()，是怎么移除不需要的类
 
 ![img](https://github.com/chou401/pic-md/raw/master/2597186-20220218230920130-226480162.png)
 
@@ -1024,18 +1024,16 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
 3. 继承WebMvcConfigurationSupport：会覆盖WebMvcAutoConfiguration的配置。
 4. 继承DelegatingWebMvcConfiguration：会覆盖WebMvcAutoConfiguration的配置。
 
-#### 配置类
-
-##### WebMvcConfigurationAdapter
+#### WebMvcConfigurationAdapter
 
 - WebMvcConfigurerAdapter 是 WebMvcConfigurer 的实现类大部分为空方法，是 WebMvcConfigurer的子类实现，由于Java8中可以使用default关键字为接口添加默认方法，为在源代码中spring5.0之后就已经弃用本类，如果需要可以实现WebMvcConfigurer类。
 - `WebMvcConfigurationAdapter`已经废弃，最好用`WebMvcConfigurer`代替。
 
-##### WebMvcConfigurationSupport
+#### WebMvcConfigurationSupport
 
 - WebMvcConfigurationSupport 是mvc的基本实现并包含了WebMvcConfigurer接口中的方法。
 
-##### WebMvcAutoConfiguration
+#### WebMvcAutoConfiguration
 
 - WebMvcAutoConfiguration 是mvc的自动装在类并部分包含了WebMvcConfigurer接口中的方法。
 
@@ -1048,22 +1046,22 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
   @ConditionalOnMissingBean(WebMvcConfigurationSupport.class)
   @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 10)
   @AutoConfigureAfter({ DispatcherServletAutoConfiguration.class,
-  		TaskExecutionAutoConfiguration.class, ValidationAutoConfiguration.class })
+      TaskExecutionAutoConfiguration.class, ValidationAutoConfiguration.class })
   public class WebMvcAutoConfiguration {
-  	...
+    ...
   }
   ```
 
   - @ConditionalOnMissingBean({WebMvcConfigurationSupport.class})，当Spring容器中不存在WebMvcConfigurationSupportbean，WebMvcAutoConfiguration才会注入。
   - 如果有配置文件继承了DelegatingWebMvcConfiguration，或者WebMvcConfigurationSupport，或者配置类注解了@EnableWebMvc，那么WebMvcAutoConfiguration 将不会被自动配置，而是使用WebMvcConfigurationSupport的配置。那么所有实现了WebMvcConfigurer的配置类有可能会全部失效。
 
-##### WebMvcConfigurer
+#### WebMvcConfigurer
 
 - 用途：跨域、拦截器、静态资源处理。
 
 - 接口方法的作用：
 
-  ```
+```text
   addInterceptors：拦截器
   addViewControllers：页面跳转
   addResourceHandlers：静态资源
@@ -1072,7 +1070,7 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
   configureContentNegotiation：配置内容裁决的一些参数
   addCorsMappings：跨域
   configureMessageConverters：信息转换器
-  ```
+```
 
 - WebMvcConfigurer配置类其实是`Spring`内部的种配置方式，可以自定义一些Handler，Interceptor，ViewResolver，MessageConverter等等的东西对springmvc框架进行配置。
 
@@ -1120,9 +1118,7 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
 
   ![image-20230203141903620](https://github.com/chou401/pic-md/raw/master/img/image-20230203141903620.png)
 
-#### 注解
-
-##### **@EnableWebMVC**
+#### **@EnableWebMVC**
 
 ```java
 @Retention(RetentionPolicy.RUNTIME)
@@ -1139,13 +1135,12 @@ public @interface EnableWebMvc {
 ```java
 @Configuration
 public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
-	private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
-	...
+  private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
+  ...
 }
-
 ```
 
-**失效问题解决**
+##### 失效问题解决
 
 1. 在类上加注解解决失效问题
 
@@ -1179,25 +1174,25 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
   @SpringBootConfiguration
   @EnableAutoConfiguration
   @ComponentScan(excludeFilters = {
-  		@Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
-  		@Filter(type = FilterType.CUSTOM,
-  				classes = AutoConfigurationExcludeFilter.class) })
+      @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
+      @Filter(type = FilterType.CUSTOM,
+          classes = AutoConfigurationExcludeFilter.class) })
   public @interface SpringBootApplication {
-  	@AliasFor(annotation = EnableAutoConfiguration.class)
-  	Class<?>[] exclude() default {};
-  	@AliasFor(annotation = EnableAutoConfiguration.class)
-  	String[] excludeName() default {};
-  	@AliasFor(annotation = ComponentScan.class, attribute = "basePackages")
-  	String[] scanBasePackages() default {};
-  	@AliasFor(annotation = ComponentScan.class, attribute = "basePackageClasses")
-  	Class<?>[] scanBasePackageClasses() default {};
+    @AliasFor(annotation = EnableAutoConfiguration.class)
+    Class<?>[] exclude() default {};
+    @AliasFor(annotation = EnableAutoConfiguration.class)
+    String[] excludeName() default {};
+    @AliasFor(annotation = ComponentScan.class, attribute = "basePackages")
+    String[] scanBasePackages() default {};
+    @AliasFor(annotation = ComponentScan.class, attribute = "basePackageClasses")
+    Class<?>[] scanBasePackageClasses() default {};
   }
 
   ```
 
   - 这里引用了`@EnableAutoConfiguration`注解
 
-##### @EnableAutoConfiguration
+@EnableAutoConfiguration
 
 - ```java
   @Target(ElementType.TYPE)
@@ -1207,9 +1202,9 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
   @AutoConfigurationPackage
   @Import(AutoConfigurationImportSelector.class)
   public @interface EnableAutoConfiguration {
-  	String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
-  	Class<?>[] exclude() default {};
-  	String[] excludeName() default {};
+    String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
+    Class<?>[] exclude() default {};
+    String[] excludeName() default {};
 
   }
   ```
@@ -1230,30 +1225,30 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 - ```java
   public class AutoConfigurationImportSelector implements DeferredImportSelector, BeanClassLoaderAware,
-  		ResourceLoaderAware, BeanFactoryAware, EnvironmentAware, Ordered {
-  	...
-  	@Override
-  	public String[] selectImports(AnnotationMetadata annotationMetadata) {
-  		// 是否启用自动配置
-  		if (!isEnabled(annotationMetadata)) {
-  			return NO_IMPORTS;
-  		}
-  		// 获取META-INF/spring-autoconfigure-metadata.properties文件的配置，返回AutoConfigurationMetadata类
-  		AutoConfigurationMetadata autoConfigurationMetadata = AutoConfigurationMetadataLoader
-  				.loadMetadata(this.beanClassLoader);
-  		// 获取自动配置类，返回AutoConfigurationEntry
-  		AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(
-  				autoConfigurationMetadata, annotationMetadata);
-  		// 返回要自动配置的类名
-  		return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
-  	}
-  	...
+      ResourceLoaderAware, BeanFactoryAware, EnvironmentAware, Ordered {
+    ...
+    @Override
+    public String[] selectImports(AnnotationMetadata annotationMetadata) {
+      // 是否启用自动配置
+      if (!isEnabled(annotationMetadata)) {
+        return NO_IMPORTS;
+      }
+      // 获取META-INF/spring-autoconfigure-metadata.properties文件的配置，返回AutoConfigurationMetadata类
+      AutoConfigurationMetadata autoConfigurationMetadata = AutoConfigurationMetadataLoader
+          .loadMetadata(this.beanClassLoader);
+      // 获取自动配置类，返回AutoConfigurationEntry
+      AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(
+          autoConfigurationMetadata, annotationMetadata);
+      // 返回要自动配置的类名
+      return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
+    }
+    ...
   }
   ```
 
 - 如果引用了`@EnableAutoConfiguration`注解，就会往spring容器中注入两个类。
-  1.  `AutoConfigurationPackages.Registrar`：扫包。
-  2.  `AutoConfigurationImportSelector`：等所有类全加载到spring容器之后扫描配置类。
+  1. `AutoConfigurationPackages.Registrar`：扫包。
+  2. `AutoConfigurationImportSelector`：等所有类全加载到spring容器之后扫描配置类。
 
 ### junit
 
@@ -1271,7 +1266,7 @@ pom 中增加testResources，其他操作按照正常创建 test 流程即可。
                 <directory>${basedir}/src/main/resources/</directory>
             </resource>
         </resources>
-				<finalName>xxxx</finalName>
+        <finalName>xxxx</finalName>
         <testResources>
             <testResource>
                 <directory>${basedir}/config/${build.profile.id}/</directory>

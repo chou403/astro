@@ -64,7 +64,7 @@ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.39.1/install.sh | b
 
 安装中提示
 
-```
+```text
  Failed to connect to raw.githubusercontent.com port 443 after 23 ms: Couldn't connect to server
 ```
 
@@ -100,14 +100,14 @@ export NVM_NODEJS_ORG_MIRROR=https://npm.taobao.org/mirrors/node/
 
 windows 需要在nvm的安装路径下，找到settings.txt打开，在后面加加上
 
-```
+```text
 node_mirror: https://npm.taobao.org/mirrors/node/
 npm_mirror: https://npm.taobao.org/mirrors/npm/
 ```
 
 ## Navicat导出ncx解析数据库密码
 
-网址：https://tool.lu/coderunner/
+网址：<https://tool.lu/coderunner/>
 
 代码
 
@@ -269,12 +269,12 @@ git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
 cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
 ```
 
-**oh-my-zsh内置自动补全**
+### oh-my-zsh内置自动补全
 
 - **自动列出目录：**输入 cd 按 tab 键，目录将自动列出，在按 tab 可以切换。
 - **自动补全目录：**例如 /opt/local/bin 这个长路径，只需要 cd /o/l/b 按 tab 键自动补全
 
-**zsh-completions：额外补全**（二选一）
+### zsh-completions：额外补全（二选一）
 
 ```bash
 ##下载安装
@@ -290,7 +290,7 @@ source "$ZSH/oh-my-zsh.sh"
 brew install zsh-completions
 ```
 
-**zsh-autosuggestions：历史补全**
+### zsh-autosuggestions：历史补全
 
 ```bash
 ##下载安装
@@ -304,7 +304,7 @@ plugins=(
 )
 ```
 
-**Incremental completion on zsh:实时补全**
+### Incremental completion on zsh:实时补全
 
 ```bash
 ##创建文件夹
@@ -320,7 +320,7 @@ echo 'source $ZSH_CUSTOM/plugins/incr/incr.zsh' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-**zsh-syntax-highlighting：语法高亮**
+### zsh-syntax-highlighting：语法高亮
 
 命令错误显示红色，直至正确才为绿色，路径正确会添加下划线
 
@@ -333,7 +333,7 @@ plugins=([plugins...]
          zsh-syntax-highlighting)
 ```
 
-**安装 Powerlevel10k**
+### 安装 Powerlevel10k
 
 Github
 
@@ -353,7 +353,7 @@ git clone --depth=1 https://gitee.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$H
 ZSH_THEME=powerlevel10k/powerlevel10k
 ```
 
-**安装nerd font**
+### 安装nerd font
 
 Powerlevel10k 需要依赖 nerd font
 
@@ -371,14 +371,14 @@ Powerlevel10k 需要依赖 nerd font
 
 创建 .vimrc 配置文件
 
-```bash
+```vim
 " Configuration file for vim
-set modelines=0		" CVE-2007-2438
+set modelines=0     " CVE-2007-2438
 
 " Normally we use vim-extensions. If you want true vi-compatibility
 " remove change the following statements
-set nocompatible	" Use Vim defaults instead of 100% vi compatibility
-set backspace=2		" more powerful backspacing
+set nocompatible    " Use Vim defaults instead of 100% vi compatibility
+set backspace=2     " more powerful backspacing
 
 " Don't write backup file if vim is being called by "crontab -e"
 au BufWrite /private/tmp/crontab.* set nowritebackup nobackup
@@ -424,13 +424,13 @@ endif
 
 ## redis
 
-**执行安装命令**
+执行安装命令
 
 ```bash
 brew install redis
 ```
 
-**查看安装到的目录**
+查看安装到的目录
 
 ```bash
 ❯ brew list redis
@@ -449,7 +449,7 @@ brew install redis
 
 /opt/homebrew/Cellar/redis/7.2.3/homebrew.mxcl.redis.plist 这个文件比较关键，是设置开机自启动的关键。
 
-**设置开机自启动**
+设置开机自启动
 
 查看文件中的内容
 
@@ -498,7 +498,7 @@ sudo vi /Library/LaunchDaemons/io.redis.redis-server.plist
 sudo launchctl load /Library/LaunchDaemons/io.redis.redis-server.plist使用launchctl手动启动/关闭redis
 ```
 
-- 启动 redisz
+- 启动 redis
 
   ```bash
   sudo launchctl start io.redis.redis-server
@@ -523,7 +523,7 @@ source ~/.zshrc
 
 ## kafka
 
-**mac安装kafka运行错误@@HOMEBREW_JAVA@@/bin/java: No such file or directory**
+mac安装kafka运行错误@@HOMEBREW_JAVA@@/bin/java: No such file or directory
 
 描述：安装brew使用的中科大的镜像，直接通过`brew install kafka`后执行启动命令`brew services start kafka`报错
 

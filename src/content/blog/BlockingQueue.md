@@ -93,13 +93,13 @@ tags:
     //条件对象，用于通知put方法队列的线程
     private final Condition notFull;
 
-	//迭代器
+    //迭代器
     transient Itrs itrs = null;
 
 
 ```
 
-**添加元素原理**
+#### 添加元素原理
 
 添加方法有add，offer，put。
 
@@ -176,7 +176,7 @@ public void put(E e) throws InterruptedException {
 
 他是通过condition的await方法来实现阻塞的，但由于又添加了lockInterruptibly标识，说明其阻塞可被打断。
 
-**获取元素/删除元素原理**
+#### 获取元素/删除元素原理
 
 方法有remove，poll，take。
 
