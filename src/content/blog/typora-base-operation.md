@@ -1,10 +1,13 @@
 ---
-title: typora
-description: Typora 使用操作（文本颜色&快捷键）
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:46:00Z
+modDatetime: 2024-02-22T00:37:28Z
+title: typora
+featured: false
+draft: false
 tags:
   - typora
+description: Typora 使用操作（文本颜色&快捷键）
 ---
 
 ## Table of contents

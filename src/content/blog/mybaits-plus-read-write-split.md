@@ -1,11 +1,14 @@
 ---
-title: Mybatis Plus
-description: 基于 Mybatis Plus 的三种实现读写分离 & 分库分表
+author: chou401
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-01-31T16:52:00Z
+modDatetime: 2024-02-22T00:37:28Z
+title: Mybatis Plus
+featured: false
+draft: false
 tags:
   - java
   - mybatisplus
+description: 基于 Mybatis Plus 的三种实现读写分离 & 分库分表
 ---
 
 ## Table of contents

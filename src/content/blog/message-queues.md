@@ -1,11 +1,14 @@
 ---
-title: MQ
-description: 消息队列 & 常见的六种消息队列
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-01T11:16:00Z
+modDatetime: 2024-02-22T00:37:27Z
+title: MQ
+featured: false
+draft: false
 tags:
   - java
   - queue
+description: 消息队列 & 常见的六种消息队列
 ---
 
 ## Table of contents

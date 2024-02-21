@@ -1,11 +1,14 @@
 ---
-title: 阻塞队列
-description: 开发使用到的阻塞队列
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:24:35Z
+modDatetime: 2024-02-22T00:37:27Z
+title: 阻塞队列
+featured: false
+draft: false
 tags:
   - java
   - queue
+description: 开发使用到的阻塞队列
 ---
 
 ## Table of contents

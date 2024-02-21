@@ -1,10 +1,13 @@
 ---
-title: 面基记录
-description: 面试经常被问到的问题
+author: chou401
 pubDatetime: 2024-01-30T12:28:25Z
-modDatetime: 2024-01-30T12:28:25Z
+modDatetime: 2024-02-22T00:37:27Z
+title: 面基记录
+featured: false
+draft: false
 tags:
   - java
+description: 面试经常被问到的问题
 ---
 
 ## Java 中的四种引用类型

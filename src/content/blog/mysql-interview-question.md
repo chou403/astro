@@ -1,11 +1,13 @@
 ---
-title: Mysql
-description: Mysql 底层实现 & 性能优化
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-01T11:17:00Z
+modDatetime: 2024-02-22T00:37:28Z
+title: Mysql
 featured: true
+draft: false
 tags:
   - mysql
+description: Mysql 底层实现 & 性能优化
 ---
 
 ## Table of contents

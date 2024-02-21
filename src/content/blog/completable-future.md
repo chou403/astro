@@ -1,11 +1,14 @@
 ---
-title: CompletableFuture
-description: CompletableFuture 线程处理代码片段
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:24:35Z
+modDatetime: 2024-02-22T00:37:27Z
+title: CompletableFuture
+featured: false
+draft: false
 tags:
   - java
   - thread
+description: CompletableFuture 线程处理代码片段
 ---
 
 ## Table of contents

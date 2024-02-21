@@ -1,10 +1,13 @@
 ---
-title: 算法入门到放弃
-description: 从复杂度、栈、队列以及树的基本概念开始，讲述算法中常用的排序以及计算方式。
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:22:35Z
+modDatetime: 2024-02-22T00:37:27Z
+title: 算法入门到放弃
+featured: false
+draft: false
 tags:
   - java
+description: 从复杂度、栈、队列以及树的基本概念开始，讲述算法中常用的排序以及计算方式。
 ---
 
 ## Table of contents

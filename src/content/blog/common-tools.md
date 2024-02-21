@@ -1,10 +1,13 @@
 ---
-title: Tools
-description: 开发或者学习中用到的工具安装流程记录
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:46:00Z
+modDatetime: 2024-02-22T00:37:27Z
+title: Tools
+featured: false
+draft: false
 tags:
   - tool
+description: 开发或者学习中用到的工具安装流程记录
 ---
 
 ## Table of contents

@@ -1,10 +1,13 @@
 ---
-title: Java SPI
-description: java spi 描述
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:35:00Z
+modDatetime: 2024-02-22T00:37:27Z
+title: Java SPI
+featured: false
+draft: false
 tags:
   - java
+description: java spi 描述
 ---
 
 ## Table of contents

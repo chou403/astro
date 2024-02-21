@@ -1,11 +1,14 @@
 ---
-title: Jenkins
-description: Jenkins 安装使用
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:35:00Z
+modDatetime: 2024-02-22T00:37:27Z
+title: Jenkins
+featured: false
+draft: false
 tags:
   - jenkins
   - devops
+description: Jenkins 安装使用
 ---
 
 ## Table of contents

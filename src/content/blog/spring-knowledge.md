@@ -1,11 +1,14 @@
 ---
-title: Spring
-description: Spring 基础知识点
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:44:00Z
+modDatetime: 2024-02-22T00:37:28Z
+title: Spring
+featured: false
+draft: false
 tags:
   - java
   - spring
+description: Spring 基础知识点
 ---
 
 ## Table of contents

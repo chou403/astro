@@ -1,11 +1,14 @@
 ---
-title: Slf4j
-description: Slf4j 简介
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:44:00Z
+modDatetime: 2024-02-22T00:37:28Z
+title: Slf4j
+featured: false
+draft: false
 tags:
   - java
   - slf4j
+description: Slf4j 简介
 ---
 
 ## Table of contents

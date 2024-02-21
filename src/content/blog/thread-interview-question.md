@@ -1,12 +1,14 @@
 ---
-title: Thread & ThreaPool
-description: 线程 & 线程池相关介绍
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-01T11:17:30Z
+modDatetime: 2024-02-22T00:37:28Z
+title: Thread & ThreaPool
 featured: true
+draft: false
 tags:
   - java
   - thread
+description: 线程 & 线程池相关介绍
 ---
 
 ## Table of contents

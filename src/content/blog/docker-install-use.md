@@ -1,11 +1,14 @@
 ---
-title: Docker
-description: linux 安装 docker 以及使用
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:25:50Z
+title: Docker
+featured: false
+draft: false
 tags:
   - docker
   - devops
+description: linux 安装 docker 以及使用
 ---
 
 ## Table of contents

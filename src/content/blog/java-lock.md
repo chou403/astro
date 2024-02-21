@@ -1,11 +1,14 @@
 ---
-title: ReentrantLock & synchronized & ReentrantReadWriteLock
-description: Java 常用锁的介绍 & 底层代码
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-01T10:38:00Z
+modDatetime: 2024-02-22T00:37:27Z
+title: ReentrantLock & synchronized & ReentrantReadWriteLock
+featured: false
+draft: false
 tags:
   - java
   - lock
+description: Java 常用锁的介绍 & 底层代码
 ---
 
 ## Table of contents

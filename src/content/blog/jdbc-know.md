@@ -1,11 +1,13 @@
 ---
-title: JDBC
-description: jdbc acid & 隔离级别
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:35:00Z
-
+modDatetime: 2024-02-22T00:37:27Z
+title: JDBC
+featured: false
+draft: false
 tags:
   - jdbc
+description: jdbc acid & 隔离级别
 ---
 
 ## Table of contents

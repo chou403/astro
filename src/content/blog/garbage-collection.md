@@ -1,12 +1,14 @@
 ---
-title: 垃圾回收
-description: 三种垃圾回收算法 & 三色标记算法 & 五种垃圾回收器及选择
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:28:25Z
+modDatetime: 2024-02-22T00:37:27Z
+title: 垃圾回收
 featured: true
+draft: false
 tags:
   - java
   - gc
+description: 三种垃圾回收算法 & 三色标记算法 & 五种垃圾回收器及选择
 ---
 
 ## Table of contents

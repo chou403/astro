@@ -1,11 +1,14 @@
 ---
-title: Mybatis
-description: Mybatis 项目集成实现和重点底层源码分析
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:41:00Z
+modDatetime: 2024-02-22T00:37:28Z
+title: Mybatis
+featured: false
+draft: false
 tags:
   - java
   - mybatis
+description: Mybatis 项目集成实现和重点底层源码分析
 ---
 
 ## Table of contents

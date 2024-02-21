@@ -1,10 +1,13 @@
 ---
-title: mysqld_multi
-description: 基于 MySQL 自带工具 mysqld_multi 实现主从复制
+author: chou401
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-02-01T15:26:00Z
+modDatetime: 2024-02-22T00:37:28Z
+title: mysqld_multi
+featured: false
+draft: false
 tags:
   - mysql
+description: 基于 MySQL 自带工具 mysqld_multi 实现主从复制
 ---
 
 ## Table of contents

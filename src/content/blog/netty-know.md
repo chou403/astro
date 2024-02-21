@@ -1,10 +1,13 @@
 ---
-title: Netty
-description: Netty 相关学习（待补充版）
+author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:43:00Z
+modDatetime: 2024-02-22T00:37:28Z
+title: Netty
+featured: false
+draft: false
 tags:
   - netty
+description: Netty 相关学习（待补充版）
 ---
 
 ## Table of contents
