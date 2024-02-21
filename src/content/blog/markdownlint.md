@@ -1,6 +1,6 @@
 ---
-title: "markdownlint"
-description: "vscode markdownlint 插件使用"
+title: markdownlint
+description: vscode markdownlint 插件使用
 pubDatetime: 2024-02-20T14:40:35Z
 tags:
   - markdown

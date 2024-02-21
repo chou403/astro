@@ -1,6 +1,6 @@
 ---
-title: "Thread & ThreaPool"
-description: "线程 & 线程池 相关介绍"
+title: Thread & ThreaPool
+description: 线程 & 线程池相关介绍
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-02-01T11:17:30Z
 featured: true

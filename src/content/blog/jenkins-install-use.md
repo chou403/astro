@@ -1,6 +1,6 @@
 ---
-title: "Jenkins 工具"
-description: "Jenkins 安装使用"
+title: Jenkins
+description: Jenkins 安装使用
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:35:00Z
 tags:

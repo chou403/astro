@@ -1,6 +1,6 @@
 ---
-title: "Java SPI"
-description: "简述 java spi"
+title: Java SPI
+description: java spi 描述
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:35:00Z
 tags:

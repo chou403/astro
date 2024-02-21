@@ -1,6 +1,6 @@
 ---
-title: "Spring "
-description: "Spring 知识记录"
+title: Spring
+description: Spring 基础知识点
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:44:00Z
 tags:

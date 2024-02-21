@@ -1,13 +1,13 @@
 ---
-title: "面基记录"
-description: "面基记录"
+title: 面基记录
+description: 面试经常被问到的问题
 pubDatetime: 2024-01-30T12:28:25Z
 modDatetime: 2024-01-30T12:28:25Z
 tags:
   - java
 ---
 
-**Java 中的四种引用类型**
+## Java 中的四种引用类型
 
 Java 中的引用类型分别为**强、软、弱、虚**。
 

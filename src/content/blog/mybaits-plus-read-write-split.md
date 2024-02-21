@@ -1,6 +1,6 @@
 ---
-title: "Mybatis Plus"
-description: "基于 Mybatis Plus 的三种实现读写分离 & 分库分表"
+title: Mybatis Plus
+description: 基于 Mybatis Plus 的三种实现读写分离 & 分库分表
 pubDatetime: 2024-01-27T15:56:54Z
 modDatetime: 2024-01-31T16:52:00Z
 tags:

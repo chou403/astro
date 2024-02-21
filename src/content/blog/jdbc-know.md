@@ -1,6 +1,6 @@
 ---
-title: "JDBC 不懂就来"
-description: "jdbc acid & 隔离级别"
+title: JDBC
+description: jdbc acid & 隔离级别
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:35:00Z
 

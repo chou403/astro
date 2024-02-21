@@ -1,6 +1,6 @@
 ---
-title: "MQ"
-description: "简述消息队列 & 常见的六种消息队列"
+title: MQ
+description: 消息队列 & 常见的六种消息队列
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-02-01T11:16:00Z
 tags:

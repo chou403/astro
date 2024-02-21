@@ -1,6 +1,6 @@
 ---
-title: "Slf4j "
-description: "Slf4j描述"
+title: Slf4j
+description: Slf4j 简介
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:44:00Z
 tags:

@@ -1,6 +1,6 @@
 ---
-title: "ReentrantLock & synchronized & ReentrantReadWriteLock"
-description: "Java 中锁的分类"
+title: ReentrantLock & synchronized & ReentrantReadWriteLock
+description: Java 常用锁的介绍 & 底层代码
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-02-01T10:38:00Z
 tags:

@@ -1,6 +1,6 @@
 ---
-title: "阻塞队列"
-description: "简述几种常用的阻塞队列"
+title: 阻塞队列
+description: 开发使用到的阻塞队列
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:24:35Z
 tags:

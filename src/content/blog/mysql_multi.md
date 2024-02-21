@@ -1,6 +1,6 @@
 ---
-title: "mysqld_multi"
-description: "基于 MySQL 自带工具 mysqld_multi 实现主从复制"
+title: mysqld_multi
+description: 基于 MySQL 自带工具 mysqld_multi 实现主从复制
 pubDatetime: 2024-01-27T15:56:54Z
 modDatetime: 2024-02-01T15:26:00Z
 tags:

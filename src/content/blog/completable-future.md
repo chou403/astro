@@ -1,6 +1,6 @@
 ---
-title: "CompletableFuture"
-description: "CompletableFuture线程处理代码片段"
+title: CompletableFuture
+description: CompletableFuture 线程处理代码片段
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:24:35Z
 tags:

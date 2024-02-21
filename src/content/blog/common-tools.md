@@ -1,6 +1,6 @@
 ---
-title: "Tools"
-description: "开发或者学习中用到的工具安装流程记录"
+title: Tools
+description: 开发或者学习中用到的工具安装流程记录
 pubDatetime: 2022-09-25T15:20:35Z
 modDatetime: 2024-01-30T12:46:00Z
 tags:
