@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T10:32:22Z
+modDatetime: 2024-02-22T10:41:56Z
 title: Docker
 featured: false
 draft: false
@@ -44,20 +44,21 @@ description: linux 安装 docker 以及使用
 
 > {
 > "registry-mirrors": [ \
+>
 > > "<https://registry.docker-cn.com>", \
 > > "<http://hub-mirror.c.163.com>", \
 > > "<https://docker.mirrors.ustc.edu.cn>", \
 > > "<https://kfwkfulq.mirror.aliyuncs.com>" \
 > > ], \
-> "max-concurrent-downloads": 10, \
-> "log-driver": "json-file", \
-> "log-level": "warn", \
-> "log-opts": { \
-> "max-size": "10m", \
-> "max-file": "3" \
-> }, \
-> "data-root": "/var/lib/docker" \
-> }
+> > "max-concurrent-downloads": 10, \
+> > "log-driver": "json-file", \
+> > "log-level": "warn", \
+> > "log-opts": { \
+> > "max-size": "10m", \
+> > "max-file": "3" \
+> > }, \
+> > "data-root": "/var/lib/docker" \
+> > }
 
 ## 检查docker是否安装成功
 
@@ -161,7 +162,7 @@ description: linux 安装 docker 以及使用
 
 ## 下载
 
-> curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+> curl -L "<https://github.com/docker/compose/releases/download/1.29.2/docker-compose-linux-x86_64>" -o /usr/local/bin/docker-compose
 >
 > curl -L "<http://ithltt.com/files/docker-compose-linux-x86_64>" -o /usr/local/bin/docker-compose
 
@@ -395,7 +396,7 @@ description: linux 安装 docker 以及使用
 
 ## 调整URL列表
 
-> RUN sed -i 's/mirrorlist/##mirrorlist/g' /etc/yum.repos.d/CentOS-_ \
+> RUN sed -i 's/mirrorlist/##mirrorlist/g' /etc/yum.repos.d/CentOS-_\
 > RUN sed -i 's|##baseurl=<http://mirror.centos.org|baseurl=http://vault.centos.org|g>' /etc/yum.repos.d/CentOS-_
 
 ## 重新生成缓存
@@ -473,7 +474,7 @@ docker-compose.yml
 > TZ: Asia/Shanghai \
 > volumes:
 
-## 数据卷映射
+## tomcat数据卷映射
 
 > /docker_tomcat/webapps:/usr/local/tomcat/webapps \
 >
@@ -497,12 +498,7 @@ docker-compose.yml
 > 82:80 \
 > environment:
 
-## 指定时区
-
-> TZ: Asia/Shanghai \
-> volumes:
-
-## 数据卷映射
+## nginx 数据卷映射
 
 > /docker_nginx/logs:/usr/local/nginx/logs
 
