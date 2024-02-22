@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:28Z
+modDatetime: 2024-02-22T10:32:22Z
 title: Mysql
 featured: true
 draft: false
@@ -675,8 +675,6 @@ DELIMITER ;
 
 #### 开始测试
 
-> “
->
 > 电脑配置比较低：win10 标压渣渣i5 读写约500MB的SSD
 
 由于配置低，本次测试只准备了3148000条数据，占用了磁盘5G(还没建索引的情况下)，跑了38min，电脑配置好的同学，可以插入多点数据测试

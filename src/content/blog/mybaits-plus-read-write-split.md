@@ -1,9 +1,9 @@
 ---
 author: chou401
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-02-22T00:37:28Z
+modDatetime: 2024-02-22T10:32:22Z
 title: Mybatis Plus
-featured: false
+featured: true
 draft: false
 tags:
   - java

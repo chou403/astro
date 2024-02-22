@@ -1,9 +1,9 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:27Z
+modDatetime: 2024-02-22T10:32:22Z
 title: MQ
-featured: false
+featured: true
 draft: false
 tags:
   - java
@@ -461,6 +461,7 @@ rabbitmq 提供了 ha-promote-on-shutdown，ha-promote-on-failure 两个参数�
 | always                                           | 无论什么情况下从节点都将被提升为主节点         |
 
 > 这里要注意的是ha-promote-on-failure设置为always，插拔网线模拟网络异常的两个测试场景：当网络恢复后，其中一个会重新变为mirror，具体是哪个变为mirror，受cluster_partition_handling处理策略的影响。
+>
 > 例如两台节点A，B组成集群，并且cluster_partition_handling设置为autoheal，队列的master位于节点A上，具有全量数据，mirror位于节点B上，并且还未完成消息的同步，此时出现网络异常，网络异常后两个节点交互决策：如果节点A节点成为赢家，此时B节点内部会重启，这样数据全部保留不会丢失；相反如果B节点成为赢家，A需要重启，那么由于ha-prromote-on-failure设置为always，B节点上的mirror提升为master，这样就出现了数据丢失。
 
 ###### 主队列选择策略
@@ -1445,7 +1446,9 @@ kafka broker failover 序列图如下所示：
 - /controller -> int (broker id of the controller) 存储center controller中央控制器所在kafka broker的信息
 
 > "version": 版本编号默认为1,
+>
 > "brokerid": kafka集群中broker唯一编号,
+>
 > "timestamp": kafka broker中央控制器变更时的时间戳
 
 ### RocketMQ
@@ -1607,6 +1610,7 @@ wirte() 写请求 和 read()，需要先写入用户缓存区，然后通过系�
 `mmap()` 系统调用函数会把文件磁盘地址「**映射**」到内核缓存区（page cache），而内核缓存区会 「**映射**」到用户空间（虚拟地址）。这样，操作系统内核与用户空间就不需要再进行任何的数据拷贝。
 
 > 注意，这里用户空间（虚拟地址）不是直接映射到文件磁盘地址，而是文件对应的 page cache，用户虚拟地址一般是和用户内存地址「映射」的，如果使用内存映射技术，则用户虚拟地址可以和内核内存地址「映射」。
+>
 > 根据维基百科给出的定义：在大多数操作系统中，映射的内存区域实际上是内核的page cache，这意味着不需要在用户空间创建副本。多个进程之间也可以通过同时映射 page cache，来进行进程通信）
 
 ###### mmap() 函数简介

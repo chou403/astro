@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:28Z
+modDatetime: 2024-02-22T10:32:22Z
 title: Spring
 featured: false
 draft: false
@@ -98,8 +98,11 @@ jar包里面含有一下三部分文件
 ![image-20230404172555912](https://github.com/chou401/pic-md/raw/master/img/image-20230404172555912.png)
 
 > org：主要存放springboot相关的class文件
+>
 > META-INF：主要存放maven和MANIFEST.MF文件
+>
 > BOOT-INF/classes：主要存放应用编译后的class文件
+>
 > BOOT-INF/lib：主要存放应用依赖的jar包文件
 
 打开META-INF下MENIFEST.MF文件，内容如下：

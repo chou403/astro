@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:27Z
+modDatetime: 2024-02-22T10:32:22Z
 title: Tools
 featured: false
 draft: false
@@ -47,6 +47,7 @@ mac 卸载脚本
 > brew outdated查询可更新的包
 >
 > brew upgrade 全部更新包
+>
 > brew upgrade 包名 指定包更新包
 >
 > brew cleanup清理旧版本

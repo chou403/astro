@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-01-30T12:25:50Z
+modDatetime: 2024-02-22T10:32:22Z
 title: Docker
 featured: false
 draft: false
@@ -23,7 +23,7 @@ description: linux 安装 docker 以及使用
 
 > sudo yum-config-manager \
 > --add-repo \
-> <https://download.docker.com/linux/centos/docker-ce.repo>
+> <https://download.docker.com/linux/centos/docker-ce.repo> \
 > sudo yum-config-manager \
 > --add-repo \
 > <http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo>
@@ -43,22 +43,21 @@ description: linux 安装 docker 以及使用
 ## 写入文件内容
 
 > {
-> "registry-mirrors": [
->
-> > "<https://registry.docker-cn.com>",
-> > "<http://hub-mirror.c.163.com>",
-> > "<https://docker.mirrors.ustc.edu.cn>",
-> > "<https://kfwkfulq.mirror.aliyuncs.com>"
-> > ],
-> > "max-concurrent-downloads": 10,
-> > "log-driver": "json-file",
-> > "log-level": "warn",
-> > "log-opts": {
-> > "max-size": "10m",
-> > "max-file": "3"
-> > },
-> > "data-root": "/var/lib/docker"
-> > }
+> "registry-mirrors": [ \
+> > "<https://registry.docker-cn.com>", \
+> > "<http://hub-mirror.c.163.com>", \
+> > "<https://docker.mirrors.ustc.edu.cn>", \
+> > "<https://kfwkfulq.mirror.aliyuncs.com>" \
+> > ], \
+> "max-concurrent-downloads": 10, \
+> "log-driver": "json-file", \
+> "log-level": "warn", \
+> "log-opts": { \
+> "max-size": "10m", \
+> "max-file": "3" \
+> }, \
+> "data-root": "/var/lib/docker" \
+> }
 
 ## 检查docker是否安装成功
 
@@ -122,8 +121,8 @@ description: linux 安装 docker 以及使用
 
 ## 创建并启动容器
 
-> docker run -it xxx bash
-> 注释:
+> docker run -it xxx bash \
+> 注释: \
 > xxx 代表镜像名或者imageId的前几位
 
 ## 查看容器
@@ -260,9 +259,9 @@ description: linux 安装 docker 以及使用
 
 ## 使用数据卷
 
-> docker run -v 数据卷名称:容器内部路径 镜像ID
-> docker run -v 路径:容器内部路径 镜像ID
-> 例:
+> docker run -v 数据卷名称:容器内部路径 镜像ID \
+> docker run -v 路径:容器内部路径 镜像ID \
+> 例: \
 > docker run -d -p 8080:8080 -v V01:/usr/local/tomcat/webapps/ --name tomcat 镜像ID
 
 ## 使用自定义镜像
@@ -271,7 +270,7 @@ description: linux 安装 docker 以及使用
 
 ## 使用自定义镜像DockerFile 生成镜像 (注意镜像名不能有大写字母)
 
-> docker build -t 镜像名:版本号 .
+> docker build -t 镜像名:版本号 . \
 > docker build -t 镜像名:版本号 - < /path/DockerFile(文件绝对路径, 脚本中不能使用相对路径!!)
 
 ### 本地构建 helloworldapp 镜像文件
@@ -296,18 +295,18 @@ description: linux 安装 docker 以及使用
 
 ## 指定基础镜像
 
-> 格式 第一行必须是FROM(不包括注释)
-> FROM <image>
-> FROM <image>:<tag>
-> FROM <image>@<digest>
-> 实例:
+> 格式 第一行必须是FROM(不包括注释) \
+> FROM <image> \
+> FROM <image>:<tag> \
+> FROM <image>@<digest> \
+> 实例: \
 > FROM mysql:5.6
 
 ## MAINTAINER: 维护者信息
 
-> 格式:
-> MAINTAINER <name>
-> 实例:
+> 格式: \
+> MAINTAINER <name> \
+> 实例: \
 > MAINTAINER <xxx@aaaa.com>
 
 ## 构建时候执行的命令
@@ -322,24 +321,24 @@ description: linux 安装 docker 以及使用
 
 ### ENTRYPOINT: 配置容器,使其可执行化. 配合CMD可省去"application",只添加参数（可以外部传递参数）
 
-> ENTRYPOINT ["executable","parm1","parm2"](优先执行可执行文件)
+> ENTRYPOINT ["executable","parm1","parm2"](优先执行可执行文件) \
 > ENTRYPOINT command parm1 parm2(执行Shell内部命令)
 
 ## 构建容器后调用 容器启动时进行调用
 
-> CMD ["executable","parm1","parm2"](优先执行可执行文件)
-> CMD ["parm1","parm2"](设置了ENTRYPOINT, 直接调用ENTRYPOINT添加参数)
+> CMD ["executable","parm1","parm2"](优先执行可执行文件) \
+> CMD ["parm1","parm2"](设置了ENTRYPOINT, 直接调用ENTRYPOINT添加参数) \
 > CMD command parm1 parm2(执行Shell内部命令)
 
 ## LAB:用于为镜像添加元数据 可以
 
-> LABEL <Key>=<Value> <Key>=<Value> <Key>=<Value>
-> 实例:
+> LABEL <Key>=<Value> <Key>=<Value> <Key>=<Value> \
+> 实例: \
 > LABEL Version="1.0" Description="描述" by="糖糖"
 
 ## ENV: 设置环境变量
 
-> ENV <key> <Value>
+> ENV <key> <Value> \
 > ENV <key>=<Value>
 
 ## EXPOSE: 指定外界交互的端口
@@ -361,8 +360,6 @@ description: linux 安装 docker 以及使用
 ## ARG 指定传递给构建运行时的变量
 
 > ARG <name>[=<default value>]
-
-##
 
 ## 示例DockerFile
 
@@ -398,7 +395,7 @@ description: linux 安装 docker 以及使用
 
 ## 调整URL列表
 
-> RUN sed -i 's/mirrorlist/##mirrorlist/g' /etc/yum.repos.d/CentOS-_
+> RUN sed -i 's/mirrorlist/##mirrorlist/g' /etc/yum.repos.d/CentOS-_ \
 > RUN sed -i 's|##baseurl=<http://mirror.centos.org|baseurl=http://vault.centos.org|g>' /etc/yum.repos.d/CentOS-_
 
 ## 重新生成缓存
@@ -411,7 +408,7 @@ description: linux 安装 docker 以及使用
 
 ## 创建运行用户和组
 
-> RUN groupadd Tang
+> RUN groupadd Tang \
 > RUN useradd -s /sbin/nologin -M Tang -g Tang
 
 ## WORKDIR 切换到Nginx目录
@@ -440,112 +437,69 @@ docker-compose.yml
 
 文件内容如下
 
-> version: '3.8'
-> services:
-> mysql:
-
-                # 在docker启动时启动服务
-
-> restart: always
-
-                # 使用的镜像
-
-> image: mysql:5.7.5-m15
-
-                # 容器名称
-
-> container_name: Mysql
-
-                # 端口映射
-
+> version: '3.8' \
+> services: \
+> mysql: \
+> #在docker启动时启动服务 \
+> restart: always \
+> #使用的镜像 \
+> image: mysql:5.7.5-m15 \
+> #容器名称 \
+> container_name: Mysql \
+> #端口映射 \
+> ports:- 3306:3306 \
+> #环境参数 \
+> environment: \
+> #数据库密码 \
+> MYSQL_ROOT_PASSWORD: 123456 \
+> #指定时区 \
+> TZ: Asia/Shanghai \
+> volumes: #数据卷映射(容器内存在/var/lib/mysql/所以如果不指定根目录无法启动mysql容器) \
+> /docker_mysql/:/var/lib/mysql/ \
+> tomcat: \
+> #在docker启动时启动服务 \
+> restart: always \
+> #使用的镜像 \
+> image: tomcat:8.5.51 \
+> #容器名称 \
+> container_name: Tomcat \
+> #端口映射 \
 > ports:
->
->                 -       3306:3306
-
-                # 环境参数
-
-> environment:
-
-                        # 数据库密码
-
-> MYSQL_ROOT_PASSWORD: 123456
-
-                        # 指定时区
-
-> TZ: Asia/Shanghai
-> volumes:
-
-                        # 数据卷映射(容器内存在/var/lib/mysql/所以如果不指定根目录无法启动mysql容器)
-
-> /docker_mysql/:/var/lib/mysql/
-> tomcat:
-
-                # 在docker启动时启动服务
-
-> restart: always
-
-                # 使用的镜像
-
-> image: tomcat:8.5.51
-
-                # 容器名称
-
-> container_name: Tomcat
-
-                # 端口映射
-
-> ports:
->
 > 8070:8080
-> environment:
+> environment: \
 
 ## 指定时区
 
-> TZ: Asia/Shanghai
+> TZ: Asia/Shanghai \
 > volumes:
 
 ## 数据卷映射
 
-> /docker_tomcat/webapps:/usr/local/tomcat/webapps
+> /docker_tomcat/webapps:/usr/local/tomcat/webapps \
 >
-> /docker_tomcat/logs:/usr/local/tomcat/logs
-> nginx:
-
-                # 在docker启动时启动服务
-
-> restart: always
-
-                # 使用本地自建镜像
-
-> build:
-
-                        # 构建镜像的配置文件的目录
-
-> context: /root/nginxDocker/
-
-                        # 构建镜像的配置文件的名称
-
-> dockerfile: Dockerfile_nginx
-
-                # 使用的镜像
-
-> image: nginx:1.23.3
-
-                # local_images: nginx:1.23.3
-                # 容器名称
-
-> container_name: Nginx
-
-                # 端口映射
-
-> ports:
->
-> 82:80
+> /docker_tomcat/logs:/usr/local/tomcat/logs \
+> nginx: \
+> #在docker启动时启动服务 \
+> restart: always \
+> #使用本地自建镜像 \
+> build: \
+> #构建镜像的配置文件的目录 \
+> context: /root/nginxDocker/ \
+> #构建镜像的配置文件的名称
+> dockerfile: Dockerfile_nginx \
+> #使用的镜像 \
+> image: nginx:1.23.3 \
+> #local_images: nginx:1.23.3 \
+> #容器名称 \
+> container_name: Nginx \
+> #端口映射 \
+> ports: \
+> 82:80 \
 > environment:
 
 ## 指定时区
 
-> TZ: Asia/Shanghai
+> TZ: Asia/Shanghai \
 > volumes:
 
 ## 数据卷映射
