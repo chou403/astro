@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T10:32:22Z
+modDatetime: 2024-02-27T10:09:35Z
 title: Tools
 featured: false
 draft: false
@@ -58,6 +58,75 @@ mac 卸载脚本
 >
 > brew search <包名>查询可用包
 
+## pyenv
+
+安装 pyenv
+
+```bash
+brew install pyenv
+```
+
+安装指定版本 python
+
+```bash
+pyenv install 2.7.18
+```
+
+查看管理的 python
+
+```bash
+❯ pyenv versions
+* system (set by /Users/chouchou/.pyenv/version)
+  2.7.18
+```
+
+\* 号表示的就是目前使用的 python 版本，system 是系统自带的。
+
+将当前 shell 的 python 语言设置成 python2.7.18
+
+```bash
+pyenv shell 2.7.18
+#报错
+#pyenv: shell integration not enabled. Run `pyenv init' for instructions.
+```
+
+执行 `pyenv init` 将输出的内容写入~/.zshrc 中。`source ~/.zshrc`
+
+## n
+
+```bash
+brew install n
+```
+
+列出已安装的所有版本
+
+```bash
+n ls
+```
+
+只需执行 n <version> 下载并安装Node.js版本。如果 <version> 已经下载了, n 将从其缓存安装。
+
+```bash
+sudo n i v20.4.0
+sudo n i v20.4.0
+# 安装 node 最新版
+sudo n i lastest
+# 安装 node 最新稳定版
+sudo n i stable
+```
+
+选择应用版本
+
+```bash
+sudo n
+```
+
+卸载
+
+```bash
+sudo n rm 14.20.0
+```
+
 ## nvm
 
 nvm 安装命令，版本号可以从官方最新看到。
@@ -88,10 +157,30 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 ```
 
+查看远程可用的 Node.js 版本
+
+```bash
+nvm ls-remote
+```
+
 ## node
+
+安装指定版本 node
+
+```bash
+nvm install version_number
+```
+
+没有版本号，安装最新版本
 
 ```bash
 nvm install node
+```
+
+使用特定版本的 node 版本
+
+```bash
+nvm use version_number
 ```
 
 如果出现卡住无法下载，改国内源。

@@ -1,6 +1,6 @@
 # 介绍
 
-依赖于 [AstroPaper](https://github.com/satnaing/astro-paper) 模版创建 Blog 记录相关内容。
+依赖于 [AstroPaper](https://github.com/satnaing/astro-paper) 模版创建 [Blog](https://chou401.github.io/astro/) 记录相关内容。
 
 ## 项目结构
 

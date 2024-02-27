@@ -7,9 +7,17 @@ export interface Props {
   ariaLabel?: string;
   title?: string;
   disabled?: boolean;
+  link?: string;
 }
 
-const { href, className, ariaLabel, title, disabled = false } = Astro.props;
+const {
+  href,
+  className,
+  ariaLabel,
+  title,
+  disabled = false,
+  link,
+} = Astro.props;
 ---
 
 {
@@ -24,7 +32,7 @@ const { href, className, ariaLabel, title, disabled = false } = Astro.props;
     </span>
   ) : (
     <a
-      href={SITE.base + href}
+      href={link ? href : SITE.base + href}
       class={`group inline-block hover:text-skin-accent ${className}`}
       aria-label={ariaLabel}
       title={title}

@@ -6,7 +6,7 @@ title: JWT
 featured: false
 draft: false
 tags:
-  - test
+  - jwt
 description: 介绍 JWT & token + redis
 ---
 
@@ -57,7 +57,7 @@ JWT 包含三个部分
 
 ## 创建 JWT
 
-jwtutil
+**JwtUtil:**
 
 ```java
 public class JwtUtil {
@@ -172,3 +172,5 @@ JWT 把用户信息用密钥加密防篡改，然后放到请求头里。用户�
 
 如果只是将 JWT 当做访问凭证，那么它面临的问题和普通的 token，即普遍意义上的 session 模式完全一样，jwt 并不能解决这个问题，反而增加了复杂度。
 JWT 的场景，是可靠的发布消息，就像 ios 登录一样，将用户信息封装成 JWT 提供给第三方业务服务，业务服务只需要 apple 发布的公钥用于验证 JWT 的真实性，以决定是否使用其提供的内容，这也是为什么 ios 登录时提供的不仅有 jwt，还有一个用于访问 api 的 code，后者才是对应的访问凭证。
+
+token + redis 结合方式已经完全可以支持 99% 的项目。

@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:28Z
+modDatetime: 2024-02-27T10:09:35Z
 title: Questions
 featured: false
 draft: false
@@ -96,4 +96,26 @@ public class TransactionConfig {
     }
 
 }
+```
+
+### Caused by: org.eclipse.aether.transfer.ArtifactNotFoundException
+
+在多模块依赖的 Maven 工程，如果存在 pom 文件依赖，请在根目录下执行 mvn 命令。
+
+### 'dependencies.dependency.systemPath' for cn.evun:datasever-sdk:jar should not point at files within the project directory
+
+修改 pom 文件依赖中的 systemPath
+
+```xml
+<systemPath>${basedir}/src/main/resources/lib/datasever-sdk-1.0.0.jar</systemPath>
+# 改成
+<systemPath>${pom.basedir}/src/main/resources/lib/datasever-sdk-1.0.0.jar</systemPath>
+```
+
+## error commander@12.0.0: The engine "node" is incompatible with this module. Expected version ">=18". Got "14.20.0"
+
+执行 `yarn install` 时提示上述错误。系统使用版本 14.20.0，要求 node 版本大于 18，升级 node 版本到要求或者执行以下命令忽略校验：
+
+```bash
+yarn config set ignore-engines true
 ```
