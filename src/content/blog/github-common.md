@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-02-28T10:49:59.000Z
-modDatetime:
+modDatetime: 2024-02-28T12:38:27Z
 title: Github
 featured: false
 draft: false
@@ -42,7 +42,7 @@ repo 全部选上即可，选择创建。
 >
 > 分支名：GitHub的分支名称
 >
-> 自定义域名：<https://cdn.jsdelivr.net/gh/用户名/仓库名>
+> 自定义域名：<https://cdn.jsdelivr.net/gh/用户名/仓库名> e.g: <https://cdn.jsdelivr.net/gh/chou401/pic-md@master/>
 
 ![202402281109435.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//202402281109435.png)
 
