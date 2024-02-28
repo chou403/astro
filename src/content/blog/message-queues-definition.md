@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T10:41:57Z
+modDatetime: 2024-02-28T12:37:00Z
 title: MQ
 featured: true
 draft: false
@@ -15,7 +15,7 @@ description: 消息队列 & 常见的六种消息队列
 
 ## 概述
 
-![image-20230428172550591](https://github.com/chou401/pic-md/raw/master/img/image-20230428172550591.png)
+![image-20230428172550591](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230428172550591.png)
 
 ### 介绍
 
@@ -42,7 +42,7 @@ description: 消息队列 & 常见的六种消息队列
 
 - **消息通讯：**消息通讯是指，消息队列一般都内置了搞笑的通信机制，因此也可以用作消息通讯。比如实现点对点消息队列，或者聊天室等。
 
-![image-20230428140353787](https://github.com/chou401/pic-md/raw/master/img/image-20230428140353787.png)
+![image-20230428140353787](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230428140353787.png)
 
 以上实际是消息队列的两种消息模式，点对点或发布订阅模式。
 
@@ -305,7 +305,7 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
 
 #### 工作原理
 
-![image-20230517155538862](https://github.com/chou401/pic-md/raw/master/img/image-20230517155538862.png)
+![image-20230517155538862](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230517155538862.png)
 
 - **Broker**：接收和分发消息的应用，RabbitMQ Server就是 Message Broker。
 - **Virtual Host**：出于多租户和安全因素设计的，把 AMQP 的基本组件划分到一个虚拟的分组中，类似于网络中的 namespace 概念。当多个不同的用户使用同一个 RabbitMQ server 提供的服务时，可以划分出多个vhost，每个用户在自己的 vhost 创建 exchange／queue 等。
@@ -325,7 +325,7 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
 
   比如：如果一个队列绑定到交换机要求路由键为 “key”，则只转发 RoutingKey 标记为 “key” 的消息，不会转发 “key1”，也不会转发 “key2” 等等。它是完全匹配、单播的模式。
 
-  ![image-20230519161049311](https://github.com/chou401/pic-md/raw/master/img/image-20230519161049311.png)
+  ![image-20230519161049311](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230519161049311.png)
 
 - **Fanout Exchange（扇型交换机）**
 
@@ -333,7 +333,7 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
 
   Fanout 类型交换机下发送消息一条，无论 RoutingKey 是什么，queue1，queue2，queue3，queue4 都可以收到消息。
 
-  ![image-20230519161221269](https://github.com/chou401/pic-md/raw/master/img/image-20230519161221269.png)
+  ![image-20230519161221269](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230519161221269.png)
 
 - **Topic Exchange（主题交换机）**
 
@@ -345,7 +345,7 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
   2. “\*” 代表一个部分。
   3. “#” 代表0个或多个部分（如果绑定的路由键为 “#” 时，则接收所有消息，路由键所有都匹配）。
 
-  ![image-20230519162427816](https://github.com/chou401/pic-md/raw/master/img/image-20230519162427816.png)
+  ![image-20230519162427816](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230519162427816.png)
 
   然后发送一条消息，RoutingKey 为 “key1.key2.key3.key4”，那么根据 “.” 将这个路由键分为了四个部分，此条路由键将会匹配：
 
@@ -365,7 +365,7 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
   - x-match = all：表示所有的键值对都匹配才能接收到消息。
   - x-match = any：表示只要有键值对匹配就能接收到消息。
 
-![image-20230523095354400](https://github.com/chou401/pic-md/raw/master/img/image-20230523095354400.png)
+![image-20230523095354400](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230523095354400.png)
 
 #### 镜像队列
 
@@ -395,11 +395,11 @@ RabbitMQ 以队列维度提供高可用的解决方案——镜像队列。
 
 按此步骤创建镜像策略，该策略为所有 `mirror*` 开头的队列创建 3 副本镜像。
 
-![image-20230523112017966](https://github.com/chou401/pic-md/raw/master/img/image-20230523112017966.png)
+![image-20230523112017966](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230523112017966.png)
 
 创建完的策略如下图显示：
 
-![image-20230523112042677](https://github.com/chou401/pic-md/raw/master/img/image-20230523112042677.png)
+![image-20230523112042677](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230523112042677.png)
 
 **参数解释：**
 
@@ -422,7 +422,7 @@ RabbitMQ 以队列维度提供高可用的解决方案——镜像队列。
 
 下图中 `mirror_queue` 匹配之前创建的镜像策略，为镜像队列。`normal_queue` 为普通队列。
 
-![image-20230523112755735](https://github.com/chou401/pic-md/raw/master/img/image-20230523112755735.png)
+![image-20230523112755735](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230523112755735.png)
 
 镜像队列显示的蓝色 `+2` 表示同步副本数为 2 个。此处如果用红色显示，则表示为同步副本数
 
@@ -430,7 +430,7 @@ RabbitMQ 以队列维度提供高可用的解决方案——镜像队列。
 
 点击队列名称可以进入查看队列详细信息，从中可以看出队列的主节点、从节点和镜像策略。
 
-![image-20230523112856113](https://github.com/chou401/pic-md/raw/master/img/image-20230523112856113.png)
+![image-20230523112856113](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230523112856113.png)
 
 ##### 配置参数
 
@@ -470,7 +470,7 @@ RabbitMQ中的每个队列都有一个主队列。该节点称为队列主服务
 
 通过在策略中设置 `queue-master-locator` 键的方法可以定义主队列选择策略，这是常用的方法。
 
-![image-20230523144411570](https://github.com/chou401/pic-md/raw/master/img/image-20230523144411570.png)
+![image-20230523144411570](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230523144411570.png)
 
 此外，也可以用队列参数 `x-queue-master-locator` 或配置文件中定义 `queue_master_locator` 的方式指定，此处不再赘述。
 
@@ -933,7 +933,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 在点对点消息系统中，消息持久化到一个队列中。此时，将有一个或多个消费者消费队列中的数据。但是一条消息只能被消费一次。当一个消费者消费了队列中的某条数据之后，该条数据则从消息队列中删除。该模式即使有多个消费者同时消费数据，也能保证数据处理的顺序。这种架构描述示意图如下：
 
-![img](https://github.com/chou401/pic-md/raw/master/27da57a28c192b5f1b8eed58fd8765af.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/27da57a28c192b5f1b8eed58fd8765af.png)
 
 **生产者发送一条消息到queue，只有一个消费者能收到**。
 
@@ -941,7 +941,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 在发布-订阅消息系统中，消息被持久化到一个topic中。与点对点消息系统不同的是，消费者可以订阅一个或多个topic，消费者可以消费该topic中所有的数据，同一条数据可以被多个消费者消费，数据被消费后不会立马删除。在发布-订阅消息系统中，消息的生产者称为发布者，消费者称为订阅者。该模式的示例图如下：
 
-![img](https://github.com/chou401/pic-md/raw/master/7de02b63e52a56b2e6b5288f5b249fca.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/7de02b63e52a56b2e6b5288f5b249fca.png)
 
 **发布者发送到topic的消息，只有订阅了topic的订阅者才会收到消息**。
 
@@ -999,7 +999,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 下图展示了Kafka的相关术语以及之间的关系：
 
-![dfef98a36bb160ddd779634de5e6c4b4](https://github.com/chou401/pic-md/raw/master/dfef98a36bb160ddd779634de5e6c4b4.png)
+![dfef98a36bb160ddd779634de5e6c4b4](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/dfef98a36bb160ddd779634de5e6c4b4.png)
 
 - 上图中一个topic配置了3个partition。Partition1有两个offset：0和1。Partition2有4个offset。Partition3有1个offset。副本的id和副本所在的机器的id恰好相同。
 - 如果一个topic的副本数为3，那么Kafka将在集群中为每个partition创建3个相同的副本。集群中的每个broker存储一个或多个partition。多个producer和consumer可同时生产和消费数据。
@@ -1042,7 +1042,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 #### Kafka架构
 
-![img](https://github.com/chou401/pic-md/raw/master/cb62ef93fb5ef2f406a1ed0fe3a079a8.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/cb62ef93fb5ef2f406a1ed0fe3a079a8.png)
 
 如上图所示，一个典型的Kafka集群中包含若干Producer（可以是web前端产生的Page View，或者是服务器日志，系统CPU、Memory等），若干broker（Kafka支持水平扩展，一般broker数量越多，集群吞吐率越高），若干Consumer Group，以及一个Zookeeper集群。Kafka通过Zookeeper管理集群配置，选举leader，以及在Consumer Group发生变化时进行rebalance。Producer使用push模式将消息发布到broker，Consumer使用pull模式从broker订阅并消费消息。
 
@@ -1050,7 +1050,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 Topic在逻辑上可以被认为是一个queue，每条消费都必须指定它的Topic，可以简单理解为必须指明把这条消息放进哪个queue里。为了使得Kafka的吞吐率可以线性提高，物理上把Topic分成一个或多个Partition，每个Partition在物理上对应一个文件夹，该文件夹下存储这个Partition的所有消息和索引文件。创建一个topic时，同时可以指定分区数目，分区数越多，其吞吐量也越大，但是需要的资源也越多，同时也会导致更高的不可用性，kafka在接收到生产者发送的消息之后，会根据均衡策略将消息存储到不同的分区中。**因为每条消息都被append到该Partition中，属于顺序写磁盘**，因此效率非常高（经验证，顺序写磁盘效率比随机写内存还要高，这是Kafka高吞吐率的一个很重要的保证）。
 
-![img](https://github.com/chou401/pic-md/raw/master/ce47715713754188bd90492eaec2b67c.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/ce47715713754188bd90492eaec2b67c.png)
 
 对于传统的message queue而言，一般会删除已经被消费的消息，而Kafka集群会保留所有的消息，无论其被消费与否。当然，因为磁盘限制，不可能永久保留所有数据（实际上也没必要），因此Kafka提供两种策略删除旧数据。一是基于时间，二是基于Partition文件大小。例如可以通过配置$KAFKA_HOME/config/server.properties，让Kafka删除一周前的数据，也可在Partition文件超过1GB时删除旧数据，配置如下所示：
 
@@ -1077,7 +1077,7 @@ Producer发送消息到broker时，会根据Paritition机制选择将其存储�
 
 使用Consumer high level API时，同一Topic的一条消息只能被同一个Consumer Group内的一个Consumer消费，但多个Consumer Group可同时消费这一消息。
 
-![img](https://github.com/chou401/pic-md/raw/master/edd5bf39ad20cf985f45988c75446af7.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/edd5bf39ad20cf985f45988c75446af7.png)
 
 这是**Kafka用来实现一个Topic消息的广播（发给所有的Consumer）和单播（发给某一个Consumer）的手段**。一个Topic可以对应多个Consumer Group。如果需要实现广播，只要每个Consumer有一个独立的Group就可以了。要实现单播只要所有的Consumer在同一个Group里。用Consumer Group还可以将Consumer进行自由的分组而不需要多次发送消息到不同的Topic。
 
@@ -1129,7 +1129,7 @@ ISR 的最坏情况，会使 ack=-1 退化成 ack=1 的最坏情况，完全背�
 
 下面给出此时leader出现故障的情况，可以看出，此时数据可能重复。
 
-![img](https://github.com/chou401/pic-md/raw/master/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5ZSP5ZmX,size_20,color_FFFFFF,t_70,g_se,x_16.jpeg)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5ZSP5ZmX,size_20,color_FFFFFF,t_70,g_se,x_16.jpeg)
 
 Leader维护了⼀个动态的 in-sync replica set（ISR）：和 Leader 保持同步的 Follower 集合。当 ISR 集合中的 Follower 完成数据的同步之后，Leader 就会给 Follower 发送 ACK。如果 Follower ⻓时间未向 Leader 同步数据，则该 Follower 将被踢出 ISR 集合，该时间阈值由replica.lag.time.max.ms 参数设定。Leader 发⽣故障后，就会从 ISR 中选举出新的 Leader。
 kafka服务端中min.insync.replicas。 如果我们不设置的话，默认这个值是1。一个leader partition会维护一个ISR列表，这个值就是限制ISR列表里面 至少得有几个副本，比如这个值是2，那么当ISR列表里面只有一个副本的时候，往这个分区插入数据的时候会报错。
@@ -1176,7 +1176,7 @@ Consumer读消息也是从Leader读取，**只有被commit过的消息才会暴�
 
 Kafka Replication的数据流如下图所示：
 
-![image-20230703112926417](https://github.com/chou401/pic-md/raw/master/image-20230703112926417.png)
+![image-20230703112926417](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230703112926417.png)
 
 2.ACK前需要保证有多少个备份
 
@@ -1236,13 +1236,13 @@ kafka 中为了防止 log 文件过大导致数据定位效率低下而采取了
 
 但是对于上层应用来说，可以将partition看成最小的存储单元（一个由多个segment文件拼接而成的“巨型”文件），每个partition都由一些列有序的、不可变的消息组成，这些消息被连续的追加到partition中。
 
-![image-20230703112608060](https://github.com/chou401/pic-md/raw/master/image-20230703112608060.png)
+![image-20230703112608060](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230703112608060.png)
 
 ###### ISR和AR
 
 ISR (In-Sync Replicas)，这个是指副本同步队列。副本数对Kafka的吞吐率是有一定的影响，但极大的增强了可用性。默认情况下Kafka的replica数量为1，即每个partition都有一个唯一的leader，为了确保消息的可靠性，通常应用中将其值(由broker的参数offsets.topic.replication.factor指定)大小设置为大于1，比如3。 所有的副本（replicas）统称为Assigned Replicas，即AR。ISR是AR中的一个子集，由leader维护ISR列表，follower从leader同步数据有一些延迟（包括延迟时间replica.lag.time.max.ms和延迟条数replica.lag.max.messages两个维度, 从 0.9.0.0 版本后中只支持replica.lag.time.max.ms这个维度），任意一个超过阈值都会把follower剔除出ISR, 存入OSR（Outof-Sync Replicas）列表，新加入的follower也会先存放在OSR中。**AR=ISR+OSR**。
 
-![image-20210918150431039](https://github.com/chou401/pic-md/raw/master/image202304051925825.png)
+![image-20210918150431039](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image202304051925825.png)
 
 **为什么在Kafka 0.9.0.0版本后移除了replica.lag.max.messages参数而只保留了replica.lag.time.max.ms作为ISR中副本管理的参数呢？**
 
@@ -1254,7 +1254,7 @@ replica.lag.max.messages表示当前某个副本落后leader的消息数量超�
 
 每个replica都有自己的HW，leader和follower各自负责更新自己的HW的状态。对于leader新写入的消息，consumer不能立刻消费，leader会等待该消息被所有ISR中的replicas同步后更新HW，此时消息才能被consumer消费。这样就保证了如果leader所在的broker失效，该消息仍然可以从新选举的leader中获取。对于来自内部broker的读取请求，没有HW的限制。
 
-![img](https://github.com/chou401/pic-md/raw/master/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIzMDY4Mg==,size_16,color_FFFFFF,t_70.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIzMDY4Mg==,size_16,color_FFFFFF,t_70.png)
 
 **由此可见，Kafka的复制机制既不是完全的同步复制，也不是单纯的异步复制。**
 
@@ -1269,7 +1269,7 @@ Kafka的ISR的管理最终都会反馈到Zookeeper节点上。具体位置为：
 
 #### HA相关ZooKeeper结构
 
-![img](https://github.com/chou401/pic-md/raw/master/c9a549eafe1ef71c22152b41c728bb58.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/c9a549eafe1ef71c22152b41c728bb58.png)
 
 ##### admin
 
@@ -1304,7 +1304,7 @@ producer 发送消息到 broker 时，会根据分区算法选择将其存储到
 
 producer 写入消息序列图如下所示：
 
-![img](https://github.com/chou401/pic-md/raw/master/3b45ec04ecea8ba94ca092b4de195fa5.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/3b45ec04ecea8ba94ca092b4de195fa5.png)
 
 流程说明：
 
@@ -1320,7 +1320,7 @@ producer 写入消息序列图如下所示：
 
 物理上把 topic 分成一个或多个 patition（对应 server.properties 中的 num.partitions=3 配置），每个 patition 物理上对应一个文件夹（该文件夹存储该 patition 的所有消息和索引文件），如下：
 
-![img](https://github.com/chou401/pic-md/raw/master/90540631f5560f08b643d73401e9e73e.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/90540631f5560f08b643d73401e9e73e.png)
 
 ##### 存储策略
 
@@ -1336,7 +1336,7 @@ producer 写入消息序列图如下所示：
 
 创建 topic 的序列图如下所示：
 
-![img](https://github.com/chou401/pic-md/raw/master/83e7411c3ebbb7c7c0d84a758d22e184.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/83e7411c3ebbb7c7c0d84a758d22e184.png)
 
 流程说明：
 
@@ -1350,7 +1350,7 @@ producer 写入消息序列图如下所示：
 
 删除 topic 的序列图如下所示：
 
-![img](https://github.com/chou401/pic-md/raw/master/e0d44eb05a13c1e59b00b7d39ecee0c8.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/e0d44eb05a13c1e59b00b7d39ecee0c8.png)
 
 流程说明：
 
@@ -1361,7 +1361,7 @@ producer 写入消息序列图如下所示：
 
 kafka broker failover 序列图如下所示：
 
-![img](https://github.com/chou401/pic-md/raw/master/6725b09c54e9183071e778ba1805928b.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/6725b09c54e9183071e778ba1805928b.png)
 
 流程说明：
 
@@ -1395,7 +1395,7 @@ kafka broker failover 序列图如下所示：
 
 #### Kafka在zookeeper中存储结构图
 
-![img](https://github.com/chou401/pic-md/raw/master/e577bb59a08c0b336dac332039d5bb6f.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/e577bb59a08c0b336dac332039d5bb6f.png)
 
 ##### topic注册信息
 

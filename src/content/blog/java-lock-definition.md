@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:27Z
+modDatetime: 2024-02-28T12:37:00Z
 title: ReentrantLock & synchronized & ReentrantReadWriteLock
 featured: false
 draft: false
@@ -211,7 +211,7 @@ synchronized的底层实现是完全依赖JVM虚拟机的，所以先看看对�
 
 JVM是虚拟机，是一种标准规范，主要作用就是运行java的类文件的。而虚拟机有很多实现版本，HotSpot就是虚拟机的一种实现，是基于热点代码探测的，有JIT即时编译功能，能提供更高质量的本地代码。HotSpot 虚拟机中对象在内存中可分为对象头（Header）、实例数据（Instance Data）和对齐填充（Padding）。其组成结构如下图：
 
-![image-20230825223549259](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230825223549259.png)
+![image-20230825223549259](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281129677.png)
 
 1）实例数据：存放类的属性数据信息，包括父类的属性信息。如果是数组，那么实例部分还包括数组的长度，这部分内存按4字节对齐。
 
@@ -223,7 +223,7 @@ JVM是虚拟机，是一种标准规范，主要作用就是运行java的类文�
 
 对于标记字段，用于存储对象自身的运行时数据，其组成如下图
 
-![img](https://raw.githubusercontent.com/chou401/pic-md/master/1746338-20230329144259342-1477226941.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281129588.png)
 
 锁信息占3位）在jdk1.6之前只有重量级锁，而1.6后对其进行了优化，就有了偏向锁和轻量级锁。
 
@@ -346,21 +346,21 @@ public ReentrantLock(boolean fair) {
 
 **ReentrantLock 可以使用 lockInterruptibly 获取锁并响应中断指令，而 synchronized 不能响应中断，也就是如果发生了死锁，使用 synchronized 会一直等待下去，而使用 ReentrantLock 可以响应中断并释放锁，从而解决死锁的问题**，比如以下 ReentrantLock 响应中断的示例：
 
-![img](https://raw.githubusercontent.com/chou401/pic-md/master/v2-295dc5c5c1611e25ca7e32a12c1baab5_r.jpg)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281129252.jpg)
 
 以上程序的执行结果如下所示：
 
-![img](https://raw.githubusercontent.com/chou401/pic-md/master/v2-41af01e5aee54030a2bd3429191b39ef_r.jpg)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281129878.jpg)
 
 ### 底层实现不同
 
 **synchronized 是 JVM 层面通过监视器（Monitor）实现的，而 ReentrantLock 是通过 AQS（AbstractQueuedSynchronizer）程序级别的 API 实现。** synchronized 通过监视器实现，可通过观察编译后的字节码得出结论，如下图所示：
 
-![img](https://raw.githubusercontent.com/chou401/pic-md/master/v2-f801feb292fa284062ab77ed419e0770_r.jpg)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281129738.jpg)
 
 其中 monitorenter 表示进入监视器，相当于加锁操作，而 monitorexit 表示退出监视器，相当于释放锁的操作。 ReentrantLock 是通过 AQS 实现，可通过观察 ReentrantLock 的源码得出结论，核心实现源码如下：
 
-![img](https://raw.githubusercontent.com/chou401/pic-md/master/v2-b76e76b03d158accc357568d8c360526_r.jpg)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281137689.jpg)
 
 ## ReentrantReadWriteLock的实现原理
 

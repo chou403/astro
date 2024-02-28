@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T10:32:22Z
+modDatetime: 2024-02-28T12:37:01Z
 title: Spring
 featured: false
 draft: false
@@ -95,7 +95,7 @@ firstList.removeIf(first -> secondList.stream().anyMatch(second -> first.getCode
 
 jar包里面含有一下三部分文件
 
-![image-20230404172555912](https://github.com/chou401/pic-md/raw/master/img/image-20230404172555912.png)
+![image-20230404172555912](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230404172555912.png)
 
 > org：主要存放springboot相关的class文件
 >
@@ -107,7 +107,7 @@ jar包里面含有一下三部分文件
 
 打开META-INF下MENIFEST.MF文件，内容如下：
 
-![image-20230404172728434](https://github.com/chou401/pic-md/raw/master/img/image-20230404172728434.png)
+![image-20230404172728434](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230404172728434.png)
 
 从上述MANIFEST.MF中可以看到Main-Class及Start-Class配置，其中Main-Class指定jar文件的入口类JarLauncher，当使用java -jar执行jar包的时候会调用JarLauncher的main方法，而不是我们编写的启动类。
 
@@ -363,7 +363,7 @@ public class MainMethodRunner {
 
 上述关键代码执行流程简化如下图:
 
-![img](https://raw.githubusercontent.com/chou401/pic-md/master/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0VmbHlpbmdz,size_16,color_FFFFFF,t_70.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281126515.png)
 
 #### 使用依赖包common
 
@@ -399,26 +399,26 @@ SpringBoot 自动配置，Auto-Configuration
 - 广义的“配置类”：被注解@Component 直接或间接修饰的某个类，即我们常说的 Spring 组件，其中包括了@Configuration 类
 - 狭义的“配置类”：特指被注解 @Configuration 所修饰的某个类，又成为 @Configuration 类
 
-![image-20230822172218836](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230822172218836.png)
+![image-20230822172218836](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281126131.png)
 
-![image-20230822172402498](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230822172402498.png)
+![image-20230822172402498](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281127736.png)
 
-![image-20230822173011734](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230822173011734.png)
+![image-20230822173011734](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281127191.png)
 
-![image-20230823113418389](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230823113418389.png)
+![image-20230823113418389](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281128533.png)
 
-![image-20230823113448199](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230823113448199.png)
+![image-20230823113448199](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281131684.png)
 
-![image-20230823113602551](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230823113602551.png)
+![image-20230823113602551](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281128270.png)
 
-![image-20230823113646014](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230823113646014.png)
+![image-20230823113646014](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281128307.png)
 
 #### @Conditional
 
 - 它的作用是实现：只有在特定条件满足时，才会向 IOC 容器注册指定的组件
 - 我们可以将 @Conditional 理解为某种 if 语句
 
-![image-20230823113909162](https://raw.githubusercontent.com/chou401/pic-md/master/image-20230823113909162.png)
+![image-20230823113909162](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281128177.png)
 
 #### @ConditionalOnProperty
 
@@ -765,7 +765,19 @@ com.xsn.configurationtest.C@5ab956d7
 
 ###### ImportBeanDefinitionRegistrar
 
-同样，`@Import` 注解可以 **Import** 一个 **ImportBeanDefinitionRegistrar** 的实现类
+ImportBeanDefinitionRegistrar 通常和@Import注解配合使用，@Import注解将ImportBeanDefinitionRegistrar的实现类注入到@Import所属根类的ConfigurationClass属性中，在注册跟类的BeanDefinition时，会遍历调用其@Import的所有ImportBeanDefinitionRegistrar接口的 registerBeanDefinitions()方法。
+
+**介绍:**
+
+ImportBeanDefinitionRegistrar 是 Spring 对外提供的动态注册 BeanDefinition 的接口，并且 Spring 内部大多也用该接口动态注册 BeanDefinition。
+
+> ImportBeanDefinitionRegistrar 接口的 Bean 不会直接注册到 IOC 容器，它的执行时机比较早，发生在 SpringBoot 启动流程的注册 BeanDefinition。
+>
+> ImportBeanDefinitionRegistrar 接口提供了 registerBeanDefinitions(AnnotationMetadata, BeanDefinitionRegistry) 供子类重写：
+>
+> - 开发者可以直接调用 BeanDefinitionRegistry#registerBeanDefinition() 方法传入 BeanDefinitionName 和对应的 BeanDefinition 对象，直接往 Spring 临时容器（beanDefinitionMap）中注册。
+> - 所谓的 Spring 临时容器是指：在 Spring 解析类时会将所有符合注册要求的类放到一个临时容器中，后续执行完 BeanPostProcessor、initMessageSource、initApplicationEventMulticaster、
+>   onRefresh 等操作之后，才会从临时容器中取出所有类，真正注入到 Spring 容器（singletonObjects）中。
 
 ```java
 public interface ImportBeanDefinitionRegistrar {
@@ -796,6 +808,107 @@ public @interface EnableAspectJAutoProxy
 ```
 
 它 Import 的 AspectJAutoProxyRegistrar 便是一个 ImportBeanDefinitionRegistrar，该类会帮我们注册一个 AnnotationAwareAspectJAutoProxyCreator 的 BeanDefinition，实现 AOP 代理
+
+**ImportBeanDefinitionRegistrar在 SpringBoot 启动流程中的体现？**
+
+1.  处理ImportBeanDefinitionRegistrar的入口
+
+    在 SpringBoot 启动流程中，通过 ConfigurationClassParser#doProcessConfigurationClass() 解析启动类的注解时，会做@Import注解的process操作，即进入到ConfigurationClassParser#processImports()方法。
+
+    ```java
+    @Nullable
+    protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass, Predicate<String> filter) throws IOException {
+        if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
+            this.processMemberClasses(configClass, sourceClass, filter);
+        }
+
+        Iterator var4 = AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(), PropertySources.class, PropertySource.class).iterator();
+
+        AnnotationAttributes importResource;
+        while(var4.hasNext()) {
+            importResource = (AnnotationAttributes)var4.next();
+            if (this.environment instanceof ConfigurableEnvironment) {
+                this.processPropertySource(importResource);
+            } else {
+                this.logger.info("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() + "]. Reason: Environment must implement ConfigurableEnvironment");
+            }
+        }
+
+        Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
+        if (!componentScans.isEmpty() && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+            Iterator var14 = componentScans.iterator();
+
+            while(var14.hasNext()) {
+                AnnotationAttributes componentScan = (AnnotationAttributes)var14.next();
+                Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
+                Iterator var8 = scannedBeanDefinitions.iterator();
+
+                while(var8.hasNext()) {
+                    BeanDefinitionHolder holder = (BeanDefinitionHolder)var8.next();
+                    BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
+                    if (bdCand == null) {
+                        bdCand = holder.getBeanDefinition();
+                    }
+
+                    if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
+                        this.parse(bdCand.getBeanClassName(), holder.getBeanName());
+                    }
+                }
+            }
+        }
+
+        this.processImports(configClass, sourceClass, this.getImports(sourceClass), filter, true);
+        importResource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
+        if (importResource != null) {
+            String[] resources = importResource.getStringArray("locations");
+            Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
+            String[] var20 = resources;
+            int var22 = resources.length;
+
+            for(int var23 = 0; var23 < var22; ++var23) {
+                String resource = var20[var23];
+                String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
+                configClass.addImportedResource(resolvedResource, readerClass);
+            }
+        }
+
+        Set<MethodMetadata> beanMethods = this.retrieveBeanMethodMetadata(sourceClass);
+        Iterator var18 = beanMethods.iterator();
+
+        while(var18.hasNext()) {
+            MethodMetadata methodMetadata = (MethodMetadata)var18.next();
+            configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
+        }
+
+        this.processInterfaces(configClass, sourceClass);
+        if (sourceClass.getMetadata().hasSuperClass()) {
+            String superclass = sourceClass.getMetadata().getSuperClassName();
+            if (superclass != null && !superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
+                this.knownSuperclasses.put(superclass, configClass);
+                return sourceClass.getSuperClass();
+            }
+        }
+
+        return null;
+    }
+    ```
+
+2.  将 ImportBeanDefinitionRegistrar 添加到所属 ConfigClass 的一个属性上
+    进入到 ConfigurationClassParser#processImports() 方法中，接着看processImports()方法针对ImportBeanDefinitionRegistrar接口的具体处理逻辑
+
+        ```java
+        if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
+            candidateClass = candidate.loadClass();
+            ImportBeanDefinitionRegistrar registrar = (ImportBeanDefinitionRegistrar)ParserStrategyUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class, this.environment, this.resourceLoader, this.registry);
+            configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
+        }
+        ```
+
+        processImports()方法中会判断如果一个类A实现了ImportBeanDefinitionRegistrar接口，会对类A做实例化，并将其存储到当前ConfigClass的一个属性（Map类型的变量importBeanDefinitionRegistrars）中，以便在注册ConfigurationClass到Spring容器时，拿出importBeanDefinitionRegistrars中的所有内容，执行每个ImportBeanDefinitionRegistrar的registerBeanDefinitions()方法。
+
+3.  执行 ImportBeanDefinitionRegistrar 接口方法的时机
+
+    解析完所有的candidates候选类之后，会进入到ConfigurationClassBeanDefinitionReader#loadBeanDefinitions(Set<ConfigurationClass>)方法对所有的ConfigurationClass做条件装配、属性处理，然后将相应BeanDefinition注册到Spring中。
 
 ### Spring 自动装配
 
@@ -968,11 +1081,11 @@ protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata an
 
 前面几个都好理解，现在我们主要看看filter()，是怎么移除不需要的类
 
-![img](https://github.com/chou401/pic-md/raw/master/2597186-20220218230920130-226480162.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/2597186-20220218230920130-226480162.png)
 
 我们可以看到有具体的匹配方法 match。里面有个关键的属性是 autoConfigurationMetadata , 的本质是 加载的 META-INF/spring-autoconfigure-metadata.properties 的文件中的内容。
 
-![img](https://github.com/chou401/pic-md/raw/master/2597186-20220218231102908-1017908901.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/2597186-20220218231102908-1017908901.png)
 
 其实原理很简单，如果没有对应的实现类，就不进行加载。
 
@@ -1000,7 +1113,7 @@ public class SpringBootVipDemoApplication {
 
 根据返回结果，我们猜测SpringBoot项目的启动其实就是Spring的初始化操作【IOC】。
 
-![img](https://github.com/chou401/pic-md/raw/master/2597186-20220218232932423-556100027.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/2597186-20220218232932423-556100027.png)
 
 ### 什么是 Starter
 
@@ -1010,7 +1123,7 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
 - 提供了自动配置的功能，开箱即用
 - 提供了良好的依赖管理，避免了包遗漏、版本冲突等问题。
 
-![image-20230819192249343](https://github.com/chou401/pic-md/raw/master/image-20230819192249343.png)
+![image-20230819192249343](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230819192249343.png)
 
 ### Maven 中的可选依赖
 
@@ -1122,7 +1235,7 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
 - 默认已经有多个消息转换器了。而 configureMessageConverters 方法中是一个 list 参数。直接向其中添加 HttpMessageConverter后，默认是排在最后的。就造成了你自定义的消息转换器不生效。其实是被其他转换器接管了。因此，想要让我们自定义的消息转换器生效只需要把它添加到list 的第一个就可以了。
 - SerializerFeature属性
 
-  ![image-20230203141903620](https://github.com/chou401/pic-md/raw/master/img/image-20230203141903620.png)
+  ![image-20230203141903620](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230203141903620.png)
 
 #### **@EnableWebMVC**
 

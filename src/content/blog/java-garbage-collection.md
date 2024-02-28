@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:27Z
+modDatetime: 2024-02-28T12:37:00Z
 title: 垃圾回收
 featured: true
 draft: false
@@ -164,7 +164,7 @@ JVM 中新生代采用的就是复制算法。针对内存利用率不足做了�
 
   对象已经被垃圾收集器访问过，且这个对象的所有引用都已经被扫描过。黑色表示这个对象扫描之后依然存活，是可达性对象，如果有其他对象引用指向了黑色对象，无需重新扫描，黑色对象不可能不经过灰色对象直接指向某个白色对象。
 
-![image-20230424154311461](https://github.com/chou401/pic-md/raw/master/img/image-20230424154311461.png)
+![image-20230424154311461](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424154311461.png)
 
 ### 标记的过程
 
@@ -172,19 +172,19 @@ JVM 中新生代采用的就是复制算法。针对内存利用率不足做了�
 
   初始阶段只有GC Roots 是黑色的，其他对象都是白色的，如果没有被黑色对象引用那么最终都会被当做垃圾对象回收。
 
-  ![image-20230424164613104](https://github.com/chou401/pic-md/raw/master/img/image-20230424164613104.png)
+  ![image-20230424164613104](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424164613104.png)
 
 - **开始扫描**
 
   A和B均为扫描过的对象并且其引用也已经被垃圾回收器扫描过所以此时A、B对象均变为了黑色，而刚扫描到对象C，由于C的D和E还没有扫描到，所以C暂时为灰色。
 
-  ![image-20230424164543590](https://github.com/chou401/pic-md/raw/master/img/image-20230424164543590.png)
+  ![image-20230424164543590](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424164543590.png)
 
 - **扫描结束**
 
   此时扫描完成，黑色对象就是存活的对象，即可达对象，白色对象G为不可达对象，在垃圾回收时会被回收掉。
 
-  ![image-20230424164809038](https://github.com/chou401/pic-md/raw/master/img/image-20230424164809038.png)
+  ![image-20230424164809038](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424164809038.png)
 
   这个过程正确执行的前提是没有其他线程改变对象间的引用关系，然而，并发标记的过程中，用户线程仍在运行，因此就会产生漏标和错标的情况。
 
@@ -192,7 +192,7 @@ JVM 中新生代采用的就是复制算法。针对内存利用率不足做了�
 
 #### 多标
 
-![image-20230424165421241](https://github.com/chou401/pic-md/raw/master/img/image-20230424165421241.png)
+![image-20230424165421241](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424165421241.png)
 
 ```java
 C.E = null
@@ -206,7 +206,7 @@ C.E = null
 
 #### 漏标
 
-![image-20230424170559888](https://github.com/chou401/pic-md/raw/master/img/image-20230424170559888.png)
+![image-20230424170559888](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424170559888.png)
 
 ```java
 var E = C.E;
@@ -220,7 +220,7 @@ B.E = E; // 黑色B 引用 白色E
 
 漏标**只有在满足下面两种情况**下才会发生，那么要想解决并发扫描时漏标的问题只需要破坏任何一个条件即可。
 
-![image-20230424171617866](https://github.com/chou401/pic-md/raw/master/img/image-20230424171617866.png)
+![image-20230424171617866](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424171617866.png)
 
 #### 增量更新
 
@@ -349,7 +349,7 @@ SATB（原始快照）相对增量更新效率比较高（当然SATB可能会造
 
 ## 垃圾收集器
 
-![image-20230424105126389](https://github.com/chou401/pic-md/raw/master/img/image-20230424105126389.png)
+![image-20230424105126389](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424105126389.png)
 
 **GC 为什么要暂停用户线程？**
 
@@ -410,11 +410,11 @@ $\textcolor{CornflowerBlue}{JVM配置：-XX:+UseConcMarkSweepGC 使用CMS收集�
 
 #### 垃圾收集流程
 
-![image-20230424111120289](https://github.com/chou401/pic-md/raw/master/img/image-20230424111120289.png)
+![image-20230424111120289](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424111120289.png)
 
 ##### 大概分为四个主要步骤
 
-![image-20230424111223763](https://github.com/chou401/pic-md/raw/master/img/image-20230424111223763.png)
+![image-20230424111223763](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424111223763.png)
 
 - **初始标记（Initial Mark）**
 
@@ -436,7 +436,7 @@ $\textcolor{CornflowerBlue}{JVM配置：-XX:+UseConcMarkSweepGC 使用CMS收集�
 
 尽管CMS是一款里程碑式的垃圾收集器，开启了GC线程和用户线程同时工作的先河，但是不管是哪个JDK版本，CMS从来都不是默认的垃圾收集器。
 
-![image-20230424144233399](https://github.com/chou401/pic-md/raw/master/img/image-20230424144233399.png)
+![image-20230424144233399](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230424144233399.png)
 
 - **对处理器敏感**
 
@@ -486,11 +486,11 @@ G1垃圾回收器将堆内存分割成不同的区域，然后并发的对其进
 
 #### 内存模型
 
-![image-20230425145527908](https://github.com/chou401/pic-md/raw/master/img/image-20230425145527908.png)
+![image-20230425145527908](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230425145527908.png)
 
 G1收集器采用一种不同的方式来管理内存：
 
-![image-20230414181654804](https://github.com/chou401/pic-md/raw/master/img/image-20230414181654804.png)
+![image-20230414181654804](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230414181654804.png)
 
 **堆内存被划分为多个大小相等的heap区，每个heap区都是逻辑上连续的一段内存（virtual memory)，其中一部分区域被当成收集器相同的角色（eden，survivor，old），但每个角色的区域个数都不是固定的。**这在内存使用上提供了更多的灵活性。
 
@@ -506,7 +506,7 @@ G1 采用了分区（Region）的思路，将整个堆内存区域分成**大小
 
 G1 对内存的使用以分区（Region）为单位，而对对象的分配则以卡片（Card）为单位。
 
-![image-20230425160046585](https://github.com/chou401/pic-md/raw/master/img/image-20230425160046585.png)
+![image-20230425160046585](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230425160046585.png)
 
 ##### 巨型对象 Humongous Region
 
@@ -520,7 +520,7 @@ G1 对内存的使用以分区（Region）为单位，而对对象的分配则�
 
 实际实现中，RSet 默认是一个 HashMap，Map的key是引用的 Region，value 是一个 List，List 中存储引用Region 中的引用 Card 列表。Region、Card Table 以及 RSet 的示意图：
 
-![image-20230425162127860](https://github.com/chou401/pic-md/raw/master/img/image-20230425162127860.png)
+![image-20230425162127860](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230425162127860.png)
 
 上图中，RegionA 和 RegionB 中分别有对象引用 RegionC 中的对象，在 RegionC 对应的 RSet 就会记录这样的引用关系。这时候只需要扫描那两张Card 里的对象就可以了。这是一种**典型的空间换时间**的方法，避免了整个堆的扫描，提高效率。该 RSet 中有两个 KV 对，第一个 KV 的key是 RegionA，value 是一个列表，列表中有两个元素 3 和 65534，分别代表 RegionA 中引用对象在对应 Card Table 中的下标。第二个 KV 对的 key 是RegionB，value 中列表只有一个元素 1565，代表 RegionB 中引用对象在对应 Card Table 中的下标。
 
@@ -528,7 +528,7 @@ G1 对内存的使用以分区（Region）为单位，而对对象的分配则�
 
 CSet 收集示意图：
 
-![image-20230425172916290](https://github.com/chou401/pic-md/raw/master/img/image-20230425172916290.png)
+![image-20230425172916290](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230425172916290.png)
 
 收集集合（Collection Set）代表每次GC暂停时回收的一系列目标分区。在任意一次收集暂停中，CSet 所有分区都会被释放，内部存活的对象都会被转移到分配的空闲分区中。因此无论是年轻代收集，还是混合收集，工作的机制都是一致的。年轻代收集 CSet 只容纳年轻代分区，而混合收集会通过启发式算法，在老年代候选回收分区中，筛选出回收收益最高的分区添加到 CSet 中。
 
@@ -567,7 +567,7 @@ G1 在进行垃圾收集的时候，会根据每个 Region 预计垃圾收集所
 
 G1 的 Young GC 和 CMS 的 Young GC ，其标记-复制全过程 STW。
 
-![image-20230426112834867](https://github.com/chou401/pic-md/raw/master/img/image-20230426112834867.png)
+![image-20230426112834867](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230426112834867.png)
 
 ##### 混合收集
 
@@ -579,7 +579,7 @@ G1 没有Full GC概念，需要 Full GC 时，调用 serialOldGC 进行全堆扫
 
 为了满足暂停目标，G1 可能不能一口气将所有的候选分区收集掉，因此G1 可能会产生连续多次的混合收集要应用线程交替执行，每次STW 的混合收集与年轻代收集过程相类似。
 
-![image-20230426140913494](https://github.com/chou401/pic-md/raw/master/img/image-20230426140913494.png)
+![image-20230426140913494](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230426140913494.png)
 
 GC 步骤分两步：
 
@@ -722,7 +722,7 @@ ZGC设计目标：
 
 与CMS中的ParNew和G1类似，ZGC也采用标记-复制算法，不过ZGC对该算法做了重大改进：ZGC在标记、转移和重定位阶段几乎都是并发的，这是ZGC实现停顿时间小于10ms目标的最关键原因。
 
-![image-20230417102646070](https://github.com/chou401/pic-md/raw/master/img/image-20230417102646070.png)
+![image-20230417102646070](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230417102646070.png)
 
 ZGC只有三个STW：初始标记、再标记、初始转移。其中，初始标记和初始转移分别都只需要扫描所有GC Roots，其处理时间和GC Roots的数量成正比，一般情况耗时比较短；再标记阶段STW时间很短，最多1ms，超过1ms则再次进入并发标记阶段，即，ZGC几乎所有的暂停都只依赖于GC Roots集合大小，停顿时间不会随着堆的大小或者活跃对象的大小而增加。与ZGC对比，G1的转移阶段完全STW的，且停顿时间随存活对象的大小增加而增加。
 
@@ -738,7 +738,7 @@ ZGC（Z Garbage Collector）完全抛弃了按代收集理论，它与G1一样�
 
 - 大页面：容量不固定，可以动态变化，但必须为2MB的整数倍，用来存放大小大于等于4MB的对象。每个大页面只会存放一个大对象，也就是虽然它叫大页面，但它的容量可能还没中页面大，最小容量4MB。
 
-  ![image-20230414172817666](https://github.com/chou401/pic-md/raw/master/img/image-20230414172817666.png)
+  ![image-20230414172817666](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230414172817666.png)
 
 ZGC对于大页面的回收策略是不同的，简单说就是小页面优先回收，中页面和大页面则尽量不回收。
 
@@ -746,11 +746,11 @@ ZGC对于大页面的回收策略是不同的，简单说就是小页面优先�
 
 在过去，对于X86架构的计算机，内存控制器还没有整合进CPU，所有对内存的访问都需要通过北桥芯片来完成。X86系统中的所有内存都可以通过CPU进行同等访问。任何CPU访问任何内存的速度是一致的，不必考虑不同内存地址之间的差异，这称为“统一内存访问”（Uniform Memory Access，UMA）。UMA系统的架构示意图如图所示：
 
-![image-20230414175606068](https://github.com/chou401/pic-md/raw/master/img/image-20230414175606068.png)
+![image-20230414175606068](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230414175606068.png)
 
 在UMA中，各处理器与内存单元通过互联总线进行连接，各个CPU之间没有主从关系。之后的X86平台经历了一场从“拼频率”到“拼核心数”的转变，越来越多的核心被尽可能的塞进了同一块芯片上，各个核心对于内存带宽的争抢访问称为瓶颈，所以人们希望能够把CPU和内存集成在一个单元上（称Socket），这就是非统一内存访问（Non-Uniform Memory Access，NUMA）。在NUMA下，CPU访问本地存储器的速度比访问非本地存储器快一些。
 
-![image-20230414175933503](https://github.com/chou401/pic-md/raw/master/img/image-20230414175933503.png)
+![image-20230414175933503](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230414175933503.png)
 
 ZGC是支持NUMA的，在进行小页面分配时优先从本地内存分配，当不能分配时才会从远端的内存分配。对于中页面和大页面的分配，ZGC并没有要求从本地内存分配，而是直接交给操作系统，由操作系统找到一块能满足ZGC页面的空间。ZGC这样设计的目的在于，对于小页面，存放的都是小对象，从本地内存分配速度很快，且不会造成内存使用的不平衡，而中页面和大页面因为需要空间大，如果也优先从本地内存分配，极易造成内存使用不均衡，反而影响性能。
 
@@ -764,9 +764,9 @@ HotSpot集中收集器的标记实现方案，有得把标记直接记录在对�
 
 染色指针是一种直接将少量额外的信息存储到指针上的技术。在ZGC之前的虚拟机中，可以采用指针压缩技术，将35位以内的对象引用地址压缩到32位，而ZGC的染色质真就是要借助指针的bit位来存储额外信息。
 
-![image-20230417111630085](https://github.com/chou401/pic-md/raw/master/img/image-20230417111630085.png)
+![image-20230417111630085](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230417111630085.png)
 
-![image-20230417113559100](https://github.com/chou401/pic-md/raw/master/img/image-20230417113559100.png)
+![image-20230417113559100](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230417113559100.png)
 
 ZGC必须要在64bit的机器上才能运行，其中使用低42位来表示对空间，然后借用几个高位来记录GC中的状态信息，分别为M0、M1、Remapped和一个预留字段，因为对象的引用地址大于35bit，所以在ZGC中是无法使用压缩指针的。
 
@@ -774,7 +774,7 @@ ZGC必须要在64bit的机器上才能运行，其中使用低42位来表示对�
 
 与上述地址空间划分相对应，ZGC实际仅使用64位地址空间的第0-41位，而第42-45位存储元数据，第47-63位固定位0。
 
-![image-20230417114248169](https://github.com/chou401/pic-md/raw/master/img/image-20230417114248169.png)
+![image-20230417114248169](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230417114248169.png)
 
 每个对象有一个64位指针，这64位被分为：
 
@@ -875,7 +875,7 @@ ZGC一次垃圾回收周期中地址视图的切换过程：
 
 着色指针和读屏障技术不仅应用在并发转移阶段，还应用在并发标记阶段：将对象设置为已标记，传统的垃圾回收器需要进行一次内存访问，并将对象存活信息放在对象头中；而在ZGC中，只需要设置指针地址的第42-45位即可，并且因为是寄存器访问，所以速度比访问内存更快。
 
-![image-20230423160203752](https://github.com/chou401/pic-md/raw/master/img/image-20230423160203752.png)
+![image-20230423160203752](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423160203752.png)
 
 - **标记**
 
@@ -889,23 +889,23 @@ ZGC一次垃圾回收周期中地址视图的切换过程：
 
   我们给M0、M1和Remapped三种状态赋予不同的颜色，方便理解：
 
-  ![image-20230423150650176](https://github.com/chou401/pic-md/raw/master/img/image-20230423150650176.png)
+  ![image-20230423150650176](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423150650176.png)
 
   假设现在有四个对象，都在小页面（对象大小<2MB）A中，因为此时还没有开始进行GC，所以所有引用的指针都处于Remapped状态：
 
-  ![image-20230423153653755](https://github.com/chou401/pic-md/raw/master/img/image-20230423153653755.png)
+  ![image-20230423153653755](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423153653755.png)
 
   经过初次标记阶段厚，对象A被GC Root 引用，对象D被任何对象引用，A对象引用的指针颜色发生变化：
 
-  ![image-20230423154450713](https://github.com/chou401/pic-md/raw/master/img/image-20230423154450713.png)
+  ![image-20230423154450713](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423154450713.png)
 
   然后进行并发标记，并发标记过程中，将所有存活对象的指针状态全部改为M0，由于D对象不可达，所以它的指针颜色还是蓝色，但在并发标记阶段，B对象又引用了一个新的对象E，因为是新的对象还没有被GC扫描过，所以指针颜色是蓝色：
 
-  ![image-20230423154608727](https://github.com/chou401/pic-md/raw/master/img/image-20230423154608727.png)
+  ![image-20230423154608727](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423154608727.png)
 
   而在重新标记阶段，根据原始快照（STAB）会从B对象继续开始扫描，然后把E对象的指针变为绿色：
 
-  ![image-20230423154643033](https://github.com/chou401/pic-md/raw/master/img/image-20230423154643033.png)
+  ![image-20230423154643033](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423154643033.png)
 
   至此标记阶段就完成了，剩下的对象指针为Remapped的都是垃圾对象，转移阶段进行回收。
 
@@ -917,13 +917,13 @@ ZGC一次垃圾回收周期中地址视图的切换过程：
 
   在初始转移阶段，只会转移初始标记的存活对象，同时做对象的重定位，假设小页面A的对象都要转移到小页面B中，经过初始转移后，对象的位置及指针颜色如下：
 
-  ![image-20230423163652891](https://github.com/chou401/pic-md/raw/master/img/image-20230423163652891.png)
+  ![image-20230423163652891](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423163652891.png)
 
   因为A对象转移到新的页面时进行了重定位，所以A对象的指针状态变为了Remapped蓝色。但对B对象的引用指针还是绿色。
 
   然后进行并发转移，把B、C、E对象也都转移到小页面B中：
 
-  ![image-20230423165819998](https://github.com/chou401/pic-md/raw/master/img/image-20230423165819998.png)
+  ![image-20230423165819998](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423165819998.png)
 
   在并发转移阶段，只会把B、C、E对象转移到新的小页面B中，并不会修改它们对应的引用指针，也就是B对C的引用还指向原来小页面中的旧地址，并没有对转移对象做重定位。
 
@@ -943,11 +943,11 @@ ZGC一次垃圾回收周期中地址视图的切换过程：
 
   当第二次GC开始，由于上一次GC使用M0来表示存活对象，那么这一次就采用M1来标识存活对象，然后经过初始标记后，对象A的引用就变成了红色：
 
-  ![image-20230423165640436](https://github.com/chou401/pic-md/raw/master/img/image-20230423165640436.png)
+  ![image-20230423165640436](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423165640436.png)
 
   然后进行并发标记，在并发标记的过程中，因为F对象的指针为蓝色，就将其直接改为红色。当对象A扫描引用B时，发现它的指针颜色为绿色，状态为M0，它就会到原来的小页面A的转发表取到对象B的新地址进行重定位，然后再从转发表删除B指针的记录，重定位和删除转发表同样也是原子操作。C对象和E对象的操作一样，经过并发标记厚，新的对象布局如下：
 
-  ![image-20230423170212287](https://github.com/chou401/pic-md/raw/master/img/image-20230423170212287.png)
+  ![image-20230423170212287](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230423170212287.png)
 
   然后依次类推，下一次GC做标记时，在使用M0来标记存活对象。
 

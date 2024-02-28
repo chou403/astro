@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:27Z
+modDatetime: 2024-02-28T12:37:00Z
 title: Java SPI
 featured: false
 draft: false
@@ -24,7 +24,7 @@ SPI: Service Provider Interface，它是从 Java6 开始引入的，是一种基
 
 ### 运行流程
 
-![image-20230821143535836](https://github.com/chou401/pic-md/raw/master/image-20230821143535836.png)
+![image-20230821143535836](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230821143535836.png)
 
 ### 三大规范要素
 
@@ -41,7 +41,7 @@ SPI: Service Provider Interface，它是从 Java6 开始引入的，是一种基
 
 ### Java SPI 与 SpringBoot 自动配置
 
-![image-20230821154836454](https://github.com/chou401/pic-md/raw/master/image-20230821154836454.png)
+![image-20230821154836454](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230821154836454.png)
 
 该如何实现 Auto-Configuration
 
@@ -50,4 +50,4 @@ SPI: Service Provider Interface，它是从 Java6 开始引入的，是一种基
 - 第二，对用户友好，将“全自动”贯彻到底
   - 参考 Java SPI 的设计思想
 
-![image-20230821155311581](https://github.com/chou401/pic-md/raw/master/image-20230821155311581.png)
+![image-20230821155311581](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230821155311581.png)
