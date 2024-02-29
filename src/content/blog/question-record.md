@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-27T10:09:35Z
+modDatetime: 2024-02-29T18:14:14Z
 title: Questions
 featured: false
 draft: false
@@ -119,3 +119,10 @@ public class TransactionConfig {
 ```bash
 yarn config set ignore-engines true
 ```
+
+## idea 关闭时卡在 closing project
+
+可能得原因为：项目的依赖文件没有下载或加载完成时，就会触发 closing project。
+
+1. 更改 idea 的依赖包下载源。
+2. 菜单 -> Help -> Find Action -> 输入“Registry” -> 在提示结果点击“Registry..” -> 去掉“ide.await.scope.completion”的勾选

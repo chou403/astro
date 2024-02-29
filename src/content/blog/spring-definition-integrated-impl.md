@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-28T12:37:01Z
+modDatetime: 2024-02-29T18:14:14Z
 title: Spring
 featured: false
 draft: false
@@ -387,7 +387,7 @@ common 执行mvn install时，会报错提示 Unable to find a single main class
 
 ### Spring 自动配置
 
-![image-20230823113954382](/Users/chouchou/Library/Application Support/typora-user-images/image-20230823113954382.png)
+![image-20230823113954382](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281405585.png)
 
 SpringBoot 自动配置，Auto-Configuration
 
@@ -811,104 +811,171 @@ public @interface EnableAspectJAutoProxy
 
 **ImportBeanDefinitionRegistrar在 SpringBoot 启动流程中的体现？**
 
-1.  处理ImportBeanDefinitionRegistrar的入口
+1. 处理ImportBeanDefinitionRegistrar的入口
 
-    在 SpringBoot 启动流程中，通过 ConfigurationClassParser#doProcessConfigurationClass() 解析启动类的注解时，会做@Import注解的process操作，即进入到ConfigurationClassParser#processImports()方法。
+   在 SpringBoot 启动流程中，通过 ConfigurationClassParser#doProcessConfigurationClass() 解析启动类的注解时，会做@Import注解的process操作，即进入到ConfigurationClassParser#processImports()方法。
 
-    ```java
-    @Nullable
-    protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass, Predicate<String> filter) throws IOException {
-        if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
-            this.processMemberClasses(configClass, sourceClass, filter);
-        }
+   ```java
+   @Nullable
+   protected final SourceClass doProcessConfigurationClass(ConfigurationClass configClass, SourceClass sourceClass, Predicate<String> filter) throws IOException {
+       if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
+           this.processMemberClasses(configClass, sourceClass, filter);
+       }
 
-        Iterator var4 = AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(), PropertySources.class, PropertySource.class).iterator();
+       Iterator var4 = AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(), PropertySources.class, PropertySource.class).iterator();
 
-        AnnotationAttributes importResource;
-        while(var4.hasNext()) {
-            importResource = (AnnotationAttributes)var4.next();
-            if (this.environment instanceof ConfigurableEnvironment) {
-                this.processPropertySource(importResource);
-            } else {
-                this.logger.info("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() + "]. Reason: Environment must implement ConfigurableEnvironment");
-            }
-        }
+       AnnotationAttributes importResource;
+       while(var4.hasNext()) {
+           importResource = (AnnotationAttributes)var4.next();
+           if (this.environment instanceof ConfigurableEnvironment) {
+               this.processPropertySource(importResource);
+           } else {
+               this.logger.info("Ignoring @PropertySource annotation on [" + sourceClass.getMetadata().getClassName() + "]. Reason: Environment must implement ConfigurableEnvironment");
+           }
+       }
 
-        Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
-        if (!componentScans.isEmpty() && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
-            Iterator var14 = componentScans.iterator();
+       Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
+       if (!componentScans.isEmpty() && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+           Iterator var14 = componentScans.iterator();
 
-            while(var14.hasNext()) {
-                AnnotationAttributes componentScan = (AnnotationAttributes)var14.next();
-                Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
-                Iterator var8 = scannedBeanDefinitions.iterator();
+           while(var14.hasNext()) {
+               AnnotationAttributes componentScan = (AnnotationAttributes)var14.next();
+               Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
+               Iterator var8 = scannedBeanDefinitions.iterator();
 
-                while(var8.hasNext()) {
-                    BeanDefinitionHolder holder = (BeanDefinitionHolder)var8.next();
-                    BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
-                    if (bdCand == null) {
-                        bdCand = holder.getBeanDefinition();
-                    }
+               while(var8.hasNext()) {
+                   BeanDefinitionHolder holder = (BeanDefinitionHolder)var8.next();
+                   BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
+                   if (bdCand == null) {
+                       bdCand = holder.getBeanDefinition();
+                   }
 
-                    if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
-                        this.parse(bdCand.getBeanClassName(), holder.getBeanName());
-                    }
-                }
-            }
-        }
+                   if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
+                       this.parse(bdCand.getBeanClassName(), holder.getBeanName());
+                   }
+               }
+           }
+       }
 
-        this.processImports(configClass, sourceClass, this.getImports(sourceClass), filter, true);
-        importResource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
-        if (importResource != null) {
-            String[] resources = importResource.getStringArray("locations");
-            Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
-            String[] var20 = resources;
-            int var22 = resources.length;
+       this.processImports(configClass, sourceClass, this.getImports(sourceClass), filter, true);
+       importResource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
+       if (importResource != null) {
+           String[] resources = importResource.getStringArray("locations");
+           Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
+           String[] var20 = resources;
+           int var22 = resources.length;
 
-            for(int var23 = 0; var23 < var22; ++var23) {
-                String resource = var20[var23];
-                String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
-                configClass.addImportedResource(resolvedResource, readerClass);
-            }
-        }
+           for(int var23 = 0; var23 < var22; ++var23) {
+               String resource = var20[var23];
+               String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
+               configClass.addImportedResource(resolvedResource, readerClass);
+           }
+       }
 
-        Set<MethodMetadata> beanMethods = this.retrieveBeanMethodMetadata(sourceClass);
-        Iterator var18 = beanMethods.iterator();
+       Set<MethodMetadata> beanMethods = this.retrieveBeanMethodMetadata(sourceClass);
+       Iterator var18 = beanMethods.iterator();
 
-        while(var18.hasNext()) {
-            MethodMetadata methodMetadata = (MethodMetadata)var18.next();
-            configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
-        }
+       while(var18.hasNext()) {
+           MethodMetadata methodMetadata = (MethodMetadata)var18.next();
+           configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
+       }
 
-        this.processInterfaces(configClass, sourceClass);
-        if (sourceClass.getMetadata().hasSuperClass()) {
-            String superclass = sourceClass.getMetadata().getSuperClassName();
-            if (superclass != null && !superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
-                this.knownSuperclasses.put(superclass, configClass);
-                return sourceClass.getSuperClass();
-            }
-        }
+       this.processInterfaces(configClass, sourceClass);
+       if (sourceClass.getMetadata().hasSuperClass()) {
+           String superclass = sourceClass.getMetadata().getSuperClassName();
+           if (superclass != null && !superclass.startsWith("java") && !this.knownSuperclasses.containsKey(superclass)) {
+               this.knownSuperclasses.put(superclass, configClass);
+               return sourceClass.getSuperClass();
+           }
+       }
 
-        return null;
-    }
-    ```
+       return null;
+   }
+   ```
 
-2.  将 ImportBeanDefinitionRegistrar 添加到所属 ConfigClass 的一个属性上
-    进入到 ConfigurationClassParser#processImports() 方法中，接着看processImports()方法针对ImportBeanDefinitionRegistrar接口的具体处理逻辑
+2. 将 ImportBeanDefinitionRegistrar 添加到所属 ConfigClass 的一个属性上
+   进入到 ConfigurationClassParser#processImports() 方法中，接着看processImports()方法针对ImportBeanDefinitionRegistrar接口的具体处理逻辑
 
-        ```java
-        if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
-            candidateClass = candidate.loadClass();
-            ImportBeanDefinitionRegistrar registrar = (ImportBeanDefinitionRegistrar)ParserStrategyUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class, this.environment, this.resourceLoader, this.registry);
-            configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
-        }
-        ```
+   ```java
+   if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
+       candidateClass = candidate.loadClass();
+       ImportBeanDefinitionRegistrar registrar = (ImportBeanDefinitionRegistrar)ParserStrategyUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class, this.environment, this.resourceLoader, this.registry);
+       configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
+   }
+   ```
 
-        processImports()方法中会判断如果一个类A实现了ImportBeanDefinitionRegistrar接口，会对类A做实例化，并将其存储到当前ConfigClass的一个属性（Map类型的变量importBeanDefinitionRegistrars）中，以便在注册ConfigurationClass到Spring容器时，拿出importBeanDefinitionRegistrars中的所有内容，执行每个ImportBeanDefinitionRegistrar的registerBeanDefinitions()方法。
+   processImports()方法中会判断如果一个类A实现了ImportBeanDefinitionRegistrar接口，会对类A做实例化，并将其存储到当前ConfigClass的一个属性（Map类型的变量importBeanDefinitionRegistrars）中，以便在注册ConfigurationClass到Spring容器时，拿出importBeanDefinitionRegistrars中的所有内容，执行每个ImportBeanDefinitionRegistrar的registerBeanDefinitions()方法。
 
-3.  执行 ImportBeanDefinitionRegistrar 接口方法的时机
+3. 执行 ImportBeanDefinitionRegistrar 接口方法的时机
 
-    解析完所有的candidates候选类之后，会进入到ConfigurationClassBeanDefinitionReader#loadBeanDefinitions(Set<ConfigurationClass>)方法对所有的ConfigurationClass做条件装配、属性处理，然后将相应BeanDefinition注册到Spring中。
+   解析完所有的candidates候选类之后，会进入到ConfigurationClassBeanDefinitionReader#loadBeanDefinitions(Set<ConfigurationClass>)方法对所有的ConfigurationClass做条件装配、属性处理，然后将相应BeanDefinition注册到Spring中。
+   ConfigurationClassPostProcessor#processConfigBeanDefinitions
+
+   ```java
+   public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
+     ...
+
+     do {
+         // 解析启动类中的所有 ConfigurationClass 或者说 BeanDefinition
+         parser.parse(candidates);
+         parser.validate();
+         Set<ConfigurationClass> configClasses = new LinkedHashSet(parser.getConfigurationClasses());
+         configClasses.removeAll(alreadyParsed);
+         if (this.reader == null) {
+             this.reader = new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor, this.resourceLoader, this.environment, this.importBeanNameGenerator, parser.getImportRegistry());
+         }
+         // 真正加载所有的 ConfigurationClass
+         this.reader.loadBeanDefinitions(configClasses);
+         alreadyParsed.addAll(configClasses);
+         candidates.clear();
+
+         ...
+     } while(!candidates.isEmpty());
+   }
+   ```
+
+   ```java
+   public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
+       TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
+       Iterator var3 = configurationModel.iterator();
+
+       while(var3.hasNext()) {
+           ConfigurationClass configClass = (ConfigurationClass)var3.next();
+           this.loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
+       }
+
+   }
+
+   private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass, TrackedConditionEvaluator trackedConditionEvaluator) {
+       // 类注册阶段的条件装配
+       if (trackedConditionEvaluator.shouldSkip(configClass)) {
+           String beanName = configClass.getBeanName();
+           if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
+               this.registry.removeBeanDefinition(beanName);
+           }
+
+           this.importRegistry.removeImportingClass(configClass.getMetadata().getClassName());
+       } else {
+           if (configClass.isImported()) {
+               this.registerBeanDefinitionForImportedConfigurationClass(configClass);
+           }
+
+           Iterator var3 = configClass.getBeanMethods().iterator();
+
+           // 处理 @Bean 方法
+           while(var3.hasNext()) {
+               BeanMethod beanMethod = (BeanMethod)var3.next();
+               this.loadBeanDefinitionsForBeanMethod(beanMethod);
+           }
+
+           this.loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+           // 执行 @Import 导入的 ImportBeanDefinitionRegistrar 接口方法
+           this.loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
+       }
+   }
+   ```
+
+   > 在加载并注册启动类的BeanDefinition时，会将启动类ConfigurationClass下的一些属性进行解析处理，其中就包括对@Import的所有ImportBeanDefinitionRegistrar接口方法进行执行。
 
 ### Spring 自动装配
 
