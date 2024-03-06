@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-28T12:37:00Z
+modDatetime: 2024-03-06T17:58:03Z
 title: 垃圾回收
 featured: true
 draft: false
@@ -60,7 +60,7 @@ GC Roots 的对象有以下几种：
 
 缺点：
 
-- 碎片化，会导致吴舒小分块散落在堆的各处。
+- 碎片化，会导致无数小分块散落在堆的各处。
 
 - 分配速度不理想，每次分配都需要遍历空闲列表找到足够大的分块。
 

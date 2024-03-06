@@ -7,7 +7,7 @@ export const SITE: Site = {
   desc: "花易谢、雾易失、梦易逝、云易散",
   title: "知道的越多，才知知道的越少",
   ogImage: "astropaper-og.jpg",
-  lightAndDarkMode: true,
+  lightAndDarkMode: false,
   postPerPage: 6,
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };

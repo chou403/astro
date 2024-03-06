@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-02-22T15:00:03.000Z
-modDatetime: 2024-03-04T17:50:04Z
+modDatetime: 2024-03-06T17:58:03Z
 title: Feign & openFeign
 featured: false
 draft: false
@@ -1336,3 +1336,223 @@ public MethodHandler create(Target<?> target,
 > 4. 接着硬编码拼死一个HTTP协议，http 1.1，HTTP template：DELETE /user/{id} HTTP/1.1
 > 5. indexToName：解析@PathVariable注解，第一个占位符（index是0）要替换成方法入参里的id这个参数的值
 > 6. 假如后面来调用这个deleteUser()方法，传递进来的id = 1.那么此时就会拿出之前解析好的HTTP template：DELETE /user/{id} HTTP/1.1。然后用传递进来的id = 1替换掉第一个占位符的值，DELETE /user/1 HTTP/1.1
+
+### OpenFeign处理HTTP请求
+
+#### 动态代理处理请求的入口
+
+我们知道所有对动态代理对象（T Proxy）的所有接口方法的调用，都会交给 `InvocationHandler` 来处理，此处的 `InvocationHandler` 是 `ReflectiveFeign` 的内部类 `FeignInvocationHandler`。针对 FeignClient 的每个方法都会对应一个 `SynchronousMethodHandler`。
+
+以 `http://localhost:9090/ServiceB/user/sayHello/1?name=zhangsan&age=18` 请求调用为例：
+
+![202403051440325](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051440325.png)
+
+请求调用 ServiceBController 的 greeting() 方法后，要调用 ServiceAClient#sayHello() 方法时，请求会进到 ServiceAClient 的动态代理类，进而请求交给 ReflectiveFeign 的内部类 FeignInvocationHandler 来处理，在结合 JDK 动态代理的特性，方法会交给 invoke() 方法执行，所以动态代理处理请求的入口为：`ReflectiveFeign` 的内部类 `FeignInvocationHandler` 的 invoke() 方法：
+
+![202403051446826](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051446826.png)
+
+方法逻辑：
+
+> 1. 针对父类 Object 的 equals、hashCode、toString 方法直接处理
+> 2. 其他方法则从 dispatch 中获取 Method 对应的 MethodHandler，然后将方法的执行交给 MethodHandler 来处理
+> 3. dispatch 是一个以 Method 为 key，MethodHandler 为 value 的 Map 类型（Map<Method， MethodHandler>），其是在构建 FeignInvocationHandler 时，记录了每个 FeignClient 对应的所有方法 MethodHandler 的映射
+
+invoke() 方法中通过方法名找到 Method 对应的 MethodHandler，这里的 MethodHandler 为 SynchronousMethodHandler，然后将 args 参数交给它来处理请求
+
+#### SynchronousMethodHandler 处理请求机制
+
+```java
+@Override
+  public Object invoke(Object[] argv) throws Throwable {
+    // 创建一个请求模版
+    RequestTemplate template = buildTemplateFromArgs.create(argv);
+    Options options = findOptions(argv);
+    Retryer retryer = this.retryer.clone();
+    while (true) {
+      try {
+        // 执行请求并返回 decode 后的结果
+        return executeAndDecode(template, options);
+      } catch (RetryableException e) {
+        try {
+          retryer.continueOrPropagate(e);
+        } catch (RetryableException th) {
+          Throwable cause = th.getCause();
+          if (propagationPolicy == UNWRAP && cause != null) {
+            throw cause;
+          } else {
+            throw th;
+          }
+        }
+        if (logLevel != Logger.Level.NONE) {
+          logger.logRetry(metadata.configKey(), logLevel);
+        }
+        continue;
+      }
+    }
+  }
+```
+
+`SynchronousMethodHandler#invoke()` 方法中主要包括两大块：创建请求模版、执行请求并返回 decode 后的结果。
+
+这里的重试机制，其实就是依靠 Retryer#continueOrPropagate() 方法中对重试次数的判断，超过最大重试次数抛异常结束流程。
+
+![202403051634061](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051634061.png)
+
+##### 创建请求模版（SpringMvcContract 解析方法参数）
+
+在上文中我们聊到会用 SpringMvcContract 解析Spring mvc 的注解，最终拿到方法的对应的请求（RequestTemplate）是 `GET /user/sayHello/{id} HTTP/1.1`，但是要生成一个可以访问的请求地址，需要再基于 SpringMvcContract 去解析 @RequestParam 注解，将方法的入参，绑定到 HTTP 请求参数里去，最终将请求处理为 `GET /user/sayHello/1?name=zhangsan&age=18 HTTP/1.1`
+
+而 `RequestTemplate template = buildTemplateFromArgs.create(argv)` 负责做这个操作，ReflectiveFeign#create(Object[] argv)：
+
+```java
+@Override
+public RequestTemplate create(Object[] argv) {
+  // 获取 REST 请求模版
+  RequestTemplate mutable = RequestTemplate.from(metadata.template());
+  mutable.feignTarget(target);
+  if (metadata.urlIndex() != null) {
+    int urlIndex = metadata.urlIndex();
+    checkArgument(argv[urlIndex] != null, "URI parameter %s was null", urlIndex);
+    mutable.target(String.valueOf(argv[urlIndex]));
+  }
+  Map<String, Object> varBuilder = new LinkedHashMap<String, Object>();
+  // 遍历 REST 请求要调用方法标记了 springmvc 注解的参数
+  for (Entry<Integer, Collection<String>> entry : metadata.indexToName().entrySet()) {
+    int i = entry.getKey();
+    Object value = argv[entry.getKey()];
+    if (value != null) { // Null values are skipped.
+      // 使用 SpringMvcContract 解析出方法参数对应的 value 值
+      if (indexToExpander.containsKey(i)) {
+        value = expandElements(indexToExpander.get(i), value);
+      }
+      for (String name : entry.getValue()) {
+        varBuilder.put(name, value);
+      }
+    }
+  }
+
+  // 构建出完整的 REST 请求
+  RequestTemplate template = resolve(argv, mutable, varBuilder);
+  // 处理表单内容
+  if (metadata.queryMapIndex() != null) {
+    // add query map parameters after initial resolve so that they take
+    // precedence over any predefined values
+    Object value = argv[metadata.queryMapIndex()];
+    Map<String, Object> queryMap = toQueryMap(value);
+    template = addQueryMapQueryParameters(queryMap, template);
+  }
+
+  // 处理请求头内容
+  if (metadata.headerMapIndex() != null) {
+    template =
+        addHeaderMapHeaders((Map<String, Object>) argv[metadata.headerMapIndex()], template);
+  }
+
+  return template;
+}
+```
+
+以解析 `@PathVariable("id") Long id` 为例，SpringMvcContract 解析逻辑如下：
+
+![202403051717607](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051717607.png)
+
+```java
+private Object expandElements(Expander expander, Object value) {
+  if (value instanceof Iterable) {
+    return expandIterable(expander, (Iterable) value);
+  }
+  return expander.expand(value);
+}
+```
+
+![202403051723717](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051723717.png)
+
+最后解析出 `@PathVariable("id") Long id` 对应的值为 1，然后将所有的标注了 SpringMVC 注解的参数都解析完之后，将参数名和对应的 value 值放到一个命名为 `varBuilder` 的 Map 中：
+
+![202403051728793](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051728793.png)
+
+接着需要根据 varBuilder 的内容构建出一个完整的 REST 请求（即：将 SpringMVC 注解标注的参数全部用 value 值替换、添加到请求中）
+
+![202403051736823](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051736823.png)
+
+![202403051744919](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051744919.png)
+
+`RequestTemplate resolve(Map<String, ?> variables)` 中负责解析并构建完整的 RequestTemplate，进到方法中的 urlTemplate 为 `/user/sayHello/{id}`，variables 为上面的 varBuilder：`{"id":1,"name":"zhangsan","age":18}`。
+
+方法中首先将 `"id":1` 替换 `urlTemplate（/user/sayHello/{id}）` 中的 {id}，得出 expanded 为 `/user/sayHello/1`，然后再将查询参数 `"name":"zhangsan","age":18` 拼接到请求中，得到最终的 URL 为：`/user/sayHello/1?name=zhangsan&age=18`，返回的 RequestTemplate 内容为：
+
+`buildTemplateFromArgs.create(argv)` 方法执行完成之后，得到一个完整的 RequestTemplate，下面需要基于这个 RequestTemplate 来执行请求。
+
+![202403051758648](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051758648.png)
+
+##### 执行请求并解码返回值
+
+`SynchronousMethodHandler#executeAndDecode(RequestTemplate, Options)` 方法负责执行请求并解码返回值，具体执行逻辑如下：
+
+![202403051804120](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051804120.png)
+
+方法中主要做三件事：应用所有的 RequestInterceptor（即执行 RequestInterceptor#apply()方法）、通过 LoadBalancerFeignClient 做负载均衡执行请求，使用 Decoder 对请求返回结果解码或处理返回结果。
+
+下面分开来看
+
+###### 应用所有的 RequestInterceptor
+
+![202403051813337](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051813337.png)
+
+遍历所有的请求拦截器 `RequestInterceptor`，将每个请求拦截器都应用到 RequestTemplate 请求模版上面去，也就是让每个请求拦截器都对请求进行处理（调用拦截器的 apply（RequestTemplate）方法）。
+
+> - 其实这里本质上就是基于 RequestTemplate，创建一个Request
+> - Request 是基于之前的 HardCodedTarget（包含了目标请求服务信息的一个 Target，服务名也在其中），处理 RequestTemplate，生成一个 Request
+
+应用完所有的 RequestInterceptor 之后，如果 Feign 日志的隔离级别不等于 `Logger.Level.NONE`，则打印即将要发送的 Request 请求日志；
+打印完请求日志之后，会通过 `SynchronousMethodHandler` 中的成员 Client 来执行请求，对于 OpenFeign 旧版而言，Client 是 `LoadBalancerFeignClient`。
+
+###### LoadBalancerFeignClient 负载均衡执行请求详述
+
+基于 LoadBalancerFeignClient 完成了请求的处理和发送，这里肯定是将 HTTP 请求发送到对应 server 的某个实例上去，同时获取到 Response 响应。
+
+`LoadBalancerFeignClient#execute()` 方法处理逻辑：
+
+```java
+public Response execute(Request request, Request.Options options) throws IOException {
+  try {
+    // 将请求的 url 封装成 URI
+    URI asUri = URI.create(request.url());
+    // 获取要请求的服务名
+    String clientName = asUri.getHost();
+    // 从 URI 中剔除服务名
+    URI uriWithoutHost = cleanUrl(request.url(), clientName);
+    // 将请求封装为 RibbonRequest
+    FeignLoadBalancer.RibbonRequest ribbonRequest = new FeignLoadBalancer.RibbonRequest(this.delegate, request, uriWithoutHost);
+    // 将 options 封装为请求配置传给 Ribbon
+    IClientConfig requestConfig = this.getClientConfig(options, clientName);
+    // 通过集成的 Ribbon 执行请求
+    return ((FeignLoadBalancer.RibbonResponse)this.lbClient(clientName).executeWithLoadBalancer(ribbonRequest, requestConfig)).toResponse();
+  } catch (ClientException var8) {
+    IOException io = this.findIOException(var8);
+    if (io != null) {
+      throw io;
+    } else {
+      throw new RuntimeException(var8);
+    }
+  }
+}
+```
+
+方法逻辑解析：
+
+> 1. 首先将请求的url封装成一个URI，然后从请求URL地址中，获取到要访问的服务名称clientName（示例为ServiceA）
+> 2. 然后将请求URI中的服务名称剔除，比如这里的 <http://Service-A/user/sayHello/> 变为 http:///user/sayHello/
+> 3. 接着基于去除了服务名称的uri地址，创建了一个适用于Ribbon的请求（FeignLoadBalancer.RibbonRequest）
+> 4. 根据服务名从SpringClientFactory（Feign上下文）中获取Ribbon相关的配置IClientConfig，比如（连接超时时间、读取数据超时时间），如果获取不到，则创建一个FeignOptionsClientConfig
+> 5. 最后根据服务名从CachingSpringLoadBalancerFactory获取对应的FeignLoadBalancer；在FeignLoadBalancer里封装了ribbon的ILoadBalancer
+
+既然Feign中集成了Ribbon，那它们是怎么整合到一起的？FeignLoadBalancer中用了Ribbon的那个ILoadBalancer？Feign如何使用Ribbon进行负载均衡？最终发送出去的请求URI是什么样的？
+
+**1> Feign 是如何和 Ribbon、eureka 整合在一起的？FeignLoadBalancer 中用了 Ribbon 的那个 ILoadBalancer？**
+
+1. FeignLoadBalancer中用了Ribbon的那个ILoadBalancer?
+
+FeignLoadBalancer的类继承结构如下：
+
+2. Ribbon和Eureka的集成?
