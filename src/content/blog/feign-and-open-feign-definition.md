@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-02-22T15:00:03.000Z
-modDatetime: 2024-03-06T17:58:03Z
+modDatetime: 2024-03-07T18:15:13Z
 title: Feign & openFeign
 featured: false
 draft: false
@@ -1553,6 +1553,229 @@ public Response execute(Request request, Request.Options options) throws IOExcep
 
 1. FeignLoadBalancer中用了Ribbon的那个ILoadBalancer?
 
-FeignLoadBalancer的类继承结构如下：
+   FeignLoadBalancer的类继承结构如下：
+
+   ![202403061818220](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403061818220.png)
+
+   ![202403061819814](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403061819814.png)
+
+   FeignLoadBalancer间接继承自LoadBalancerContext，LoadBalancerContext中有一个ILoadBalancer类型的成员，其就是FeignLoadBalancer中集成的Ribbon的ILoadBalancer。从代码执行流程来看，集成的ILoadBalancer为Ribbon默认的ZoneAwareLoadBalancer：
+
+   ![202403061830279](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403061830279.png)
+
+   到这里，可以看到根据服务名获取到的FeignLoadBalancer中组合了Ribbon的ZoneAwareLoadBalancer负载均衡器。
 
 2. Ribbon和Eureka的集成?
+   RibbonClientConfiguration#ribbonLoadBalancer
+
+   ```java
+   @Bean
+   @ConditionalOnMissingBean
+   // serverList: 服务实例列表信息
+   public ILoadBalancer ribbonLoadBalancer(IClientConfig config, ServerList<Server> serverList, ServerListFilter<Server> serverListFilter, IRule rule, IPing ping, ServerListUpdater serverListUpdater) {
+       return (ILoadBalancer)(this.propertiesFactory.isSet(ILoadBalancer.class, this.name)
+       ? (ILoadBalancer)this.propertiesFactory.get(ILoadBalancer.class, config, this.name)
+       : new ZoneAwareLoadBalancer(config, rule, ping, serverList, serverListFilter, serverListUpdater));
+   }
+   ```
+
+   Ribbon自己和Eureka集成的流程：Ribbon的配置类RibbonClientConfiguration，会初始化ZoneAwareLoadBalancer并将其注入到Spring容器；ZoneAwareLoadBalancer内部持有跟eureka进行整合的DomainExtractingServerList（Eureka和Ribbon集成的配置类EurekaRibbonClientConfiguration（spring-cloud-netflix-eureka-client项目下）中负责将其注入到Spring容器）,nacos 和 ribbon 集成的配置类 NacosRibbonClientConfiguration。
+
+   小结：
+   在spring boot启动，要去获取一个ribbon的ILoadBalancer的时候，会去从那个服务对应的一个独立的spring容器（Ribbon子上下文）中获取；获取到一个服务对应的ZoneAwareLoadBalancer，其中组合了DomainExtractingServerList，DomainExtractingServerList自己会去eureka的注册表里去拉取服务对应的注册表（即：服务的实例列表）。
+
+**2> Feign如何使用Ribbon进行负载均衡？**
+feign是基于ribbon的ZoneAwareLoadBalancer来进行负载均衡的，从一个server list中选择出来一个server。
+
+接着上面的内容，进入到FeignLoadBalancer的executeWithLoadBalancer()方法；
+
+由于AbstractLoadBalancerAwareClient是FeignLoadBalancer的父类，FeignLoadBalancer类中没有重写executeWithLoadBalancer()方法，进入到AbstractLoadBalancerAwareClient#executeWithLoadBalancer()方法：
+
+![202403071635683](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071635683.png)
+
+方法逻辑解析：
+
+> 1. 首先构建一个LoadBalancerCommand，LoadBalancerCommand刚创建的时候里面的server是null，也就是还没确定要对哪个server发起请求；
+> 2. command.submit()方法的代码块，本质上是重写了LoadBalancerCommand#submit(ServerOperation<T>)方法入参ServerOperation的call()方法。
+>
+>    - call()方法内部根据选择出的Server构造出具体的http请求地址，然后基于底层的http通信组件，发送出去这个请求。
+>    - call()方法是被内嵌到LoadBalancerCommand#submit()方法中的，也就是在执行LoadBalancerCommand的时候会调用call()方法；
+>
+> 3. 最后通过command.toBlocking().single()方法，进行阻塞式的同步执行，获取到响应结果。
+
+从整体来看，ServerOperation中封装了负载均衡选择出来的server，然后直接基于这个server替换掉请求URL中的服务名，拼接出最终的请求URL地址，然后基于底层的http组件发送请求。
+
+LoadBalancerCommand肯定是在某个地方使用Ribbon的ZoneAwareLoadBalancer负载均衡选择出来了一个server，然后将这个server，交给ServerOpretion中的call()方法去处理。
+
+结合方法的命名找到LoadBalancerCommand#selectServer()：
+
+![202403071639910](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071639910.png)
+
+![202403071640043](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071640043.png)
+
+![202403071642161](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071642161.png)
+
+selectServer()方法逻辑解析：
+
+> 在这个方法中，就是直接基于Feign集成的Ribbon的ZoneAwareLoadBalancer的chooseServer()方法，通过负载均衡机制选择了一个server出来。
+>
+> - 先通过LoadBalancerContext#getServerFromLoadBalancer()方法获取到ILoadBalancer；
+> - 在利用ILoadBalancer#chooseServer()方法选择出一个Server。
+
+选择出一个Server之后，再去调用ServerOperation.call()方法，由call()方法拼接出最终的请求URI，发送http请求；
+
+**3> 最终发送出去的请求URI是什么样的？**
+ServerOperation#call()方法里负责发送请求，在executeWithLoadBalancer()方法中重写了LoadBalancerCommand#command()方法中入参ServerOperation的call()方法；
+
+![202403071648955](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071648955.png)
+
+```java
+public URI reconstructURIWithServer(Server server, URI original) {
+  // 获取服务 ip
+  String host = server.getHost();
+  // 获取服务的 port
+  int port = server.getPort();
+  // 获取请求协议，这里为 http
+  String scheme = server.getScheme();
+
+  if (host.equals(original.getHost())
+        && port == original.getPort()
+        && scheme == original.getScheme()) {
+    return original;
+  }
+  if (scheme == null) {
+    scheme = original.getScheme();
+  }
+  if (scheme == null) {
+    scheme = deriveSchemeAndPortFromPartialUri(original).first();
+  }
+
+  try {
+    StringBuilder sb = new StringBuilder();
+    // 拼接请求协议，此时请求为 http://
+    sb.append(scheme).append("://");
+    if (!Strings.isNullOrEmpty(original.getRawUserInfo())) {
+      sb.append(original.getRawUserInfo()).append("@");
+    }
+    // 拼接请求 ip，此时请求为 http://192.168.1.3
+    sb.append(host);
+    if (port >= 0) {
+      // 拼接请求 post，此时请求为 http://192.168.1.3:8082
+      sb.append(":").append(port);
+    }
+    // 拼接请求路径，此时请求为 http://192.168.1.3:8082/user/sayHello/1
+    sb.append(original.getRawPath());
+    // 拼接请求查询参数，此时请求为 http:///user/sayHello/1?name=zhangsan&age=18
+    if (!Strings.isNullOrEmpty(original.getRawQuery())) {
+      sb.append("?").append(original.getRawQuery());
+    }
+    if (!Strings.isNullOrEmpty(original.getRawFragment())) {
+      sb.append("#").append(original.getRawFragment());
+    }
+    URI newURI = new URI(sb.toString());
+    return newURI;
+  } catch (URISyntaxException e) {
+    throw new RuntimeException(e);
+  }
+}
+```
+
+方法逻辑解析：
+
+> 根据之前处理好的请求URI和Server的地址拼接出真实的地址； 依次拼接http://，服务的IP、服务的Port、请求路径、查询参数，最终体现为：
+>
+> - 原request的uri：GET http:///user/sayHello/1?name=saint&age=18 HTTP/1.1
+> - server地址：192.168.1.3:8082
+> - 拼接后的地址：<http://192.168.1.3:8082/user/sayHello/1?name=saint&age=18>
+
+接着使用拼接后的地址替换掉request.uri，再调用FeignLoadBalacner#execute()方法发送一个http请求；其中发送请求的超时时间默认为1000ms，即1s；最后返回结果封装到FeignLoadBalancer.RibbonResponse。
+
+###### 指定Decoder时对请求返回结果解码
+
+如果配置了decoder，则使用Decoder#decode()方法对结果进行解码；
+
+```java
+public interface Decoder {
+
+  /**
+   * Decodes an http response into an object corresponding to its
+   * {@link java.lang.reflect.Method#getGenericReturnType() generic return type}. If you need to
+   * wrap exceptions, please do so via {@link DecodeException}.
+   *
+   * @param response the response to decode
+   * @param type {@link java.lang.reflect.Method#getGenericReturnType() generic return type} of the
+   *        method corresponding to this {@code response}.
+   * @return instance of {@code type}
+   * @throws IOException will be propagated safely to the caller.
+   * @throws DecodeException when decoding failed due to a checked exception besides IOException.
+   * @throws FeignException when decoding succeeds, but conveys the operation failed.
+   */
+  Object decode(Response response, Type type) throws IOException, DecodeException, FeignException;
+
+  /** Default implementation of {@code Decoder}. */
+  public class Default extends StringDecoder {
+
+    @Override
+    public Object decode(Response response, Type type) throws IOException {
+      if (response.status() == 404 || response.status() == 204)
+        return Util.emptyValueOf(type);
+      if (response.body() == null)
+        return null;
+      if (byte[].class.equals(type)) {
+        return Util.toByteArray(response.body().asInputStream());
+      }
+      return super.decode(response, type);
+    }
+  }
+}
+```
+
+###### 默认情况下，Feign接收到服务返回的结果后，如何处理？
+
+即：未指定decoder时，会直接使用AsyncResponseHandler#handleResponse()方法处理接收到的服务返回结果：
+
+![202403071718925](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071718925.png)
+
+![202403071723997](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071723997.png)
+
+如果响应结果的returnType为Response时，则将return信息的body()解析成byte数组，放到resultFuture的RESULT中；然后SynchronousMethodHandler#executeAndDecode()方法中通过resultFuture.join()方法拿到RESULT（即：请求的真正的响应结果）。
+
+一般而言，会走到如下else if 分支
+
+```java
+// 请求成功后，返回结果类型为 void，则处理的返回结果赋值 null
+if (isVoidType(returnType)) {
+  resultFuture.complete(null);
+} else {
+  // 解析请求的返回结果
+  final Object result = decode(response, returnType);
+  shouldClose = closeAfterDecode;
+  resultFuture.complete(result);
+}
+```
+
+decode()方法中将response处理为我们要的returnType，比如调用的服务方返回给我们一个JSON字符串，decode()方法中会将其转换为我们需要的JavaBean（即：returnType，当前方法的返回值）。
+
+```java
+Object decode(Response response, Type type) throws IOException {
+  try {
+    return decoder.decode(response, type);
+  } catch (final FeignException e) {
+    throw e;
+  } catch (final RuntimeException e) {
+    throw new DecodeException(response.status(), e.getMessage(), response.request(), e);
+  }
+}
+```
+
+deocode()方法中会用到一个Decoder，decoder默认是OptionalDecoder，针对JavaBean返回类型，OptionalDecoder将decode委托给ResponseEntityDecoder处理。
+
+#### 总结
+
+> 1. 请求达到FeignClient时，会进入到JDK动态代理类，由ReflectiveFeign#FeignInvocationHandler分发处理请求；找到接口方法对应的SynchronousMethodHandler；
+> 2. SynchronousMethodHandler中首先使用SpringMvcContract解析标注了SpringMvc注解的参数；然后使用encoder对请求进行编码；
+> 3. RequestInterceptor对Request进行拦截处理；
+> 4. LoadBalancerFeignClient通过集成的Ribbon的负载均衡器（ZoneAwareLoadBalancer）实现负载均衡找到一个可用的Server，交给RibbonRequest组合的Client去做HTTP请求，这里的Client可以是HttpUrlConnection、HttpClient、OKHttp。
+> 5. 最后Decoder对Response响应进行解码。
+
+## OpenFeign新版本和旧版本之间的差异（高版本OpenFeign底层不使用Ribbon做负载均衡）

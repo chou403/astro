@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-03-06T17:58:03Z
+modDatetime: 2024-03-07T18:15:13Z
 title: 垃圾回收
 featured: true
 draft: false
@@ -114,7 +114,7 @@ JVM 中新生代采用的就是复制算法。针对内存利用率不足做了�
 
 - 老年代 **标记-清除算法**
 
-对象在生成空间创建，当生成空间满之后进行 minor gc，将活动对象复制到第一个幸存区，并增加其“年龄”age，当这个幸存区满之后再将此次生成空间和这个幸存区的活动对象复制到另一个幸存区，如此反复，当活动对象的 age 达到一定次数（默认是15，可以通过参数 ==-XX:MaxTenuringThreshold== 来设定）后将其移动到老年代； 当老年代满的时候就用标记-清除或标记-压缩算法进行major gc 吞吐量得到改善，分代回收花费的时间是 GC 复制算法的四分之一；但是如果部分程序新生成对象存活很久的话分代回收会适得其反。
+对象在生成空间创建，当生成空间满之后进行 minor gc，将活动对象复制到第一个幸存区，并增加其“年龄”age，当这个幸存区满之后再将此次生成空间和这个幸存区的活动对象复制到另一个幸存区，如此反复，当活动对象的 age 达到一定次数（默认是15，可以通过参数 `-XX:MaxTenuringThreshold` 来设定）后将其移动到老年代； 当老年代满的时候就用标记-清除或标记-压缩算法进行major gc 吞吐量得到改善，分代回收花费的时间是 GC 复制算法的四分之一；但是如果部分程序新生成对象存活很久的话分代回收会适得其反。
 
 #### 具体流程
 
@@ -138,7 +138,7 @@ JVM 中新生代采用的就是复制算法。针对内存利用率不足做了�
 
   如果 Young GC 时新生代有大量对象存活下来，而 survivor 区放不下，这时必须转移到老年代中，但这时发现老年代也放不下这些对象了，那怎么处理？其实JVM有一个老年代空间分配担保机制来保证对象能够进入老年代。
 
-  在执行每次 Young GC 之前，JVM 会先检查老年代最大可用连续空间是否大于新生代所有对象的总大小，因为在极端情况下，可能新生代 Young GC 后，所有对象都存活下来了，而 survivor 区又放不下，那可能所有对象都要进入老年代了。这个时候如果老年代的可用连续空间大于新生代所有对象的总大小的，那就可以放心进行 Young GC，但是如果老年代的内存大小小于新生代对象总大小的，那就可能老年代空间不够放入新生代所有存活对象，这个时候 JVM就会先检查 ==-XX:HandlePromotionFailure== 参数是否允许担保失败，如果允许，就会判断老年代最大可用连续空间是否大于历次晋升到老年代对象的平均大小（就是每次从新生代到老年代的对象的平均大小），如果大于，将尝试进行一次Young GC ，尽管这次 Young GC 是有风险的，如果小于，或者 ==-XX:HandlePromotionFailure== 参数不允许担保失败，这时就要进行一次Full GC。
+  在执行每次 Young GC 之前，JVM 会先检查老年代最大可用连续空间是否大于新生代所有对象的总大小，因为在极端情况下，可能新生代 Young GC 后，所有对象都存活下来了，而 survivor 区又放不下，那可能所有对象都要进入老年代了。这个时候如果老年代的可用连续空间大于新生代所有对象的总大小的，那就可以放心进行 Young GC，但是如果老年代的内存大小小于新生代对象总大小的，那就可能老年代空间不够放入新生代所有存活对象，这个时候 JVM就会先检查 `-XX:HandlePromotionFailure` 参数是否允许担保失败，如果允许，就会判断老年代最大可用连续空间是否大于历次晋升到老年代对象的平均大小（就是每次从新生代到老年代的对象的平均大小），如果大于，将尝试进行一次Young GC ，尽管这次 Young GC 是有风险的，如果小于，或者 `-XX:HandlePromotionFailure` 参数不允许担保失败，这时就要进行一次Full GC。
 
 - **在允许担保失败并尝试进行 Young GC 后，可能会出现三种情况**
 
@@ -448,7 +448,7 @@ $\textcolor{CornflowerBlue}{JVM配置：-XX:+UseConcMarkSweepGC 使用CMS收集�
 
 - **并发失败**
 
-  由于浮动垃圾的存在，因此CMD必须预留一部分空间来装载这些新产生的垃圾。CMS不能像Serial Old收集器那样，等到Old区填满了再来清理。在JDK5时，CMS会在老年代使用了68%的空间时激活，预留了32%的空间来装载浮动垃圾，这是一个比较偏保守的配置。如果实际引用中，老年代增长的不是太快，可以通过 ==-XX：CMSInitiatingOccupancyFraction== 参数适当调高这个值。到了 JDK6，触发的阈值就被提升至92%，只预留了8%的空间来装载浮动垃圾。
+  由于浮动垃圾的存在，因此CMD必须预留一部分空间来装载这些新产生的垃圾。CMS不能像Serial Old收集器那样，等到Old区填满了再来清理。在JDK5时，CMS会在老年代使用了68%的空间时激活，预留了32%的空间来装载浮动垃圾，这是一个比较偏保守的配置。如果实际引用中，老年代增长的不是太快，可以通过 `-XX：CMSInitiatingOccupancyFraction` 参数适当调高这个值。到了 JDK6，触发的阈值就被提升至92%，只预留了8%的空间来装载浮动垃圾。
 
   如果CMS预留的内存无法容纳浮动垃圾，那么就会导致并发失败，这时JVM不得不触发预备方案，启用Serial Old 收集器来回收Old区，这时停顿时间就变得更长了。
 
@@ -456,7 +456,7 @@ $\textcolor{CornflowerBlue}{JVM配置：-XX:+UseConcMarkSweepGC 使用CMS收集�
 
   由于CMS采用的是[标记清除]算法，这就意味着清理完成厚会在堆中产生大量的内存碎片。内存碎片过多会带来很多麻烦，其一就是很难为大对象分配内存。导致的后果就是：堆空间明明还有很多，但就是找不到一块连续的内存区域为大对象分配内存，而不得不触发一次Full GC，这样GC的停顿时间又会变得更长。
 
-  针对这种情况，CMS提供了一种备选方案，通过==-XX：CMSFullGCsBeforeCompaction== 参数设置，当CMS由于内存碎片导致出发了N次 Full GC 后，下次进入Full GC 前先整理内存碎片，不过这个参数在 JDK9 被弃用了。
+  针对这种情况，CMS提供了一种备选方案，通过 `-XX：CMSFullGCsBeforeCompaction` 参数设置，当CMS由于内存碎片导致出发了N次 Full GC 后，下次进入Full GC 前先整理内存碎片，不过这个参数在 JDK9 被弃用了。
 
 ### G1垃圾收集器
 
@@ -496,7 +496,7 @@ G1收集器采用一种不同的方式来管理内存：
 
 ##### 分区 Region
 
-G1 采用了分区（Region）的思路，将整个堆内存区域分成**大小相同**的子区（Region），在JVM 启动时会自动设置这些子区域的大小，在堆的使用上，G1并不要求对象的存储一定要在物理上连续，只要逻辑上连续即可，每个分区也不会固定地为某个代服务，可以按需在年轻代和老年代之间切换。启动时可以通过参数设置 ==-XX:G1HeapRegionSize=n== 可指定分区大小（1MB~32MB，且必须是2的幂），默认将整堆划分为2048个分区。也即能够支持的最大内存为：32MB\*2048 = 65536MB ≈ 64G内存。
+G1 采用了分区（Region）的思路，将整个堆内存区域分成**大小相同**的子区（Region），在JVM 启动时会自动设置这些子区域的大小，在堆的使用上，G1并不要求对象的存储一定要在物理上连续，只要逻辑上连续即可，每个分区也不会固定地为某个代服务，可以按需在年轻代和老年代之间切换。启动时可以通过参数设置 `-XX:G1HeapRegionSize=n` 可指定分区大小（1MB~32MB，且必须是2的幂），默认将整堆划分为2048个分区。也即能够支持的最大内存为：32MB\*2048 = 65536MB ≈ 64G内存。
 
 这些 Region 的一部分包含新生代，新生代的垃圾收集依然采用暂停所有应用线程的方式，将存活的对象拷贝到老年代或者 Survivor空间。这些 Region 的一部分包含老年代，G1 收集器通过将对象从一个区域复制到另一个区域，完成了清理工作。这就意味着，在正常的处理过程中，G1完成了堆的压缩（至少是部分堆的压缩），这样就不会有CMS 的内存碎片问题了。
 
@@ -532,25 +532,25 @@ CSet 收集示意图：
 
 收集集合（Collection Set）代表每次GC暂停时回收的一系列目标分区。在任意一次收集暂停中，CSet 所有分区都会被释放，内部存活的对象都会被转移到分配的空闲分区中。因此无论是年轻代收集，还是混合收集，工作的机制都是一致的。年轻代收集 CSet 只容纳年轻代分区，而混合收集会通过启发式算法，在老年代候选回收分区中，筛选出回收收益最高的分区添加到 CSet 中。
 
-候选老年代分区的 CSet 准入条件，可以通过活跃度阈值 ==-XX:G1MixedGCLiveThresholdPercent==（默认85%）进行设置，即只有存活对象低于85%的 Region 才可能被回收，从而拦截那些回收开销巨大的对象；同时，每次混合收集可以包含候选老年代分区，可根据 CSet 对堆的总大小占比 ==-XX:G1OldCSetRegionThresholdPercent==（默认10%）设置数量上限，即老年代一次最大收集总内存的10%。
+候选老年代分区的 CSet 准入条件，可以通过活跃度阈值 `-XX:G1MixedGCLiveThresholdPercent`（默认85%）进行设置，即只有存活对象低于85%的 Region 才可能被回收，从而拦截那些回收开销巨大的对象；同时，每次混合收集可以包含候选老年代分区，可根据 CSet 对堆的总大小占比 `-XX:G1OldCSetRegionThresholdPercent`（默认10%）设置数量上限，即老年代一次最大收集总内存的10%。
 
 由上述可知，G1 的收集都是根据 CSet 进行操作的，年轻代收集与混合收集没有明显的不同，最大的区别在于两种收集的触发条件。
 
 #### G1垃圾收集分类
 
-G1的垃圾收集分为 ==Young GC==、==Mixed GC== 和 ==Full GC==。
+G1的垃圾收集分为 `Young GC`、`Mixed GC` 和 `Full GC`。
 
 ##### Young GC
 
-G1 与之前垃圾收集器的 Young GC 有所不同，并不是当新生代的 Eden 区放满了就进行垃圾回收，G1 会计算当前 Eden 区回收大概需要多久的时间，如果回收时间远小于参数 ==-XX:MaxGCPauseMills== 设定的值，那么 G1 就会增加年轻代的 Region（可以从老年代或Humongous区划分 Region 给新生代），继续给新对象存放；直到下一次 Eden 区放满，G1 计算回收时间接近参数 ==-XX:MaxGCPauseMills== 设定的值，那么就会触发 **Young GC** 。
+G1 与之前垃圾收集器的 Young GC 有所不同，并不是当新生代的 Eden 区放满了就进行垃圾回收，G1 会计算当前 Eden 区回收大概需要多久的时间，如果回收时间远小于参数 `-XX:MaxGCPauseMills` 设定的值，那么 G1 就会增加年轻代的 Region（可以从老年代或Humongous区划分 Region 给新生代），继续给新对象存放；直到下一次 Eden 区放满，G1 计算回收时间接近参数 `-XX:MaxGCPauseMills` 设定的值，那么就会触发 **Young GC** 。
 
 ##### Mixed GC
 
-如果老年代的堆空间内存占用达到了参数 ==-XX:InitiatingHeapOccupancyPercent== 设定的值就会触发 ==Mixed GC==，回收所有的新生代和部分老年代（根据用户设置的 GC 停顿时间来确定老年代垃圾收集的先后顺序）以及 Humongous 区。正常情况下 G1 的垃圾收集是先做 ==Mixed GC==，主要是使用复制算法，需要把每个 Region 中存活的对象复制到另一个空闲的 Region，如果在复制过程中发现没有足够的空 Region 放复制的对象，那么就会触发一次 ==Full GC==。
+如果老年代的堆空间内存占用达到了参数 `-XX:InitiatingHeapOccupancyPercent` 设定的值就会触发 `Mixed GC`，回收所有的新生代和部分老年代（根据用户设置的 GC 停顿时间来确定老年代垃圾收集的先后顺序）以及 Humongous 区。正常情况下 G1 的垃圾收集是先做 `Mixed GC`，主要是使用复制算法，需要把每个 Region 中存活的对象复制到另一个空闲的 Region，如果在复制过程中发现没有足够的空 Region 放复制的对象，那么就会触发一次 `Full GC`。
 
 ##### Full GC
 
-停止系统程序，然后采用单线程进行标记、清理和压缩整理，以便空闲出来一批 Region 供下一次 ==Mixed GC== 使用，这个过程是非常耗时的。
+停止系统程序，然后采用单线程进行标记、清理和压缩整理，以便空闲出来一批 Region 供下一次 `Mixed GC` 使用，这个过程是非常耗时的。
 
 **G1 是如何满足目标暂停时间的？**
 
@@ -561,7 +561,7 @@ G1 与之前垃圾收集器的 Young GC 有所不同，并不是当新生代的 
 
 #### 收集过程
 
-G1 在进行垃圾收集的时候，会根据每个 Region 预计垃圾收集所需时间与预计回收内存大小的占比来选择对哪些区域进行回收，也就是不再有 ==Minor GC/Young GC== 和 ==Major GC/Full GC== 的概念，而是采用一种 ==Mixed GC== 的方式，即混合回收的 GC 方式。
+G1 在进行垃圾收集的时候，会根据每个 Region 预计垃圾收集所需时间与预计回收内存大小的占比来选择对哪些区域进行回收，也就是不再有 `Minor GC/Young GC` 和 `Major GC/Full GC` 的概念，而是采用一种 `Mixed GC` 的方式，即混合回收的 GC 方式。
 
 ##### 年轻代收集
 
@@ -571,7 +571,7 @@ G1 的 Young GC 和 CMS 的 Young GC ，其标记-复制全过程 STW。
 
 ##### 混合收集
 
-年轻代收集不断活动后，老年代的空间也会被逐渐填充。当老年代占用空间超过整堆比阈值 ==-XX:InitiatingHeapOccupancyPercent==（默认45%）时，G1 就会启动一次混合垃圾收集周期，即==Mixed GC== 。
+年轻代收集不断活动后，老年代的空间也会被逐渐填充。当老年代占用空间超过整堆比阈值 `-XX:InitiatingHeapOccupancyPercent`（默认45%）时，G1 就会启动一次混合垃圾收集周期，即`Mixed GC` 。
 
 该算法并不是一个老年代，除了回收整个年轻代，还会回收一部分老年代。需要注意：是一部分老年代，而不是全部老年代，可以选择哪些老年代进行收集，从而可以对垃圾回收的耗时时间进行控制。
 
@@ -623,9 +623,9 @@ GC 步骤分两步：
 
 #### 优化
 
-假设参数 ==-XX:MaxGCPauseMills== 设置的值很大，导致系统运行很久，年轻代可能都占用了堆内存的60%了，此时才触发年轻代 GC。那么存活下来的对象可能就会很多，此时就会导致 Survivor 区域放不下那么多的对象，就会进入老年代中。或者是年轻代 GC 过后，存活下来的对象过多，导致进入 Survivor 区域后出发了动态年龄判断规则，达到了 Survivor 区域的50%，也会快速导致一些对象进入老年代中。
+假设参数 `-XX:MaxGCPauseMills` 设置的值很大，导致系统运行很久，年轻代可能都占用了堆内存的60%了，此时才触发年轻代 GC。那么存活下来的对象可能就会很多，此时就会导致 Survivor 区域放不下那么多的对象，就会进入老年代中。或者是年轻代 GC 过后，存活下来的对象过多，导致进入 Survivor 区域后出发了动态年龄判断规则，达到了 Survivor 区域的50%，也会快速导致一些对象进入老年代中。
 
-所以核心还是在于调节 ==-XX:MaxGCPauseMills== 这个参数的值，在保证他的年轻代 GC 别太频繁的同时，还得考虑每次 GC 过后的存活对象有多少，避免存活对象太多快速进入老年代，频繁触发 ==Mixed GC==。
+所以核心还是在于调节 -XX:MaxGCPauseMills 这个参数的值，在保证他的年轻代 GC 别太频繁的同时，还得考虑每次 GC 过后的存活对象有多少，避免存活对象太多快速进入老年代，频繁触发 `Mixed GC`。
 
 什么场景适合使用 G1？
 
@@ -637,7 +637,7 @@ GC 步骤分两步：
 
 #### 安全点与安全区域
 
-JVM 的所有垃圾收集器在做垃圾收集时，以 G1 的 ==Mixed GC== 为例，初始标记、并发标记等每一步都需要到达一个安全点或安全区域时才能开始执行。
+JVM 的所有垃圾收集器在做垃圾收集时，以 G1 的 `Mixed GC` 为例，初始标记、并发标记等每一步都需要到达一个安全点或安全区域时才能开始执行。
 
 安全点就是指代码中一些特定的位置，当线程运行到这些位置时它的状态是确定的，这样 JVM 就可以安全的进行一些操作，比如 GC 等，所以 GC 不是想什么时候做就立即触发的，是需要等待所有线程运行到安全点后才能触发。
 
@@ -648,17 +648,17 @@ JVM 的所有垃圾收集器在做垃圾收集时，以 G1 的 ==Mixed GC== 为�
 - 抛出异常的位置
 - 循环的末尾
 
-大体实现思想是当垃圾收集需要中断线程的时候，不直接对线程操作，仅仅简单地设置一个标志位，各个线程执行过程时会不停地主动去轮询这个标志，一旦发现中断标志位镇时就自己在最近的安全点上主动中断挂起。轮询标志的地方和安全点是重合的。==Safe Point== 是对正在执行的线程设定的。如果一个线程处于 Sleep 或中断状态，它就不能响应 JVM 的中断请求，再运行到 ==Safe Point== 上。因此 JVM 引入了 ==Safe Region== 。==Safe Region== 是指在一段代码片段中，引用关系不会发生变化。在这个区域内的任何地方开始 GC 都是安全的。
+大体实现思想是当垃圾收集需要中断线程的时候，不直接对线程操作，仅仅简单地设置一个标志位，各个线程执行过程时会不停地主动去轮询这个标志，一旦发现中断标志位镇时就自己在最近的安全点上主动中断挂起。轮询标志的地方和安全点是重合的。`Safe Point` 是对正在执行的线程设定的。如果一个线程处于 Sleep 或中断状态，它就不能响应 JVM 的中断请求，再运行到 `Safe Point` 上。因此 JVM 引入了 `Safe Region` 。`Safe Region` 是指在一段代码片段中，引用关系不会发生变化。在这个区域内的任何地方开始 GC 都是安全的。
 
 #### G1 注意事项
 
-- 避免通过 -Xmn 或其他相关选项（如==-XX:NewRate==）显式设置年轻代的大小，因为年轻代的大小被固定后会导致 G1 的目标暂停机制失效。
+- 避免通过 -Xmn 或其他相关选项（如 `-XX:NewRate`）显式设置年轻代的大小，因为年轻代的大小被固定后会导致 G1 的目标暂停机制失效。
 - 当设置目标暂停时间 MaxGCPauseMillis 时，需要评估 G1 GC 的延迟和应用吞吐量之间的取舍，当该值设置较小时，标明你愿意承担垃圾收集开销的增加，从而会导致应用程序吞吐量的降低。
 - Mixed GC 的调优
-  - ==-XX:InitiatingHeapOccupancyPercent==： 控制并发标记开始的内存占比阈值。
-  - ==-XX:G1HeapWastePercent==： 设置G1中愿意浪费的堆的百分比，如果可回收Region的占比小于该值，G1不会启动Mixed GC，默认值10%，主要用来控制Mixed GC的触发时机。
-  - ==-XX:G1MixedGCLiveThresholdPercent==：设置老年代Region进入CSet的活跃对象占比阈值，避免活跃对象占比过高的Region进入CSet。
-  - ==-XX:G1MixedGCCountTarget== 和 ==-XX:G1OldCSetRegionThresholdPercent==: 主要是为了控制单次Mixed GC中Region的个数，CSet中Region的个数越多，GC过程中暂停时间越长。
+  - `-XX:InitiatingHeapOccupancyPercent`： 控制并发标记开始的内存占比阈值。
+  - `-XX:G1HeapWastePercent`： 设置G1中愿意浪费的堆的百分比，如果可回收Region的占比小于该值，G1不会启动Mixed GC，默认值10%，主要用来控制Mixed GC的触发时机。
+  - `-XX:G1MixedGCLiveThresholdPercent`：设置老年代Region进入CSet的活跃对象占比阈值，避免活跃对象占比过高的Region进入CSet。
+  - -XX:G1MixedGCCountTarget 和 `-XX:G1OldCSetRegionThresholdPercent`: 主要是为了控制单次Mixed GC中Region的个数，CSet中Region的个数越多，GC过程中暂停时间越长。
 
 #### 典型问题
 
@@ -668,9 +668,9 @@ JVM 的所有垃圾收集器在做垃圾收集时，以 G1 的 ==Mixed GC== 为�
 
 ###### 疏散失败解决方案
 
-- 如果有大量“空间耗尽（to-space exhausted）”或“空间溢出（to-space overflow）” GC 事件，则增加 ==-XX:G1ReservePercent== 以增加“to-space” 的预留内存量，默认值是Java堆的10%。注意：G1 GC 将此值限制在50%以内。
-- 通过减少 ==-XX: InitiatingHeapOccupancyPercent== 的值来更早地启动并发标记周期，来及时回收不包含活跃对象的区域，同时促使 Mixed GC 更快发生。
-- 增加选项 ==-XX:ConcGCThreads== 的值以增加并行标记线程的数量，减少并行标记阶段的耗时。
+- 如果有大量“空间耗尽（to-space exhausted）”或“空间溢出（to-space overflow）” GC 事件，则增加 `-XX:G1ReservePercent` 以增加“to-space” 的预留内存量，默认值是Java堆的10%。注意：G1 GC 将此值限制在50%以内。
+- 通过减少 `-XX: InitiatingHeapOccupancyPercent` 的值来更早地启动并发标记周期，来及时回收不包含活跃对象的区域，同时促使 Mixed GC 更快发生。
+- 增加选项 `-XX:ConcGCThreads` 的值以增加并行标记线程的数量，减少并行标记阶段的耗时。
 
 ##### 大对象分配（Humongous Allocation）
 
@@ -678,9 +678,9 @@ JVM 的所有垃圾收集器在做垃圾收集时，以 G1 的 ==Mixed GC== 为�
 
 ###### 大对象分配解决方案
 
-- 通过 ==-XX: G1HeapRegionSize== 选项增加内存区域 Region 的大小，提升 Region 对象的判断标准，以减少巨大对象的数量。
+- 通过 `-XX: G1HeapRegionSize` 选项增加内存区域 Region 的大小，提升 Region 对象的判断标准，以减少巨大对象的数量。
 - 增加堆Java的大小使得有更多的空间来存放巨型对象。
-- 通过 ==-XX:G1MaxNewSizePercent== 降低年轻代 Region 的占比，给老年代预留更多的空间，从而给巨型对象提供更多的内存空间。
+- 通过 `-XX:G1MaxNewSizePercent` 降低年轻代 Region 的占比，给老年代预留更多的空间，从而给巨型对象提供更多的内存空间。
 
 一般在疏散暂停（Evacuation Pause）和大对象分配（Humongous Allocation）会比较容易出现“空间耗尽（to-space exhausted）”或“空间溢出（to-space overflow）”的GC 事件，导致出现转移失败，进而引发 Full GC 从而导致GC的暂停时间超过 G1 设置的目标暂停时间。所以要尽量避免出现转移失败。
 
@@ -688,16 +688,16 @@ JVM 的所有垃圾收集器在做垃圾收集时，以 G1 的 ==Mixed GC== 为�
 
 通常 Young GC 的耗时与年轻代的大小成正比，具体地说，是需要复制的集合中的活跃对象的数量。
 
-如果 Young GC 中 CSet 的疏散阶段（Evacuate Collection Set phase）需要很长时间，尤其是其中的对象复制-转移，可以通过降低 ==-XX:G1NewSizePercent== 的值，降低年轻代的最小尺寸，从而降低停顿时间。
+如果 Young GC 中 CSet 的疏散阶段（Evacuate Collection Set phase）需要很长时间，尤其是其中的对象复制-转移，可以通过降低 `-XX:G1NewSizePercent` 的值，降低年轻代的最小尺寸，从而降低停顿时间。
 
-还可以使用 ==-XX:G1MaxNewSizePercent== 降低年轻代的最大占比，从而减少 Young GC 暂停期间需要处理的对象数量。
+还可以使用 `-XX:G1MaxNewSizePercent` 降低年轻代的最大占比，从而减少 Young GC 暂停期间需要处理的对象数量。
 
 ##### Mixed GC 耗时太长
 
-- 通过降低 ==-XX:InitiatingHeapOccupancyPercent== 的值，来调低并发标记阶段开始的阈值，让并发标记阶段更早触发，只有并发标记完成才能开始执行 Mixed GC。
-- 通过调节 ==-XX:G1MixedGCCountTarget== 和 ==-XX:G1OldCSetRegionThresholdPercent== 参数，降低单次回收的Region 数量，减少暂停时间。
-- 通过调节 ==-XX:G1MixedGCLiveThresholdPercent== 的值，避免活跃对象占比过高的Region进入 CSet。因为活的对象越多，Region中可回收的空间就越少，暂停时间就越长，GC 效果就越不明显。
-- 通过调节 ==-XX:G1HeapWastePercent== 的值，设置愿意浪费的堆的百分比，只有垃圾占比大于此参数，才会发生 Mixed GC，该值越小，会越早触发 Mixed GC。
+- 通过降低 `-XX:InitiatingHeapOccupancyPercent` 的值，来调低并发标记阶段开始的阈值，让并发标记阶段更早触发，只有并发标记完成才能开始执行 Mixed GC。
+- 通过调节 `-XX:G1MixedGCCountTarget` 和 `-XX:G1OldCSetRegionThresholdPercent` 参数，降低单次回收的Region 数量，减少暂停时间。
+- 通过调节 `-XX:G1MixedGCLiveThresholdPercent` 的值，避免活跃对象占比过高的Region进入 CSet。因为活的对象越多，Region中可回收的空间就越少，暂停时间就越长，GC 效果就越不明显。
+- 通过调节 `-XX:G1HeapWastePercent` 的值，设置愿意浪费的堆的百分比，只有垃圾占比大于此参数，才会发生 Mixed GC，该值越小，会越早触发 Mixed GC。
 
 #### 总结
 
