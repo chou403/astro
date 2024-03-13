@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-02-22T15:00:03.000Z
-modDatetime: 2024-03-13T10:03:44Z
+modDatetime: 2024-03-13T10:11:25Z
 title: Feign & openFeign
 featured: false
 draft: false
@@ -1830,7 +1830,6 @@ DefaultTargeter注入到Spring容器的方式和OpenFeign低版本的HystrixTarg
 在FeignAutoConfiguration类中可以找到Targeter注入到Spring容器的逻辑；
 
 **3> 后续生成动态代理类的逻辑和旧版本一样**
-
 都体现在ReflectiveFeign#newInstance()方法中：
 
 ### Client处理负载均衡（核心区别）
@@ -1838,8 +1837,7 @@ DefaultTargeter注入到Spring容器的方式和OpenFeign低版本的HystrixTarg
 上面提到OpenFeign高版本获取到的Client是FeignBlockingLoadBalancerClient，而低版本的是LoadBalancerFeignClient，LoadBalancerFeignClient基于Ribbon实现负载均衡，FeignBlockingLoadBalancerClient就靠OpenFeign自己实现负载均衡；
 
 **FeignBlockingLoadBalancerClient是如何做负载均衡的:**
-
-**1> FeignBlockingLoadBalancerClient选择一个服务实例**
+1> FeignBlockingLoadBalancerClient选择一个服务实例
 
 ```java
 public Response execute(Request request, Request.Options options) throws IOException {
