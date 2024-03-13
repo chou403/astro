@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-02-22T15:00:03.000Z
-modDatetime: 2024-03-07T18:15:13Z
+modDatetime: 2024-03-13T10:03:44Z
 title: Feign & openFeign
 featured: false
 draft: false
@@ -1779,3 +1779,100 @@ deocode()方法中会用到一个Decoder，decoder默认是OptionalDecoder，针
 > 5. 最后Decoder对Response响应进行解码。
 
 ## OpenFeign新版本和旧版本之间的差异（高版本OpenFeign底层不使用Ribbon做负载均衡）
+
+### @FeignClientsRegistrar开启对FeignClient的扫描
+
+**此处主流程上无区别:**
+在SpringBoot启动流程中 @FeignClientsRegistrar 注解开启OpenFeign的入口、OpenFeign扫描所有的FeignClient的流程，高版本和低版本基本一样。
+
+主要流程如下：
+
+> 1> 开启扫描FeignClient的入口:
+>
+> 1. 启动类上添加的@EnableFeignClients注解会通过@Import注解在SpringBoot启动流程中将ImportBeanDefinitionRegistrar接口的实现类FeignClientsRegistrar注入到启动类的ConfigurationClass的属性中，在注册启动类的BeanDefinition时，会遍历调用其@Import的所有ImportBeanDefinitionRegistrar接口的 registerBeanDefinitions()方法。
+>
+> 2> 扫描FeignClient：
+>
+> 1. 拿到@EnableFeignClients注解中配置的扫描包路径相关的属性，得到要扫描的包路径；
+> 2. 获取到扫描器ClassPathScanningCandidateComponentProvider，然后给其添加一个注解过滤器（AnnotationTypeFilter），只过滤出包含@FeignClient注解的BeanDefinition；
+> 3. 扫描器的findCandidateComponents(basePackage)方法从包路径下扫描出所有标注了@FeignClient注解并符合条件装配的接口；然后将其在BeanDefinitionRegistry中注册一下；
+
+### 为FeignClient生成动态代理类
+
+**区别主要体现在这里:**
+在注册FeignClient到Spring容器时，构建的BeanDefinition的beanClas是FeignClientFactoryBean；FeignClientFactoryBean是一个工厂，保存了@FeignClient注解的所有属性值，在Spring容器初始化的过程中，其会根据之前扫描出的FeignClient信息构建FeignClient的动态代理类。
+
+**底层通信Client的区别？**
+在使用Feign.Builder构建FeignClient的时候，获取到的Client是FeignBlockingLoadBalancerClient（这其中的逻辑后面聊，在OpenFeign低版本是LoadBalancerFeignClient）；用于生成FeignClient的Targeter是DefaultTargeter（在OpenFeign低版本是HystrixTargeter，高版本移除了Hystrix，采用Spring Cloud Circuit Breaker 做限流熔断）；
+
+具体体现在FeignClientFactoryBean#loadBalance()方法，其是一个进行负载均衡的FeignClient动态代理生成方法；
+
+**1> FeignBlockingLoadBalancerClient何时注入到Spring容器？**
+
+FeignBlockingLoadBalancerClient注入到Spring容器的方式和OpenFeign低版本的LoadBalancerFeignClient是一样的；
+
+进入到FeignBlockingLoadBalancerClient类中，看哪里调用了它唯一一个构造函数；
+
+找到FeignBlockingLoadBalancerClient发现有三个地方调用了它的构造函数，new了一个实例；
+
+- DefaultFeignLoadBalancedConfiguration
+- HttpClientFeignLoadBalancedConfiguration
+- OkHttpFeignLoadBalancedConfiguration
+
+再结合默认的配置，只有DefaultFeignLoadBalancedConfiguration中的Client符合条件装配；
+
+可以通过引入Apache HttpClient的maven依赖使用HttpClientFeignLoadBalancedConfiguration，或引入OkHttpClient的maven依赖并在application.yml文件中指定feign.okhttp.enabled属性为true使用OkHttpFeignLoadBalancedConfiguration。
+
+**2> DefaultTargeter在哪里注入到Spring容器?**
+
+DefaultTargeter注入到Spring容器的方式和OpenFeign低版本的HystrixTargeter是一样的；
+
+在FeignAutoConfiguration类中可以找到Targeter注入到Spring容器的逻辑；
+
+**3> 后续生成动态代理类的逻辑和旧版本一样**
+
+都体现在ReflectiveFeign#newInstance()方法中：
+
+### Client处理负载均衡（核心区别）
+
+上面提到OpenFeign高版本获取到的Client是FeignBlockingLoadBalancerClient，而低版本的是LoadBalancerFeignClient，LoadBalancerFeignClient基于Ribbon实现负载均衡，FeignBlockingLoadBalancerClient就靠OpenFeign自己实现负载均衡；
+
+**FeignBlockingLoadBalancerClient是如何做负载均衡的:**
+
+**1> FeignBlockingLoadBalancerClient选择一个服务实例**
+
+```java
+public Response execute(Request request, Request.Options options) throws IOException {
+  // 将请求的 url 封装成 uri
+  URI originalUri = URI.create(request.url());
+  // 获取要请求的服务名
+  String serviceId = originalUri.getHost();
+  Assert.state(serviceId != null, "Request URI does not contain a valid hostname: " + originalUri);
+  String hint = this.getHint(serviceId);
+  DefaultRequest<RequestDataContext> lbRequest = new DefaultRequest(new RequestDataContext(LoadBalancerUtils.buildRequestData(request), hint));
+  Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator.getSupportedLifecycleProcessors(this.loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class), RequestDataContext.class, ResponseData.class, ServiceInstance.class);
+  supportedLifecycleProcessors.forEach((lifecycle) -> {
+    lifecycle.onStart(lbRequest);
+  });
+  // 选择一个服务实例
+  ServiceInstance instance = this.loadBalancerClient.choose(serviceId, lbRequest);
+  org.springframework.cloud.client.loadbalancer.Response<ServiceInstance> lbResponse = new DefaultResponse(instance);
+  String message;
+  if (instance == null) {
+    message = "Load balancer does not contain an instance for the service " + serviceId;
+    if (LOG.isWarnEnabled()) {
+      LOG.warn(message);
+    }
+
+    supportedLifecycleProcessors.forEach((lifecycle) -> {
+      lifecycle.onComplete(new CompletionContext(Status.DISCARD, lbRequest, lbResponse));
+    });
+    return Response.builder().request(request).status(HttpStatus.SERVICE_UNAVAILABLE.value()).body(message, StandardCharsets.UTF_8).build();
+  } else {
+    // 构建完整的请求 url
+    message = this.loadBalancerClient.reconstructURI(instance, originalUri).toString();
+    Request newRequest = this.buildRequest(request, message, instance);
+    return LoadBalancerUtils.executeWithLoadBalancerLifecycleProcessing(this.delegate, options, newRequest, lbRequest, lbResponse, supportedLifecycleProcessors);
+  }
+}
+```
