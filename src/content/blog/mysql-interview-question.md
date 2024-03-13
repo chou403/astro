@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-28T12:37:00Z
+modDatetime: 2024-03-13T12:06:11Z
 title: Mysql
 featured: true
 draft: false
@@ -413,7 +413,7 @@ InnoDB 存储引擎会把数据存储到磁盘上，但是磁盘速度太慢，�
 
 #### InnoDB结构图
 
-![InnoDB architecture diagram showing in-memory and on-disk structures.](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/innodb-architecture-5-7.png)
+![InnoDB architecture diagram showing in-memory and on-disk structures.](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/innodb-architecture-5-7.png)
 
 内存结构(In-Memory Structures)主要是针对的是数据及其操作，主要分为：
 
@@ -505,17 +505,17 @@ Buffer Pool的LRU算法中InnoDB 将LRU链表按照5:3的比例分成了young区
 
 这样做的目的是，在预读的时候或访问不存在的缓冲页时，先加入到 old 区域的头部，当页被真正访问的时候，才将页插入 young 区域的头部。
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/v2-7ba7ee9eb267c9d62e95c3e858419e32_1440w.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/v2-7ba7ee9eb267c9d62e95c3e858419e32_1440w.png)
 
 现在有个编号为 20 的页被预读了，这个页只会被插入到 old 区域头部，而 old 区域末尾的页（10号）会被淘汰掉。
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/v2-b381ae4b18804701b12cad3b770167b2_1440w.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/v2-b381ae4b18804701b12cad3b770167b2_1440w.png)
 
 如果 20 号页一直不会被访问，它也没有占用到 young 区域的位置，而且还会比 young 区域的数据更早被淘汰出去。
 
 如果 20 号页被预读后，立刻被访问了，那么就会将它插入到 young 区域的头部，young 区域末尾的页（7号），会被挤到 old 区域，作为 old 区域的头部，这个过程并不会有页被淘汰。
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/v2-73eeea4b1a6b0e6f0553b3ef07e36e4a_1440w.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/v2-73eeea4b1a6b0e6f0553b3ef07e36e4a_1440w.png)
 
 ##### 多Buffer实例
 
@@ -566,11 +566,11 @@ select * from t_user where name like "%xiaolin%";
 
 举个例子，假设需要批量扫描：21，22，23，24，25 这五个页，这些页都会被逐一访问（读取页里的记录）。
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/v2-ce159c31ecabe38c68bb35cfce35e410_1440w.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/v2-ce159c31ecabe38c68bb35cfce35e410_1440w.png)
 
 在批量访问这些页的时候，会被逐一插入到 young 区域头部。
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/v2-1c75fa046988f1a9774fb258d73cba6f_1440w.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/v2-1c75fa046988f1a9774fb258d73cba6f_1440w.png)
 
 可以看到，原本在 young 区域的 6 和 7 号页都被淘汰了，而批量扫描的页基本占满了 young 区域，如果这些页在很长一段时间都不会被访问，那么就对 young 区域造成了污染。
 
@@ -1308,7 +1308,7 @@ change buffer：写缓冲区，是针对二级索引（辅助索引）页的更�
 
 #### change buffer 更新流程
 
-![image-20230905135508966](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230905135508966.png)
+![image-20230905135508966](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230905135508966.png)
 
 写缓冲区，仅适用于非唯一普通索引页，为什么？
 
@@ -1341,7 +1341,7 @@ LRU = least recently used（最近最少使用）：就是末位淘汰法，新�
 
 改进型 LRU：将链表分为 new 和 old 两个部分，加入元素时并不是从表头插入，而是从中间 midpoint 位置插入（就是说从磁盘中新读出的数据会放在冷数据区的头部），如果数据很快被访问，那么 page 就会向 new 列表头部移动，如果数据没有被访问，会逐步向 old 尾部移动，等待淘汰。
 
-![image-20230905152906765](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230905152906765.png)
+![image-20230905152906765](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230905152906765.png)
 
 冷数据区的数据页什么时候会被转到热数据区？
 
@@ -1740,7 +1740,7 @@ MySQL 设计者将一个 B+Tree 的节点大小设置为一个页（这样做的
 
 MySQL 查询过程
 
-![image-20230918172052198](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230918172052198.png)
+![image-20230918172052198](img/image-20230918172052198.png)
 
 通过 explain 我们可以获得以下信息
 
@@ -1993,7 +1993,7 @@ MySQL 中索引的常用数据结构有两种：一种是 B+Tree，另一种是 
 
 Hash 底层实现是由 Hash 表来实现的，是根据键值<key, value> 存储数据的结构。非常适合根据 key 查找 value 值，也就是单个 key 查询，或者说等值查询。
 
-![image-20230921175115312](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230921175115312.png)
+![image-20230921175115312](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230921175115312.png)
 
 对于每一行数据，存储引擎都会对所有的索引列计算一个哈希码，哈希码是一个较小的值，如果出现哈希码值相同的情况会拉出一条链表。
 
@@ -2039,7 +2039,7 @@ BufferPool 参数优化
      >
      > 参数 2：innodb_buffer_pool_read_requests：表示从内存中读取页的请求数。
 
-     ![image-20230922112638300](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230922112638300.png)
+     ![image-20230922112638300](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230922112638300.png)
 
      命中率低于 90%，则可以考虑增加innodb_buffer_pool_size。
 
@@ -2047,11 +2047,11 @@ BufferPool 参数优化
 
    查看 Page 页的大小（默认 16kb），innodb_page_size 只能在初始化 MySQL 实例之前配置，不能在之后修改。如果没有指定值，则使用默认页面大小初始化实例。
 
-   ![image-20230922113121486](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230922113121486.png)
+   ![image-20230922113121486](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230922113121486.png)
 
    Page 页管理状态相关参数
 
-   ![image-20230922113235811](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230922113235811.png)
+   ![image-20230922113235811](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230922113235811.png)
 
    - **Innodb_buffer_pool_pages_data**：InnoDB缓冲池中包含数据的页数。 该数字包括脏页面和干净页面。 使用压缩表时，报告的Innodb_buffer_pool_pages_data值可能大于Innodb_buffer_pool_pages_total。
    - **Innodb_buffer_pool_pages_dirty**：显示在内存中修改但尚未写入数据文件的InnoDB缓冲池数据页的数量（脏页刷新）。
@@ -2068,13 +2068,13 @@ BufferPool 参数优化
 
    - **Innodb_log_buffer_size 缓冲区大小**
 
-     ![image-20230922114800080](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230922114800080.png)
+     ![image-20230922114800080](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230922114800080.png)
 
    - **innodb_log_files_in_group 日志组文件个数**
 
      日志组根据需要来创建。而日志组的成员则需要至少 2 个，实现循环写入并作为冗余策略。
 
-     ![image-20230922114934551](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230922114934551.png)
+     ![image-20230922114934551](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230922114934551.png)
 
    - **Innodb_log_file_size 日志文件大小**
 
@@ -2082,7 +2082,7 @@ BufferPool 参数优化
 
      参数 Innodb_log_file_size 的最大值，二进制日志文件大小（innodb_log_file_size \* innodb_log_files_in_group）不能超过 512gb，所以单个日志文件的大小不能超过 256gb。
 
-     ![image-20230922115422562](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20230922115422562.png)
+     ![image-20230922115422562](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230922115422562.png)
 
 2. 日志文件参数优化
 
@@ -2286,7 +2286,7 @@ mysql> show variables like '%innodb_doublewrite%';
 5 rows in set (0.01 sec)
 ```
 
-![image-20231017153855797](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231017153855797.png)
+![image-20231017153855797](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231017153855797.png)
 
 - **step1**：当进行缓冲池中的脏页淑新到磁盘的操作时，并不会直接写磁盘，每次脏页刷新必须要先写doublewrite。
 - **step2**：通过 memcpy 函数将脏页复制到内存中的 double write buffer。
@@ -2393,7 +2393,7 @@ mysql> show variables like '%innodb_doublewrite%';
 
    记录的真实数据除了插入的那些列的数据，MySQL 会为每个记录默认的添加一些列（也称为隐藏列），具体的列如下：
 
-   ![image-20231018103232216](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231018103232216.png)
+   ![image-20231018103232216](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231018103232216.png)
 
    | 列名           | 是否必须 | 占用空间 | 描述                    |
    | -------------- | -------- | -------- | ----------------------- |
@@ -2423,7 +2423,7 @@ mysql> show variables like '%innodb_doublewrite%';
 
    当发生行溢出时，数据页只保存了前 768 字节的前缀数据，接着是 20 个字节的偏移量，指向行溢出页。
 
-   ![image-20231018105842012](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231018105842012.png)
+   ![image-20231018105842012](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231018105842012.png)
 
 ### 如何进行JOIN优化
 
@@ -2484,7 +2484,7 @@ mysql> show variables like '%innodb_doublewrite%';
 
    - 当 order 表的 user_id 为索引的时候执行过程如下：
 
-     ![image-20231018113134392](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231018113134392.png)
+     ![image-20231018113134392](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231018113134392.png)
 
    **注意：使用Index Nested-Loop Join 算法的前提是匹配的字段必须建立了索引。**
 
@@ -2494,7 +2494,7 @@ mysql> show variables like '%innodb_doublewrite%';
 
    因为不存在索引了，所以驱动表需要进行扫描。这里MySQL 并不会简单粗暴的应用 SNL 算法，而是加入了 buffer 缓冲区，降低了内循环的个数，也就是被驱动表的扫描次数。
 
-   ![image-20231018114043166](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231018114043166.png)
+   ![image-20231018114043166](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231018114043166.png)
 
    - 在外层循环扫描 user 表中的所有数据。扫描的时候，会把需要进行 join 用到的列都缓存到 buffer 中。buffer 中的数据有一个特点，里面的记录不需要一条一条地取出来和 order 表进行比较，而是整个 buffer 和 order 表进行批量比较。
 
@@ -2542,7 +2542,7 @@ mysql> show variables like '%innodb_doublewrite%';
 
 > explain select user_name,user_age,user_level from users where user_name='tom' and user_age=17;
 
-![image-20231018145644074](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231018145644074.png)
+![image-20231018145644074](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231018145644074.png)
 
 覆盖索引的定义与注意事项：
 
@@ -2569,7 +2569,7 @@ mysql> show variables like '%innodb_doublewrite%';
 
    InnoDB 实现回滚，靠的是 undo log，当事务对数据库进行修改时，InnoDB 会生成对应的 undo log，如果事务执行失败或调用了 rollback，导致事务需要回滚，便可以利用 undo log 中的信息将数据回滚到修改之前的样子。
 
-   ![image-20231018154446991](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231018154446991.png)
+   ![image-20231018154446991](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231018154446991.png)
 
 2. 一致性
 
@@ -2600,7 +2600,7 @@ mysql> show variables like '%innodb_doublewrite%';
 
    - 当数据发生修改时，InnoDB 不仅会修改 Buffer Pool 中的数据，也会在 redo log buffer 记录这次操作；当事务提交时，会对 redo log buffer 进行刷盘，记录到 redo log file 中。如果 MySQL 宕机，重启时可以读取 redo log file 中的数据，对数据库进行恢复。这样就不需要每次提交事务都实时进行刷脏了。
 
-     ![image-20231018171335505](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231018171335505.png)
+     ![image-20231018171335505](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231018171335505.png)
 
 5. ACID 总结
 
@@ -2644,7 +2644,7 @@ Read View 中比较重要的字段有 4 个：
 
 Read View 判断记录某个版本是否可见的规则如下：
 
-![image-20231019170022564](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/image-20231019170022564.png)
+![image-20231019170022564](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20231019170022564.png)
 
 1. 如果当前记录的事务 id 落在绿色部分（trx_id < min_id），表示这个版本是已提交的事务生成的，可读。
 2. 如果当前记录的事务 id 落在红色部分（trx_id ＞ max_id），表示这个版本是由将来启动的事务生成的，不可读。

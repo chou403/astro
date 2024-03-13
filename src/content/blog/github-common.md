@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-02-28T10:49:59.000Z
-modDatetime: 2024-02-28T12:38:27Z
+modDatetime: 2024-03-13T12:06:11Z
 title: Github
 featured: false
 draft: false
@@ -18,11 +18,11 @@ github 创建新的仓库作为我们图床的服务器存储。
 
 ### 生成 token 令牌
 
-![202402281052340.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/202402281052340.png)
+![202402281052340.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/202402281052340.png)
 
-![202402281054250.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/202402281054250.png)
+![202402281054250.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/202402281054250.png)
 
-![202402281055005.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/202402281055005.png)
+![202402281055005.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/202402281055005.png)
 
 然后可以给令牌做个 note，然后选择令牌截止时间，也可以永久。
 repo 全部选上即可，选择创建。
@@ -44,7 +44,7 @@ repo 全部选上即可，选择创建。
 >
 > 自定义域名：<https://cdn.jsdelivr.net/gh/用户名/仓库名> e.g: <https://cdn.jsdelivr.net/gh/chou401/pic-md@master/>
 
-![202402281109435.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//202402281109435.png)
+![202402281109435.png](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/202402281109435.png)
 
 ### jsDelivr
 
