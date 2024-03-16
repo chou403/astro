@@ -1,10 +1,10 @@
 ---
 author: chou401
 pubDatetime: 2024-03-16T20:43:41.000Z
-modDatetime:
+modDatetime: 2024-03-16T21:11:56Z
 title: MybatisPlus generator
 featured: false
-draft: first
+draft: false
 tags:
   - java
   - mybatisplus
@@ -99,7 +99,7 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/${moduleName}")
 public class ${ClassName}Controller {
 
-	private final I${ClassName}Service ${className}Service;
+    private final I${ClassName}Service ${className}Service;
 
     private final ExcelGenerator excelGenerator;
 
@@ -185,8 +185,8 @@ public class ${ClassName}Controller {
     @GetMapping("/${businessName}Export")
     @ApiOperation("${functionName}导出")
     public void ${businessName}Export(${ClassName}DTO ${className}DTO, HttpServletRequest request, HttpServletResponse response) {
-		// 按需实现
-		/*
+        // 按需实现
+        /*
         // List<Map> dataList = null;
         HashMap<String, List<Map>> excelData = new HashMap<>(1024);
         excelData.put("${functionName}导出", dataList);
@@ -262,7 +262,7 @@ public class ${ClassName}DTO implements Serializable {
     private String ${column.name}Begin;
     @ApiModelProperty(value = "$column.comment开始日期")
     private String ${column.name}End;
-	#end
+    #end
 #end
 #if($table.sub)
     /** $table.subTable.functionName信息 */
