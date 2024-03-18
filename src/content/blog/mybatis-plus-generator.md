@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-03-16T20:43:41.000Z
-modDatetime: 2024-03-18T11:16:27Z
+modDatetime: 2024-03-18T16:45:11Z
 title: MybatisPlus generator
 featured: false
 draft: false
@@ -48,7 +48,7 @@ template 中有多个模版可以选择，若不合适也可以自己配置想�
 
 以下为自己目前调整的模版
 
-controller.java.vm
+#### controller.java.vm
 
 ```java
 ##导入宏定义
@@ -210,7 +210,7 @@ public class ${ClassName}Controller {
 }
 ```
 
-domain.java.vm
+#### domainDTO.java.vm
 
 ```java
 ##导入宏定义
@@ -272,7 +272,7 @@ public class ${ClassName}DTO implements Serializable {
 }
 ```
 
-domainPO.java.vm
+#### domainPO.java.vm
 
 ```java
 ##导入宏定义
@@ -356,7 +356,59 @@ public class ${ClassName}PO extends BasePO<${ClassName}PO>{
 }
 ```
 
-mapper.java.vm
+#### domainVO.java.vm
+
+```java
+##导入宏定义
+$!{define.vm}
+
+##配置变量(宏定义)
+#getGlobalConfig()
+
+##设置表后缀（宏定义）
+#setTableSuffix("VO")
+
+##保存文件（宏定义）
+#save("/entity/vo/${moduleName}", "VO.java")
+
+##包路径（宏定义）
+#setPackageSuffix("entity.vo.${moduleName}")
+
+##自动导入包（全局变量）
+$!autoImport
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+#tableComment("返回 VO")
+@Data
+@ApiModel(value = "${className}VO对象", description = "${tableComment}")
+public class ${ClassName}VO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $tableInfo.otherColumn)
+    /** $column.comment */
+    @ApiModelProperty(value = "$column.comment")
+    #if($!{tool.getClsNameByFullName($column.type)} == "Date")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    #end
+    private $!{tool.getClsNameByFullName($column.type)} $!{column.name};
+
+    #end
+#end
+}
+```
+
+#### mapper.java.vm
 
 ```java
 ##导入宏定义
@@ -469,7 +521,7 @@ public interface ${ClassName}Mapper extends BaseMapper<${ClassName}PO> {
 }
 ```
 
-service.java.vm
+#### service.java.vm
 
 ```java
 ##导入宏定义
@@ -565,7 +617,7 @@ public interface I${ClassName}Service {
 }
 ```
 
-serviceImpl.java.vm
+#### serviceImpl.java.vm
 
 ```java
 ##导入宏定义
@@ -714,7 +766,7 @@ public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${C
 }
 ```
 
-mapper.xml.vm
+#### mapper.xml.vm
 
 ```xml
 ##引入mybatis支持
@@ -742,7 +794,7 @@ $!callback.setSavePath($tool.append($modulePath, "/src/main/resources/mapper/${m
         select#foreach($column in $tableInfo.fullColumn) A.$column.obj.name#if($foreach.count != $columns.size()),#end#end from ${tableInfo.obj.name} A
     </sql>
 
-    <select id="select${ClassName}List" resultType="${packageName}.entity.dto.${moduleName}.${ClassName}DTO">
+    <select id="select${ClassName}List" resultType="${packageName}.entity.vo.${moduleName}.${ClassName}VO">
         <include refid="select${ClassName}Vo"/>
         <!-- <where>
             <if test="$javaField != null #if($javaType == 'String' ) and $javaField.trim() != ''#end"> and A.$column.obj.name = #{$column.name}</if>
@@ -768,7 +820,7 @@ $!callback.setSavePath($tool.append($modulePath, "/src/main/resources/mapper/${m
         </where> -->
     </select>
 
-    <select id="select${ClassName}By${pkName}" resultType="${packageName}.entity.dto.${moduleName}.${ClassName}DTO">
+    <select id="select${ClassName}By${pkName}" resultType="${packageName}.entity.vo.${moduleName}.${ClassName}VO">
         <include refid="select${ClassName}Vo"/>
         where ${pkColumnName} = #{${pkColumn.name}}
     </select>
