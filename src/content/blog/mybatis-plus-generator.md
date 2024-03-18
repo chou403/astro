@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-03-16T20:43:41.000Z
-modDatetime: 2024-03-16T21:11:56Z
+modDatetime: 2024-03-18T11:16:27Z
 title: MybatisPlus generator
 featured: false
 draft: false
@@ -255,7 +255,7 @@ public class ${ClassName}DTO implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     #end
-    $!{tool.getClsNameByFullName($column.type)} $!{column.name};
+    private $!{tool.getClsNameByFullName($column.type)} $!{column.name};
 
     #if($!{tool.getClsNameByFullName($column.type)} == 'Date')
     @ApiModelProperty(value = "$column.comment开始日期")
@@ -809,22 +809,23 @@ $!callback.setSavePath($tool.append($modulePath, "/src/main/resources/mapper/${m
     </delete>
 
     <!-- 批量插入 -->
-    <insert id="insertBatch" keyProperty="$!pkColumn.name" useGeneratedKeys="true">
-        insert into $!{tableInfo.obj.name}(#foreach($column in $tableInfo.otherColumn)$!column.obj.name#if($velocityHasNext), #end#end)
+    <insert id="insertBatch" keyProperty="$!pk.name" useGeneratedKeys="true">
+        insert into $!{tableInfo.obj.parent.name}.$!{tableInfo.obj.name}(#foreach($column in $tableInfo.otherColumn)$!column.obj.name#if($foreach.hasNext), #end#end)
         values
         <foreach collection="entities" item="entity" separator=",">
-        (#foreach($column in $tableInfo.otherColumn)#{entity.$!{column.name}}#if($velocityHasNext), #end#end)
+        (#foreach($column in $tableInfo.otherColumn)#{entity.$!{column.name}}#if($foreach.hasNext), #end#end)
         </foreach>
     </insert>
+
     <!-- 批量插入或按主键更新 -->
     <insert id="insertOrUpdateBatch" keyProperty="$!pkColumn.name" useGeneratedKeys="true">
-        insert into $!{tableInfo.obj.name}(#foreach($column in $tableInfo.otherColumn)$!column.obj.name#if($velocityHasNext), #end#end)
+        insert into $!{tableInfo.obj.name}(#foreach($column in $tableInfo.otherColumn)$!column.obj.name#if($foreach.hasNext), #end#end)
         values
         <foreach collection="entities" item="entity" separator=",">
-            (#foreach($column in $tableInfo.otherColumn)#{entity.$!{column.name}}#if($velocityHasNext), #end#end)
+            (#foreach($column in $tableInfo.otherColumn)#{entity.$!{column.name}}#if($foreach.hasNext), #end#end)
         </foreach>
         on duplicate key update
-         #foreach($column in $tableInfo.otherColumn)$!column.obj.name = values($!column.obj.name) #if($velocityHasNext), #end#end
+         #foreach($column in $tableInfo.otherColumn)$!column.obj.name = values($!column.obj.name) #if($foreach.hasNext), #end#end
     </insert>
 
 </mapper>
@@ -856,3 +857,14 @@ define.vm 增减了部分全局变量
     #set($tableName = $!tableInfo.obj.name)
 #end
 ```
+
+## 疑问
+
+**mapper.xml文件中出现字段无逗号分割情况：**
+
+找到以下位置：
+
+1. Template下的 mapper.xml.vm脚本
+2. Global Config下的 mybatisSupport.vm脚本
+
+将其中的 $velocityHasNext 替换成 $foreach.hasNext 即可。
