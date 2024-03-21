@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-03-16T20:43:41.000Z
-modDatetime: 2024-03-19T17:50:09Z
+modDatetime: 2024-03-21T09:33:16Z
 title: MybatisPlus generator
 featured: false
 draft: false
@@ -309,7 +309,6 @@ $!{define.vm}
 
 ##自动导入包（全局变量）
 $!autoImport
-
 import com.baomidou.mybatisplus.annotation.*;
 import com.yonyou.dmscloud.framework.base.dto.BaseDTO;
 import com.yonyou.dmscloud.framework.base.po.BasePO;
@@ -327,7 +326,6 @@ public class ${ClassName}PO extends BasePO<${ClassName}PO>{
     private static final long serialVersionUID = 1L;
 
 #foreach ($column in $tableInfo.fullColumn)
-
     /** $column.comment */
 #if($column.obj.name == $pkColumn.name)
     @TableId(value="$column.name", type = IdType.AUTO)
@@ -336,13 +334,13 @@ public class ${ClassName}PO extends BasePO<${ClassName}PO>{
 #end
     private $!{tool.getClsNameByFullName($column.type)} $column.name;
 
-#end
-
 #if($column.obj.name == $pkColumn.name)
     @Override
     protected Serializable pkVal() {
         return this.$column.name;
     }
+
+#end
 #end
     /**
      * 将PO 信息转化为DTO
@@ -354,8 +352,8 @@ public class ${ClassName}PO extends BasePO<${ClassName}PO>{
     public <T extends BaseDTO> T transPoToDto(Class<T> dtoClass) {
         return super.transDtoToPo(dtoClass);
     }
-#foreach ($column in $tableInfo.fullColumn)
-#if($column.obj.name == $pkColumn.name)
+#foreach ($column in $tableInfo.pkColumn)
+
     /**
      * 将PO 信息转化为DTO
      *
@@ -366,7 +364,6 @@ public class ${ClassName}PO extends BasePO<${ClassName}PO>{
     public <T extends BaseDTO> void transPoToDto(T dto) {
         BeanMapperUtil.copyProperties(this, dto, "$column.name");
     }
-#end
 #end
 
 }
