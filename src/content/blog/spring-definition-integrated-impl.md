@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-29T18:14:14Z
+modDatetime: 2024-03-26T13:18:16Z
 title: Spring
 featured: false
 draft: false
@@ -1304,7 +1304,7 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
 
   ![image-20230203141903620](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230203141903620.png)
 
-#### **@EnableWebMVC**
+#### @EnableWebMVC
 
 ```java
 @Retention(RetentionPolicy.RUNTIME)
@@ -1463,3 +1463,5 @@ pom 中增加testResources，其他操作按照正常创建 test 流程即可。
         </testResources>
     </build>
 ```
+
+## 疑问

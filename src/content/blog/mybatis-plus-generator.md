@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-03-16T20:43:41.000Z
-modDatetime: 2024-03-21T09:33:16Z
+modDatetime: 2024-03-26T13:18:16Z
 title: MybatisPlus generator
 featured: false
 draft: false
@@ -71,6 +71,7 @@ $!{define.vm}
 ##主键字段首字母大写
 #set($pkName = $!tool.firstUpperCase($!pkColumn.name))
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.yonyou.cloud.dcsrepair.util.PageUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yonyou.dmscloud.framework.service.excel.ExcelDataType;
 import com.yonyou.dmscloud.framework.service.excel.ExcelExportColumn;
@@ -233,6 +234,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import io.swagger.annotations.ApiModel;
@@ -248,7 +250,6 @@ public class ${ClassName}DTO extends BaseDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
 #foreach ($column in $tableInfo.fullColumn)
-    /** $column.comment */
     @ApiModelProperty(value = "$column.comment")
     #if($!{tool.getClsNameByFullName($column.type)} == "Date")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -259,7 +260,8 @@ public class ${ClassName}DTO extends BaseDTO implements Serializable {
     #if($!{tool.getClsNameByFullName($column.type)} == 'Date')
     @ApiModelProperty(value = "$column.comment开始日期")
     private String ${column.name}Begin;
-    @ApiModelProperty(value = "$column.comment开始日期")
+
+    @ApiModelProperty(value = "$column.comment结束日期")
     private String ${column.name}End;
 
 	#end
@@ -317,6 +319,7 @@ import com.yonyou.dmscloud.framework.util.bean.BeanMapperUtil;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 #tableComment("")
@@ -328,7 +331,7 @@ public class ${ClassName}PO extends BasePO<${ClassName}PO>{
 #foreach ($column in $tableInfo.fullColumn)
     /** $column.comment */
 #if($column.obj.name == $pkColumn.name)
-    @TableId(value="$column.name", type = IdType.AUTO)
+    @TableId(value = "$column.name", type = IdType.AUTO)
 #else
     @TableField("$column.obj.name")
 #end
@@ -394,6 +397,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import io.swagger.annotations.ApiModel;
@@ -408,8 +412,7 @@ public class ${ClassName}VO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-#foreach ($column in $tableInfo.otherColumn)
-    /** $column.comment */
+#foreach ($column in $tableInfo.fullColumn)
     @ApiModelProperty(value = "$column.comment")
     #if($!{tool.getClsNameByFullName($column.type)} == "Date")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -417,7 +420,6 @@ public class ${ClassName}VO implements Serializable {
     #end
     private $!{tool.getClsNameByFullName($column.type)} $!{column.name};
 
-	#end
 #end
 }
 
@@ -523,7 +525,7 @@ public interface ${ClassName}Mapper extends BaseMapper<${ClassName}PO> {
     * @param entities List<${ClassName}DTO> 实例对象列表
     * @return 影响行数
     */
-    insertBatch(@Param("entities") List<${ClassName}DTO> entities);
+    int insertBatch(@Param("entities") List<${ClassName}DTO> entities);
 
     /**
     * 批量新增或按主键更新数据
@@ -531,7 +533,7 @@ public interface ${ClassName}Mapper extends BaseMapper<${ClassName}PO> {
     * @param entities List<${ClassName}DTO> 实例对象列表
     * @return 影响行数
     */
-    insertOrUpdateBatch(@Param("entities") List<${ClassName}DTO> entities);
+    int insertOrUpdateBatch(@Param("entities") List<${ClassName}DTO> entities);
 
 }
 
@@ -705,7 +707,8 @@ public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${C
      */
     @Override
     public IPage<${ClassName}VO> select${ClassName}List(${ClassName}DTO ${className},Page page) {
-        return ${className}Mapper.select${ClassName}List(${className},page);
+        List<${ClassName}VO> result = ${className}Mapper.select${ClassName}List(${className},page);
+        return page.setRecords(result);
     }
 
     /**
