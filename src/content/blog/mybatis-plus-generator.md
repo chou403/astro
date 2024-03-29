@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-03-16T20:43:41.000Z
-modDatetime: 2024-03-26T13:18:16Z
+modDatetime: 2024-03-29T14:10:14Z
 title: MybatisPlus generator
 featured: false
 draft: false
@@ -591,7 +591,7 @@ public interface I${ClassName}Service {
      * @param ${className} ${functionName}
      * @return ${functionName}集合
      */
-    IPage<${ClassName}VO> select${ClassName}List(${ClassName}DTO ${className},Page page);
+    IPage<${ClassName}VO> select${ClassName}List(${ClassName}DTO ${className}, Page<${ClassName}VO> page);
 
     /**
      * 查询${functionName}列表
@@ -634,7 +634,6 @@ public interface I${ClassName}Service {
     int delete${ClassName}By${pkName}(${javaType} ${pkColumn.name});
 
 }
-
 ```
 
 #### serviceImpl.java.vm
@@ -706,7 +705,7 @@ public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${C
      * @return ${functionName}
      */
     @Override
-    public IPage<${ClassName}VO> select${ClassName}List(${ClassName}DTO ${className},Page page) {
+    public IPage<${ClassName}VO> select${ClassName}List(${ClassName}DTO ${className}, Page<${ClassName}VO> page) {
         List<${ClassName}VO> result = ${className}Mapper.select${ClassName}List(${className},page);
         return page.setRecords(result);
     }
@@ -784,7 +783,6 @@ public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${C
         return ${className}Mapper.delete${ClassName}By${pkName}(${pkColumn.name});
     }
 }
-
 ```
 
 #### mapper.xml.vm
