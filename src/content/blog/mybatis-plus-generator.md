@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-03-16T20:43:41.000Z
-modDatetime: 2024-04-06T20:47:28Z
+modDatetime: 2024-04-10T19:00:55Z
 title: MybatisPlus generator
 featured: false
 draft: false
@@ -93,16 +93,12 @@ import java.util.List;
 @Api(value = "${functionName}controller", tags = {"${functionName}controller"})
 @RestController
 @RequestMapping("/${requestUrl}")
+@RequiredArgsConstructor
 public class ${ClassName}Controller {
 
 	private final I${ClassName}Service ${className}Service;
 
     private final ExcelGenerator excelGenerator;
-
-    public ${ClassName}Controller(I${ClassName}Service ${className}Service, ExcelGenerator excelGenerator) {
-        this.${className}Service = ${className}Service;
-        this.excelGenerator = excelGenerator;
-    }
 
     /**
      * 查询${functionName}分页列表
@@ -172,7 +168,7 @@ public class ${ClassName}Controller {
 }
 ```
 
-#### domainDTO.java.vm
+#### dto.java.vm
 
 ```java
 ##导入宏定义
@@ -252,7 +248,7 @@ public class ${ClassName}DTO extends BaseDTO implements Serializable {
 
 ```
 
-#### domainPO.java.vm
+#### po.java.vm
 
 ```java
 ##导入宏定义
@@ -339,7 +335,7 @@ public class ${ClassName}PO extends BasePO<${ClassName}PO>{
 
 ```
 
-#### domainVO.java.vm
+#### vo.java.vm
 
 ```java
 ##导入宏定义
@@ -558,13 +554,10 @@ import java.util.List;
  * @since ${datetime}
  */
 @Service
+@RequiredArgsConstructor
 public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${ClassName}PO> implements I${ClassName}Service {
 
     private final ${ClassName}Mapper ${className}Mapper;
-
-    public ${ClassName}ServiceImpl(${ClassName}Mapper ${className}Mapper) {
-        this.${className}Mapper = ${className}Mapper;
-    }
 
     /**
      * 查询${functionName}列表
