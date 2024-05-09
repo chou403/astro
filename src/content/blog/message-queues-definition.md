@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-03-13T12:06:11Z
+modDatetime: 2024-05-09T10:44:51Z
 title: MQ
 featured: true
 draft: false
@@ -1211,7 +1211,7 @@ Kafka在ZooKeeper中动态维护了一个ISR（in-sync replicas），这个ISR�
 1. 等待ISR中的任一个Replica“活”过来，并且选它作为Leader
 2. 选择第一个“活”过来的Replica（不一定是ISR中的）作为Leader
 
-这就需要在可用性和一致性当中作出一个简单的折衷。如果一定要等待ISR中的Replica“活”过来，那不可用的时间就可能会相对较长。而且如果ISR中的所有Replica都无法“活”过来了，或者数据都丢失了，这个Partition将永远不可用。选择第一个“活”过来的Replica作为Leader，而这个Replica不是ISR中的Replica，那即使它并不保证已经包含了所有已commit的消息，它也会成为Leader而作为consumer的数据源（前文有说明，所有读写都由Leader完成）。Kafka0.8.\*使用了第二种方式。根据Kafka的文档，在以后的版本中，Kafka支持用户通过配置选择这两种方式中的一种，从而根据不同的使用场景选择高可用性还是强一致性。
+这就需要在可用性和一致性当中作出一个简单的折中。如果一定要等待ISR中的Replica“活”过来，那不可用的时间就可能会相对较长。而且如果ISR中的所有Replica都无法“活”过来了，或者数据都丢失了，这个Partition将永远不可用。选择第一个“活”过来的Replica作为Leader，而这个Replica不是ISR中的Replica，那即使它并不保证已经包含了所有已commit的消息，它也会成为Leader而作为consumer的数据源（前文有说明，所有读写都由Leader完成）。Kafka0.8.\*使用了第二种方式。根据Kafka的文档，在以后的版本中，Kafka支持用户通过配置选择这两种方式中的一种，从而根据不同的使用场景选择高可用性还是强一致性。
 
 5.选举Leader
 

@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-28T12:37:00Z
+modDatetime: 2024-05-09T10:44:51Z
 title: 算法入门到放弃
 featured: false
 draft: false
@@ -442,7 +442,7 @@ public static int eratosthenes(int n) {
 比如 12 = 2*6 在 埃氏筛中， 第一轮 质数2 就已经把 12 给筛走了 但是12 = 3*4 ，第二轮 质数 3 又筛选了一次。
 
 而欧拉筛呢 ，他是第一轮循环 把 记录的所有质数 的 2 倍给 筛出来， 筛出来的就不是素数，第二轮把记录的所有的质数 的 3倍筛出来，筛出来的就不是素数，第三轮把记录的所有质数的4倍筛出来，筛出来的就不是素数…。
-如果仅仅按照这个思路， 欧拉筛和埃氏筛一模一样，就是a*b 和b*a 的关系 。
+如果仅仅按照这个思路， 欧拉筛和埃氏筛一模一样，就是 a*b 和 b*a 的关系 。
 
 所以欧拉筛的 精华来了。
 
@@ -515,13 +515,13 @@ x的平方根肯定在0到x之间，使用二分查找定位该数字，该数�
 public static int binarySearch(int x) {
     int index = -1,l = 0,r = x;
     while(l <= r) {
-        int mid = l + (r - l)/2;
-        if(mid * mid <= x) {
-            index = mid;
-            l = mid + 1;
-        } else {
-            r = mid - 1;
-        }
+      int mid = l + (r - l)/2;
+      if(mid * mid <= x) {
+        index = mid;
+        l = mid + 1;
+      } else {
+        r = mid - 1;
+      }
     }
     return index;
 }

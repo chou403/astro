@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-02-22T15:00:03.000Z
-modDatetime: 2024-03-13T10:11:25Z
+modDatetime: 2024-05-09T10:44:51Z
 title: Feign & openFeign
 featured: false
 draft: false
@@ -1617,7 +1617,7 @@ LoadBalancerCommand肯定是在某个地方使用Ribbon的ZoneAwareLoadBalancer�
 
 selectServer()方法逻辑解析：
 
-> 在这个方法中，就是直接基于Feign集成的Ribbon的ZoneAwareLoadBalancer的chooseServer()方法，通过负载均衡机制选择了一个server出来。
+> 在这个方法中，就是直接基于Feign集成的Ribbon的`ZoneAwareLoadBalancer`的 chooseServer() 方法，通过负载均衡机制选择了一个server出来。
 >
 > - 先通过LoadBalancerContext#getServerFromLoadBalancer()方法获取到ILoadBalancer；
 > - 在利用ILoadBalancer#chooseServer()方法选择出一个Server。
@@ -1775,7 +1775,7 @@ deocode()方法中会用到一个Decoder，decoder默认是OptionalDecoder，针
 > 1. 请求达到FeignClient时，会进入到JDK动态代理类，由ReflectiveFeign#FeignInvocationHandler分发处理请求；找到接口方法对应的SynchronousMethodHandler；
 > 2. SynchronousMethodHandler中首先使用SpringMvcContract解析标注了SpringMvc注解的参数；然后使用encoder对请求进行编码；
 > 3. RequestInterceptor对Request进行拦截处理；
-> 4. LoadBalancerFeignClient通过集成的Ribbon的负载均衡器（ZoneAwareLoadBalancer）实现负载均衡找到一个可用的Server，交给RibbonRequest组合的Client去做HTTP请求，这里的Client可以是HttpUrlConnection、HttpClient、OKHttp。
+> 4. LoadBalancerFeignClient通过集成的Ribbon的负载均衡器（`ZoneAwareLoadBalancer`）实现负载均衡找到一个可用的Server，交给RibbonRequest组合的Client去做HTTP请求，这里的Client可以是HttpUrlConnection、HttpClient、OKHttp。
 > 5. 最后Decoder对Response响应进行解码。
 
 ## OpenFeign新版本和旧版本之间的差异（高版本OpenFeign底层不使用Ribbon做负载均衡）
@@ -1834,7 +1834,7 @@ DefaultTargeter注入到Spring容器的方式和OpenFeign低版本的HystrixTarg
 
 ### Client处理负载均衡（核心区别）
 
-上面提到OpenFeign高版本获取到的Client是FeignBlockingLoadBalancerClient，而低版本的是LoadBalancerFeignClient，LoadBalancerFeignClient基于Ribbon实现负载均衡，FeignBlockingLoadBalancerClient就靠OpenFeign自己实现负载均衡；
+上面提到OpenFeign高版本获取到的Client是`FeignBlockingLoadBalancerClient`，而低版本的是`LoadBalancerFeignClient`，LoadBalancerFeignClient基于Ribbon实现负载均衡，FeignBlockingLoadBalancerClient就靠OpenFeign（通过loadBalancerClient）实现负载均衡；
 
 **FeignBlockingLoadBalancerClient是如何做负载均衡的:**
 1> FeignBlockingLoadBalancerClient选择一个服务实例
