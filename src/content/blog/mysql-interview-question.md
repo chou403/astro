@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-03-13T12:06:11Z
+modDatetime: 2024-05-09T18:01:56Z
 title: Mysql
 featured: true
 draft: false
@@ -2527,7 +2527,7 @@ mysql> show variables like '%innodb_doublewrite%';
 4. 联合索引，查询时的条件列不是联合索引中的第一个列，索引失效。
 5. 对索引字段进行函数运算。
 6. 对索引列运算（如：+、-、\*、/），索引失效。
-7. 索引字段上使用（!= 、<>、not in）时，会导致索引失效。
+7. 索引字段上使用（!= 、<>、not in）时，基本会导致索引失效。
 8. 索引字段上使用 is null，is not null，可能导致索引失效。
 9. 相 join 的两个表的字符编码不同，不能命中索引，会导致笛卡尔积的循环计算。
 10. MySQL 估计使用全表扫描要比使用索引快，则不会使用索引。
@@ -2656,3 +2656,23 @@ RC 和 RR 隔离级别都是由 MVCC 实现的，区别在于：
 
 - RC 隔离级别时，Read View 是每次执行 select 语句时都生成一个。
 - RR 隔离级别时，Read View 是在第一次执行 select 语句时生成一个，同一事务中后面的所有 select 语句都复用这个 Read View。
+
+#### MySQL AP 和 CP
+
+1. 异步复制(默认) : AP模型
+
+Master不等待Slave同步，直接返回client => **性能最高，数据可能出现不一致；可用性优先: 适合对性能要求，能够容忍计算场景少量数据丢失场景**
+
+应用发起数据更新（含 操作）请求，insert、update、deleteMaster 在执行完更新操作后立即向应用程序返回响应，然后 Master 再向 Slave 复制数据。
+
+数据更新过程中 Master 不需要等待 Slave 的响应，因此异步复制的数据库实例通常具有较高的性能，且 Slave 不可用并不影响 Master 对外提供服务。但因数据并非实时同步到 Slave，而 Master 在 Slave 有延迟的情况下发生故障则有较小概率会引起数据不一致。2. 半同步复制: AP模型
+Master等待Slave写入relaylog返回client & Slave宕机或网络中断，Master暂停10s 降级 异步复制，Slave恢复后 恢复半同步复制 => **性能居中，可用性优先，极端场景少量不一致**；
+
+应用发起数据更新（含 insert、update、delete 操作）请求，Master 在执行完更新操作后立即向 Slave 复制数据，Slave 接收到数据并写到 relay log 中（无需回放执行）后才向 Master 返回成功信息，Master 必须在接受到 Slave 的成功信息后再向应用程序返回响应。
+
+仅在数据复制发生异常（Slave 节点不可用或者数据复制所用网络发生异常）的情况下，Master 会暂停（MySQL 默认10秒左右）对应用的响应，将复制方式降为异步复制。当数据复制恢复正常，将恢复为半同步复制。3. 强同步复制: CP模型
+Master等待Slave写入relaylog返回client; Slave宕机或网络中断，Master不会降级为 异步复制 => 保证强一致性，暂停对应用响应，直到Slave恢复正常 => **性能最差，强一致性 =>强一致性: 牺牲可用性，适合对一致性要求高，能够接收服务停机或暂时不可用，保证数据强一致性业务场景**。
+
+应用发起数据更新（含 insert、update、delete 操作）请求，Master 在执行完更新操作后立即向 Slave 复制数据，Slave 接收到数据并写到 relay log 中（无需执行） 后才向 Master 返回成功信息，Master 必须在接受到 Slave 的成功信息后再向应用程序返回响应。
+
+在数据复制发生异常（Slave 节点不可用或者数据复制所用网络发生异常）的情况下，复制方式均不会发生降级，为保障数据一致性，此时 Master 会暂停对应用的响应，直至异常结束。
