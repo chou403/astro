@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-05-07T09:30:30.000Z
-modDatetime:
+modDatetime: 2024-05-13T16:26:41Z
 title: 单元测试
 featured: false
 draft: false
@@ -59,3 +59,32 @@ E-Error: 强制错误信息输入（如：非法数据、异常流程、非业�
 - F-Fast（快速的）: 单元测试可以快速运行
 - I-Independent（独立的）: 无依赖可以独立运行
 - R-Repeatable（可重复的）: 稳定重复运行，每次运行结果稳定可靠
+
+## 单元测试常用注解
+
+### Junit
+
+- @ExtendWith：声明性的注册拓展
+- @Test：标识方法为一个测试用例
+- @BeforeAll：所有方法之前，执行一次
+- @AfterAll：所有方法之后，执行一次
+- @AfterEach：每个方法之执行
+- @ParameterizedTest：参数化测试方法
+- @TimeOut：设置超时时间
+- @Order：设置测试方法的执行顺序
+- @RepeatedTest：重复执行的次数
+- @Disabled：标识禁用的测试类和方法
+- @DisplayName：类或方法自定义显示名称
+
+### Mockito
+
+- @Mock：创建被 mock 的代理对象
+- @Spy：创建被 spy 的代理对象，可保留原对象的行为
+- @InjectMocks：创建真实对象，常用于被测试类、可注入 mock 对象
+- @Captor：用于捕获方法调用的参数，方便进一步的断言和校验
+- @MockitoSettings：用于设置 Mockito 框架的全局设置
+
+### SpringBoot
+
+- @MockBean：创建被 Spring 管理的 mock bean，常用于集成测试中
+- @SpyBean：创建被 Spring 管理的 spy bean，常用于集成测试中

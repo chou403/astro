@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-28T12:37:00Z
+modDatetime: 2024-05-13T16:26:41Z
 title: ReentrantLock & synchronized & ReentrantReadWriteLock
 featured: false
 draft: false
@@ -205,7 +205,7 @@ synchronized 就在 JDK1.6 做了锁升级的优化。
 
 synchronized 是基于对象实现的。
 
-synchronized的底层实现是完全依赖JVM虚拟机的，所以先看看对象的存储结构。
+synchronized 的底层实现是完全依赖JVM虚拟机的，所以先看看对象的存储结构。
 
 ### 对象结构
 
@@ -1520,7 +1520,7 @@ CAS 有哪些缺点呢？
 4. 无法解决死锁：CAS 无法解决死锁问题，如果多个线程同时执行 CAS 操作，可能导致死锁的发生。
 5. 限制性：CAS 操作通常只能应用于单个变量，对于复杂的数据结构，需要额外的处理来实现原子操作。
 
-总的来说，CAS 虽然具有搞笑的特点，但也存在着一些局限性和缺点。
+总的来说，CAS 虽然具有高效的特点，但也存在着一些局限性和缺点。
 
 #### 什么是 ABA 问题
 

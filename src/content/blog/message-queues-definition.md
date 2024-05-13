@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-05-09T10:44:51Z
+modDatetime: 2024-05-13T16:26:41Z
 title: MQ
 featured: true
 draft: false
@@ -1117,7 +1117,7 @@ producer端设置`request.required.acks`。
 
 ###### ISR 的最坏情况
 
-排除所有 replica 全部故障，ISR 的最坏情况就是 ISR 中只剩 leader 自己一个了。退化成 ack=1 的情况了，甚至还不如 ack=1。ack=1，说的是 producer 不等服务器完全同步完 ISR，只要 leader 写入成功就行了，但是可没说不进行同步了。该有的同步过程还是会进行的，但凡能同步，kafka 肯定会同步的，而 ack=1 的最坏情况，也是 ISR 只剩下 leader 了。坏疽话说，producer 为了提高吞吐量，没等 ISR 全部同步，但是心里还是希望接口同步完成的。而这种 leader 孤家寡人的最坏情况，书上说“退化成 ack=1”，不足以说明问题的严重性。
+排除所有 replica 全部故障，ISR 的最坏情况就是 ISR 中只剩 leader 自己一个了。退化成 ack=1 的情况了，甚至还不如 ack=1。ack=1，说的是 producer 不等服务器完全同步完 ISR，只要 leader 写入成功就行了，但是可没说不进行同步了。该有的同步过程还是会进行的，但凡能同步，kafka 肯定会同步的，而 ack=1 的最坏情况，也是 ISR 只剩下 leader 了。换句话说，producer 为了提高吞吐量，没等 ISR 全部同步，但是心里还是希望接口同步完成的。而这种 leader 孤家寡人的最坏情况，书上说“退化成 ack=1”，不足以说明问题的严重性。
 
 ISR 的最坏情况，会使 ack=-1 退化成 ack=1 的最坏情况，完全背离我们设置-1 的初衷（因为特定是同步不了了）。
 

@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-01-30T12:28:25Z
-modDatetime: 2024-02-22T00:37:27Z
+modDatetime: 2024-05-13T16:26:41Z
 title: 面基记录
 featured: false
 draft: false
@@ -21,3 +21,39 @@ Java 中的引用类型分别为**强、软、弱、虚**。
 然后是弱引用，它比较引用的生存期更短，对于只有弱引用的对象来说，只要垃圾回收机制已运行，不管 JVM 的内存空间是否足够，总会回收该对象占用的内存。可以解决内存泄漏的问题，ThreadLocal 就是基于弱引用解决内存泄漏的问题。例如：WeakRefenence weakRef = new WeakRefenence()。
 
 最后是虚引用，它不能单独使用，必须和引用队列联合使用。虚引用的主要作用是跟踪对系那个被垃圾回收的状态。例如：ReferenceQueue queue = new ReferenceQueue()；PhantomReference phantomRef = new PhantomReference(obj,queue)，不过在开发中，我们用的更多的还是强引用。
+
+## Rocketmq 消息堆积 堆积到哪里
+
+## OpenFeign 如何实现的消息间内部调用 重要
+
+## OpenFeign 如何实现负载均衡 重要
+
+## CAS 原理是什么
+
+## 线程池 内存分配 紧密型如何分配线程数
+
+## spring cloud resource 和 Autowired 什么区别
+
+## Seata 有几种模式 重要
+
+## ap 和 cp 为什么 p 是不可或缺的 重要
+
+## Hashmap 的时间复杂度是多少？如果出现hash 碰撞如何处理？hashmap 最极端的时间复杂度是多少？
+
+## @Transactional 原理 为什么加上这个 就会实现所有数据库操作在一起
+
+## Java 什么操作可以多线程共享一块内存
+
+## Mysql 优化器原理 如何优化的 优化了什么
+
+## 10000 取 10 个数 用什么算法最好
+
+## Arraylist 是不是线程安全的 哪些是线程安全的
+
+CopyOnWriteArrayList、Collections.synchronizedList
+
+## stw 是什么 哪个垃圾回收器 是 stw 时间最少的
+
+## 以下内存是如何进行分配的 String s = new String（”12“）string s = ”12“
+
+## Nacos 注册中心是 ap 还是 cp ，能否 从 ap 切换为 cp

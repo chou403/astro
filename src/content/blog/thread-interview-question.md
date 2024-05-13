@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-28T12:37:01Z
+modDatetime: 2024-05-13T16:26:41Z
 title: Thread & ThreaPool
 featured: true
 draft: false
@@ -1003,7 +1003,7 @@ Java中大量使用了CAS机制来实现多线程下数据更新的原子化操�
 
 #### 基于 CAS 的 AtomicInteger 使用
 
-关于CAS的实现，最经典最常用的当属AtomicInteger了，我们马上就来看一下AtomicInteger是如何利用CAS实现原子性操作的。为了形成更新鲜明的对比，先来看一下如果不使用CAS机制，想实现线程安全我们通常如何处理。
+关于CAS的实现，最经典最常用的当属AtomicInteger了，我们马上就来看一下AtomicInteger是如何利用CAS实现原子性操作的。为了形成更加鲜明的对比，先来看一下如果不使用CAS机制，想实现线程安全我们通常如何处理。
 
 在没有使用CAS机制时，为了保证线程安全，基于synchronized的实现如下：
 
