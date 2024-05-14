@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-05-13T16:26:41Z
+modDatetime: 2024-05-14T09:22:18Z
 title: Mysql
 featured: true
 draft: false
@@ -1740,7 +1740,7 @@ MySQL 设计者将一个 B+Tree 的节点大小设置为一个页（这样做的
 
 MySQL 查询过程
 
-![image-20230918172052198](img/image-20230918172052198.png)
+![image-20230918172052198](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230918172052198.png)
 
 通过 explain 我们可以获得以下信息
 
