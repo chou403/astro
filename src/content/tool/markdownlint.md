@@ -6,6 +6,7 @@ title: markdownlint
 featured: false
 draft: false
 tags:
+  - tools
   - markdown
 description: vscode markdownlint 插件使用
 ---

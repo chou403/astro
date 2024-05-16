@@ -6,8 +6,8 @@ title: Docker
 featured: false
 draft: false
 tags:
+  - tool
   - docker
-  - devops
 description: linux 安装 docker 以及使用
 ---
 

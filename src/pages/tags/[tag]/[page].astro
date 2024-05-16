@@ -5,15 +5,16 @@ import getUniqueTags from "@utils/getUniqueTags";
 import getPostsByTag from "@utils/getPostsByTag";
 import getPageNumbers from "@utils/getPageNumbers";
 import getPagination from "@utils/getPagination";
+import getAllPosts from "@utils/getAllPosts";
 
 export interface Props {
-  post: CollectionEntry<"blog">;
+  post: any;
   tag: string;
   tagName: string;
 }
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog");
+  const posts = await getAllPosts();
 
   const tags = getUniqueTags(posts);
 

@@ -1,12 +1,13 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-05-09T10:44:51Z
+modDatetime: 2024-05-30T10:44:51Z
 title: 算法入门到放弃
 featured: false
 draft: false
 tags:
   - java
+  - algorithm
 description: 从复杂度、栈、队列以及树的基本概念开始，讲述算法中常用的排序以及计算方式。
 ---
 

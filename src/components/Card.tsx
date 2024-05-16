@@ -5,7 +5,7 @@ import { SITE } from "@config";
 
 export interface Props {
   href?: string;
-  frontmatter: CollectionEntry<"blog">["data"];
+  frontmatter: any["data"];
   secHeading?: boolean;
 }
 

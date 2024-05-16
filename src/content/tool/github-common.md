@@ -6,6 +6,7 @@ title: Github
 featured: false
 draft: false
 tags:
+  - tool
   - github
 description: github 通用的使用方式
 ---

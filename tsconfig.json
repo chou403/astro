@@ -1,6 +1,8 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
+    "strictNullChecks": true,
+    "allowJs": true,
     "baseUrl": "src",
     "jsx": "react-jsx",
     "paths": {
@@ -11,7 +13,7 @@
       "@layouts/*": ["layouts/*"],
       "@pages/*": ["pages/*"],
       "@styles/*": ["styles/*"],
-      "@utils/*": ["utils/*"]
-    }
-  }
+      "@utils/*": ["utils/*"],
+    },
+  },
 }

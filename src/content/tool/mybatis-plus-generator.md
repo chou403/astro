@@ -6,7 +6,7 @@ title: MybatisPlus generator
 featured: false
 draft: false
 tags:
-  - java
+  - tool
   - mybatisplus
 description: MybatisPlus 代码生成工具配置(基于 IDEA plugin)
 ---
@@ -96,7 +96,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ${ClassName}Controller {
 
-	private final I${ClassName}Service ${className}Service;
+    private final I${ClassName}Service ${className}Service;
 
     private final ExcelGenerator excelGenerator;
 
@@ -143,8 +143,8 @@ public class ${ClassName}Controller {
     @GetMapping("/export")
     @ApiOperation("${functionName}导出")
     public void ${businessName}Export(${ClassName}DTO ${className}DTO, HttpServletRequest request, HttpServletResponse response) {
-		// 按需实现
-		/*
+        // 按需实现
+        /*
         // List<Map> dataList = null;
         HashMap<String, List<Map>> excelData = new HashMap<>(1024);
         excelData.put("${functionName}导出", dataList);
@@ -225,7 +225,7 @@ public class ${ClassName}DTO extends BaseDTO implements Serializable {
     @ApiModelProperty(value = "$column.comment结束日期")
     private String ${column.name}End;
 
-	#end
+    #end
 #end
 #foreach ($column in $tableInfo.pkColumn)
     /**

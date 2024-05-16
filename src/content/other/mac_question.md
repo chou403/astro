@@ -6,7 +6,7 @@ title: Mac
 featured: false
 draft: false
 tags:
-  - Mac
+  - mac
 description: Mac 碰到的问题
 ---
 

@@ -6,7 +6,9 @@ title: mysqld_multi
 featured: false
 draft: false
 tags:
+  - tool
   - mysql
+  - mysqld_multi
 description: 基于 MySQL 自带工具 mysqld_multi 实现主从复制
 ---
 

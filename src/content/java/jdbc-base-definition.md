@@ -7,6 +7,7 @@ featured: false
 draft: false
 tags:
   - jdbc
+  - transaction
 description: jdbc acid & 隔离级别
 ---
 

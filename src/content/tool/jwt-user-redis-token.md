@@ -6,6 +6,7 @@ title: JWT
 featured: false
 draft: false
 tags:
+  - tool
   - jwt
 description: 介绍 JWT & token + redis
 ---

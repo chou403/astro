@@ -7,6 +7,7 @@ featured: false
 draft: false
 tags:
   - java
+  - spi
 description: java spi 描述
 ---
 

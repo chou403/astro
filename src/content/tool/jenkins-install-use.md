@@ -6,8 +6,8 @@ title: Jenkins
 featured: false
 draft: false
 tags:
+  - tool
   - jenkins
-  - devops
 description: Jenkins 安装使用
 ---
 
@@ -205,7 +205,7 @@ description: Jenkins 安装使用
 > agent any
 >
 >     stages {
->         // 步骤
+>       // 步骤
 >         stage('pull code') {
 >             steps {
 >                 echo '拉取代码'

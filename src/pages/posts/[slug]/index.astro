@@ -5,13 +5,16 @@ import PostDetails from "@layouts/PostDetails.astro";
 import getSortedPosts from "@utils/getSortedPosts";
 import getPageNumbers from "@utils/getPageNumbers";
 import getPagination from "@utils/getPagination";
+import getAllPosts from "@utils/getAllPosts";
 
 export interface Props {
-  post: CollectionEntry<"blog">;
+  post: any;
 }
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const posts = await getAllPosts().then(p =>
+    p.filter(({ data }) => !data.draft)
+  );
 
   const postResult = posts.map(post => ({
     params: { slug: post.slug },
@@ -28,7 +31,7 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 const { post } = Astro.props;
 
-const posts = await getCollection("blog");
+const posts = await getAllPosts();
 
 const sortedPosts = getSortedPosts(posts);
 

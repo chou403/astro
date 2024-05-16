@@ -8,7 +8,6 @@ draft: false
 tags:
   - java
   - seata
-  - 分布式事务
 description: seata 相关
 ---
 

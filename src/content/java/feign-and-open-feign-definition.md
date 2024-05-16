@@ -6,7 +6,7 @@ title: Feign & openFeign
 featured: false
 draft: false
 tags:
-  - spring cloud
+  - java
   - feign
 description: feign & openFeign 介绍以及使用
 ---
