@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-28T12:37:00Z
+modDatetime: 2024-05-16T14:00:41Z
 title: Netty
 featured: false
 draft: false
@@ -15,11 +15,11 @@ description: Netty 相关学习（待补充版）
 
 ## BIO（Blocking IO）
 
-![image-20230313103444295](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230313103444295.png)
+![image-20230313103444295](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230313103444295.png)
 
 ## NIO（Non Blocking IO）
 
-![image-20230313103559073](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230313103559073.png)
+![image-20230313103559073](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230313103559073.png)
 
 selector（多路复用器）
 
@@ -31,7 +31,7 @@ I/O多路复用底层主要用的linux内核函数（select，poll，epoll）来
 
 零拷贝机制
 
-![image-20230314182800432](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230314182800432.png)
+![image-20230314182800432](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230314182800432.png)
 
 长连接心跳保活机制
 

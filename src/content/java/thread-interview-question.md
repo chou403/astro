@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-05-13T16:26:41Z
+modDatetime: 2024-05-16T14:00:41Z
 title: Thread & ThreaPool
 featured: true
 draft: false
@@ -17,13 +17,13 @@ description: 线程 & 线程池相关介绍
 
 5 种状态一般是针对传统的线程状态来说（操作系统层面）
 
-![image-20230823173134948](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281137874.png)
+![image-20230823173134948](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281137874.png)
 
 Java 中给线程准备了 6 种状态
 
-![image-20230823173427644](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281130076.png)
+![image-20230823173427644](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281130076.png)
 
-![image-20230823173819528](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281130198.png)
+![image-20230823173819528](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281130198.png)
 
 NEW：Thread 对象被创建出来，但是还没有执行 start 方法
 
@@ -122,7 +122,7 @@ System.out.println(thread.getState());
 
 ## ThreadPool
 
-![image-20230411174505779](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230411174505779.png)
+![image-20230411174505779](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230411174505779.png)
 
 ### JDK 提供的线程池
 
@@ -315,7 +315,7 @@ private static int ctlOf(int rs, int wc) { return rs | wc; } // 得到上面提�
 
   线程池彻底终止。线程池在 TIDYING 状态执行完 terminated() 方法就会由 TIDYING 转变为 TERMINATED 状态。
 
-![image-20230411173800910](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230411173800910.png)
+![image-20230411173800910](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230411173800910.png)
 
 ### 线程池执行流程
 
@@ -391,7 +391,7 @@ public void execute(Runnable command) {
 }
 ```
 
-![image-20230828000746127](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281131682.png)
+![image-20230828000746127](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281131682.png)
 
 **addWorker()** 中主要分成两大部分去看
 
@@ -991,7 +991,7 @@ Java中大量使用了CAS机制来实现多线程下数据更新的原子化操�
 
 #### CAS 的基本流程
 
-![image-20230825103445318](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281131100.png)
+![image-20230825103445318](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281131100.png)
 
 在上图中涉及到三个值的比较和操作：修改之前获取的（待修改）值A，业务逻辑计算的新值B，以及待修改值对应的内存位置的C。
 

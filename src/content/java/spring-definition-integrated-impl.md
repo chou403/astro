@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-03-26T13:18:16Z
+modDatetime: 2024-05-16T14:00:41Z
 title: Spring
 featured: false
 draft: false
@@ -95,7 +95,7 @@ firstList.removeIf(first -> secondList.stream().anyMatch(second -> first.getCode
 
 jar包里面含有一下三部分文件
 
-![image-20230404172555912](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230404172555912.png)
+![image-20230404172555912](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230404172555912.png)
 
 > org：主要存放springboot相关的class文件
 >
@@ -107,7 +107,7 @@ jar包里面含有一下三部分文件
 
 打开META-INF下MENIFEST.MF文件，内容如下：
 
-![image-20230404172728434](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230404172728434.png)
+![image-20230404172728434](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230404172728434.png)
 
 从上述MANIFEST.MF中可以看到Main-Class及Start-Class配置，其中Main-Class指定jar文件的入口类JarLauncher，当使用java -jar执行jar包的时候会调用JarLauncher的main方法，而不是我们编写的启动类。
 
@@ -363,7 +363,7 @@ public class MainMethodRunner {
 
 上述关键代码执行流程简化如下图:
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281126515.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281126515.png)
 
 #### 使用依赖包common
 
@@ -387,7 +387,7 @@ common 执行mvn install时，会报错提示 Unable to find a single main class
 
 ### Spring 自动配置
 
-![image-20230823113954382](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281405585.png)
+![image-20230823113954382](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281405585.png)
 
 SpringBoot 自动配置，Auto-Configuration
 
@@ -399,26 +399,26 @@ SpringBoot 自动配置，Auto-Configuration
 - 广义的“配置类”：被注解@Component 直接或间接修饰的某个类，即我们常说的 Spring 组件，其中包括了@Configuration 类
 - 狭义的“配置类”：特指被注解 @Configuration 所修饰的某个类，又成为 @Configuration 类
 
-![image-20230822172218836](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281126131.png)
+![image-20230822172218836](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281126131.png)
 
-![image-20230822172402498](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281127736.png)
+![image-20230822172402498](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281127736.png)
 
-![image-20230822173011734](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281127191.png)
+![image-20230822173011734](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281127191.png)
 
-![image-20230823113418389](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281128533.png)
+![image-20230823113418389](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281128533.png)
 
-![image-20230823113448199](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281131684.png)
+![image-20230823113448199](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281131684.png)
 
-![image-20230823113602551](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281128270.png)
+![image-20230823113602551](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281128270.png)
 
-![image-20230823113646014](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281128307.png)
+![image-20230823113646014](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281128307.png)
 
 #### @Conditional
 
 - 它的作用是实现：只有在特定条件满足时，才会向 IOC 容器注册指定的组件
 - 我们可以将 @Conditional 理解为某种 if 语句
 
-![image-20230823113909162](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402281128177.png)
+![image-20230823113909162](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402281128177.png)
 
 #### @ConditionalOnProperty
 
@@ -1148,11 +1148,11 @@ protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata an
 
 前面几个都好理解，现在我们主要看看filter()，是怎么移除不需要的类
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/2597186-20220218230920130-226480162.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/2597186-20220218230920130-226480162.png)
 
 我们可以看到有具体的匹配方法 match。里面有个关键的属性是 autoConfigurationMetadata , 的本质是 加载的 META-INF/spring-autoconfigure-metadata.properties 的文件中的内容。
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/2597186-20220218231102908-1017908901.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/2597186-20220218231102908-1017908901.png)
 
 其实原理很简单，如果没有对应的实现类，就不进行加载。
 
@@ -1180,7 +1180,7 @@ public class SpringBootVipDemoApplication {
 
 根据返回结果，我们猜测SpringBoot项目的启动其实就是Spring的初始化操作【IOC】。
 
-![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/2597186-20220218232932423-556100027.png)
+![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/2597186-20220218232932423-556100027.png)
 
 ### 什么是 Starter
 
@@ -1190,7 +1190,7 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
 - 提供了自动配置的功能，开箱即用
 - 提供了良好的依赖管理，避免了包遗漏、版本冲突等问题。
 
-![image-20230819192249343](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230819192249343.png)
+![image-20230819192249343](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230819192249343.png)
 
 ### Maven 中的可选依赖
 
@@ -1302,7 +1302,7 @@ starter 是“一站式服务（one-stop）”的依赖 jar 包：
 - 默认已经有多个消息转换器了。而 configureMessageConverters 方法中是一个 list 参数。直接向其中添加 HttpMessageConverter后，默认是排在最后的。就造成了你自定义的消息转换器不生效。其实是被其他转换器接管了。因此，想要让我们自定义的消息转换器生效只需要把它添加到list 的第一个就可以了。
 - SerializerFeature属性
 
-  ![image-20230203141903620](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230203141903620.png)
+  ![image-20230203141903620](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230203141903620.png)
 
 #### @EnableWebMVC
 

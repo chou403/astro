@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-03-13T12:06:11Z
+modDatetime: 2024-05-16T14:00:41Z
 title: Tools
 featured: false
 draft: false
@@ -458,7 +458,7 @@ Powerlevel10k 需要依赖 nerd font
 
 终端设置选择字体即可
 
-![image-20230918224852566](https://cdn.jsdelivr.net/gh/chou401/pic-md@master/img/image-20230918224852566.png)
+![image-20230918224852566](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230918224852566.png)
 
 ## vim 配置
 

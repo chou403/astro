@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-02-22T15:00:03.000Z
-modDatetime: 2024-05-09T10:44:51Z
+modDatetime: 2024-05-16T14:00:40Z
 title: Feign & openFeign
 featured: false
 draft: false
@@ -505,7 +505,7 @@ public @interface EnableFeignClients {
 
 #### FeignClientsRegistrar 类
 
-![202402291451526](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202402291451526.png)
+![202402291451526](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202402291451526.png)
 
 由于 `FeignClientsRegistrar` 实现自 `ImportBeanDefinitionRegistrar`，结合 [SpringBoot 的自动配置](spring-deifinition-integrated-impl.md)，得知，在 SpringBoot 启动过程中会进入到 FeignClientsRegistrar#registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) 方法。
 
@@ -881,19 +881,19 @@ private void registerFeignClient(BeanDefinitionRegistry registry, AnnotationMeta
 
 在`AbstractApplicationContext#refresh()`方法中最后调用的`finishBeanFactoryInitialization(beanFactory)`方法中会将所有类全部注入到Spring容器中；在将ServiceBController注入到Spring容器过程中，会将其成员ServiceAClient也注入到Spring容器中，`AbstractAutowireCapableBeanFactory#populateBean()`方法会处理ServiceAClient，进而调用到`AutowiredAnnotationBeanPostProcessor#postProcessProperties()`方法对ServiceAClient做一个注入操作。
 
-![202403011534065](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011534065.png)
+![202403011534065](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011534065.png)
 
-![202403011541600](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011541600.png)
+![202403011541600](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011541600.png)
 
 走到`AbstractBeanFactory#getBean(String)`方法获取ServiceBController依赖的成员类型ServiceAClient。
 
-![202403011542177](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011542177.png)
+![202403011542177](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011542177.png)
 
 由于我们在注册FeignClient到Spring容器时，构建的BeanDefinition的beanClas是FeignClientFactoryBean。
 
 FeignClientFactoryBean是一个工厂，保存了@FeignClient注解的所有属性值，在Spring容器初始化的过程中，其会根据之前扫描出的FeignClient信息构建FeignClient的动态代理类。
 
-![202403011547458](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011547458.png)
+![202403011547458](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011547458.png)
 
 从debug的堆栈信息我们可以看到是FeignClientFactoryBean#getObject()方法负责获取/创建动态代理类。
 
@@ -974,7 +974,7 @@ public Object getObject() throws Exception {
 
 ##### FeignContext 上下文的获取
 
-![202403011636380](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011636380.png)
+![202403011636380](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011636380.png)
 
 调用FeignClientFactoryBean#getObject()创建/获取FeignClient动态代理类时，首先要通过
 
@@ -996,17 +996,17 @@ FeignClient 也是类似的上下文：
 **FeignContext在哪里注入到Spring容器的？**
 FeignClient 位于 spring-cloud-openfeign-core 项目，我们在这个项目下结合 SpringBoot 自动装配的特性找 XxxAutoConfiguration 和 XxxConfiguration，最终找到 FeignAutoConfiguration。
 
-![202403011646192](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011646192.png)
+![202403011646192](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011646192.png)
 
 FeignAutoConfiguration中使用@Bean方法将FeignContext注入到Spring容器。
 
-![202403011649023](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011649023.png)
+![202403011649023](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011649023.png)
 
 FeignContext 继承自 NamedContextFactory，内部负责对每个服务都维护一个对应的spring容器（以map存储，一个服务对应一个spring容器），此处和 Ribbon 一样。
 
 进入到 feign() 方法中，以获取 FeignLoggerFactory 为例：
 
-![202403011654599](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011654599.png)
+![202403011654599](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011654599.png)
 
 get(FeignContext context, Class type)方法要做的事情如下：
 
@@ -1015,17 +1015,17 @@ get(FeignContext context, Class type)方法要做的事情如下：
 
 默认使用的 FeignLoggerFactory 是在 spring-cloud-openfeign-core 项目的 FeignClientsConfiguration 类中加载的 DefaultFeignLoggerFactory，而 DefaultFeignLoggerFactory 中默认创建的是Slf4jLogger。
 
-![202403011704244](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011704244.png)
+![202403011704244](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011704244.png)
 
-![202403011705898](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011705898.png)
+![202403011705898](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011705898.png)
 
 ##### 从 FeignClient 中获取 Feign.Builder
 
 这里和上面获取 FeignLoggerFactory 一样，在 spring-cloud-openfeign-core 项目的 FeignClientsConfiguration 类中会找到两个 Feign.Builder（一个和 Hystrix 相关，另外一个 Retryer 相关的(请求超时、失败重试)）的注册逻辑：
 
-![202403011729059](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011729059.png)
+![202403011729059](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011729059.png)
 
-![202403011731270](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011731270.png)
+![202403011731270](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011731270.png)
 
 由于默认 feign.hystrix.enabled 属性为 false，所以默认注入的 Feign.Builder 是 Feign.builder().retryer(retryer)。
 
@@ -1033,7 +1033,7 @@ get(FeignContext context, Class type)方法要做的事情如下：
 
 回到 feign() 方法，其中调用的 `configureFeign(context, builder)` 方法负责处理 Feign 的相关配置（即：使用 application.yml 中配置的参数，来设置 Feign.Builder）。
 
-![202403011745579](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403011745579.png)
+![202403011745579](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403011745579.png)
 
 ```java
 protected void configureFeign(FeignContext context, Feign.Builder builder) {
@@ -1068,7 +1068,7 @@ protected void configureFeign(FeignContext context, Feign.Builder builder) {
 
 ##### 使用 Feign.Builder 构建出一个 FeignClient
 
-![202403041111641](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403041111641.png)
+![202403041111641](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403041111641.png)
 
 如果在 @FeignClient 上，没有配置 url 属性，也就是没有指定服务的 url 地址，那么 Feign 就会自动跟 Ribbon 关联起来，采用 Ribbon 来进行负载均衡，直接拿出 @FeignClient 中配置的 name() 为 Ribbon 准备对应的 url 地址：`http://ServiceA`。
 
@@ -1181,9 +1181,9 @@ HystrixTargeter 是用来让 Feign 和 Hystrix 整合使用的，在发送请求
 
 继续往下走，进入到 `HystrixTargeter#target()` 方法，具体代码执行流程如下：
 
-![202403041658903](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403041658903.png)
+![202403041658903](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403041658903.png)
 
-![202403041659749](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403041659749.png)
+![202403041659749](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403041659749.png)
 
 ```java
 public Feign build() {
@@ -1326,7 +1326,7 @@ public MethodHandler create(Target<?> target,
 
 以如下方法为例：
 
-![202403041746106](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403041746106.png)
+![202403041746106](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403041746106.png)
 
 解析逻辑如下：
 
@@ -1345,11 +1345,11 @@ public MethodHandler create(Target<?> target,
 
 以 `http://localhost:9090/ServiceB/user/sayHello/1?name=zhangsan&age=18` 请求调用为例：
 
-![202403051440325](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051440325.png)
+![202403051440325](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051440325.png)
 
 请求调用 ServiceBController 的 greeting() 方法后，要调用 ServiceAClient#sayHello() 方法时，请求会进到 ServiceAClient 的动态代理类，进而请求交给 ReflectiveFeign 的内部类 FeignInvocationHandler 来处理，在结合 JDK 动态代理的特性，方法会交给 invoke() 方法执行，所以动态代理处理请求的入口为：`ReflectiveFeign` 的内部类 `FeignInvocationHandler` 的 invoke() 方法：
 
-![202403051446826](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051446826.png)
+![202403051446826](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051446826.png)
 
 方法逻辑：
 
@@ -1396,7 +1396,7 @@ invoke() 方法中通过方法名找到 Method 对应的 MethodHandler，这里�
 
 这里的重试机制，其实就是依靠 Retryer#continueOrPropagate() 方法中对重试次数的判断，超过最大重试次数抛异常结束流程。
 
-![202403051634061](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051634061.png)
+![202403051634061](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051634061.png)
 
 ##### 创建请求模版（SpringMvcContract 解析方法参数）
 
@@ -1454,7 +1454,7 @@ public RequestTemplate create(Object[] argv) {
 
 以解析 `@PathVariable("id") Long id` 为例，SpringMvcContract 解析逻辑如下：
 
-![202403051717607](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051717607.png)
+![202403051717607](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051717607.png)
 
 ```java
 private Object expandElements(Expander expander, Object value) {
@@ -1465,17 +1465,17 @@ private Object expandElements(Expander expander, Object value) {
 }
 ```
 
-![202403051723717](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051723717.png)
+![202403051723717](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051723717.png)
 
 最后解析出 `@PathVariable("id") Long id` 对应的值为 1，然后将所有的标注了 SpringMVC 注解的参数都解析完之后，将参数名和对应的 value 值放到一个命名为 `varBuilder` 的 Map 中：
 
-![202403051728793](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051728793.png)
+![202403051728793](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051728793.png)
 
 接着需要根据 varBuilder 的内容构建出一个完整的 REST 请求（即：将 SpringMVC 注解标注的参数全部用 value 值替换、添加到请求中）
 
-![202403051736823](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051736823.png)
+![202403051736823](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051736823.png)
 
-![202403051744919](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051744919.png)
+![202403051744919](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051744919.png)
 
 `RequestTemplate resolve(Map<String, ?> variables)` 中负责解析并构建完整的 RequestTemplate，进到方法中的 urlTemplate 为 `/user/sayHello/{id}`，variables 为上面的 varBuilder：`{"id":1,"name":"zhangsan","age":18}`。
 
@@ -1483,13 +1483,13 @@ private Object expandElements(Expander expander, Object value) {
 
 `buildTemplateFromArgs.create(argv)` 方法执行完成之后，得到一个完整的 RequestTemplate，下面需要基于这个 RequestTemplate 来执行请求。
 
-![202403051758648](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051758648.png)
+![202403051758648](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051758648.png)
 
 ##### 执行请求并解码返回值
 
 `SynchronousMethodHandler#executeAndDecode(RequestTemplate, Options)` 方法负责执行请求并解码返回值，具体执行逻辑如下：
 
-![202403051804120](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051804120.png)
+![202403051804120](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051804120.png)
 
 方法中主要做三件事：应用所有的 RequestInterceptor（即执行 RequestInterceptor#apply()方法）、通过 LoadBalancerFeignClient 做负载均衡执行请求，使用 Decoder 对请求返回结果解码或处理返回结果。
 
@@ -1497,7 +1497,7 @@ private Object expandElements(Expander expander, Object value) {
 
 ###### 应用所有的 RequestInterceptor
 
-![202403051813337](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403051813337.png)
+![202403051813337](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403051813337.png)
 
 遍历所有的请求拦截器 `RequestInterceptor`，将每个请求拦截器都应用到 RequestTemplate 请求模版上面去，也就是让每个请求拦截器都对请求进行处理（调用拦截器的 apply（RequestTemplate）方法）。
 
@@ -1555,13 +1555,13 @@ public Response execute(Request request, Request.Options options) throws IOExcep
 
    FeignLoadBalancer的类继承结构如下：
 
-   ![202403061818220](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403061818220.png)
+   ![202403061818220](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403061818220.png)
 
-   ![202403061819814](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403061819814.png)
+   ![202403061819814](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403061819814.png)
 
    FeignLoadBalancer间接继承自LoadBalancerContext，LoadBalancerContext中有一个ILoadBalancer类型的成员，其就是FeignLoadBalancer中集成的Ribbon的ILoadBalancer。从代码执行流程来看，集成的ILoadBalancer为Ribbon默认的ZoneAwareLoadBalancer：
 
-   ![202403061830279](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403061830279.png)
+   ![202403061830279](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403061830279.png)
 
    到这里，可以看到根据服务名获取到的FeignLoadBalancer中组合了Ribbon的ZoneAwareLoadBalancer负载均衡器。
 
@@ -1591,7 +1591,7 @@ feign是基于ribbon的ZoneAwareLoadBalancer来进行负载均衡的，从一个
 
 由于AbstractLoadBalancerAwareClient是FeignLoadBalancer的父类，FeignLoadBalancer类中没有重写executeWithLoadBalancer()方法，进入到AbstractLoadBalancerAwareClient#executeWithLoadBalancer()方法：
 
-![202403071635683](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071635683.png)
+![202403071635683](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403071635683.png)
 
 方法逻辑解析：
 
@@ -1609,11 +1609,11 @@ LoadBalancerCommand肯定是在某个地方使用Ribbon的ZoneAwareLoadBalancer�
 
 结合方法的命名找到LoadBalancerCommand#selectServer()：
 
-![202403071639910](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071639910.png)
+![202403071639910](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403071639910.png)
 
-![202403071640043](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071640043.png)
+![202403071640043](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403071640043.png)
 
-![202403071642161](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071642161.png)
+![202403071642161](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403071642161.png)
 
 selectServer()方法逻辑解析：
 
@@ -1627,7 +1627,7 @@ selectServer()方法逻辑解析：
 **3> 最终发送出去的请求URI是什么样的？**
 ServerOperation#call()方法里负责发送请求，在executeWithLoadBalancer()方法中重写了LoadBalancerCommand#command()方法中入参ServerOperation的call()方法；
 
-![202403071648955](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071648955.png)
+![202403071648955](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403071648955.png)
 
 ```java
 public URI reconstructURIWithServer(Server server, URI original) {
@@ -1734,9 +1734,9 @@ public interface Decoder {
 
 即：未指定decoder时，会直接使用AsyncResponseHandler#handleResponse()方法处理接收到的服务返回结果：
 
-![202403071718925](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071718925.png)
+![202403071718925](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403071718925.png)
 
-![202403071723997](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403071723997.png)
+![202403071723997](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403071723997.png)
 
 如果响应结果的returnType为Response时，则将return信息的body()解析成byte数组，放到resultFuture的RESULT中；然后SynchronousMethodHandler#executeAndDecode()方法中通过resultFuture.join()方法拿到RESULT（即：请求的真正的响应结果）。
 

@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-03-16T20:43:41.000Z
-modDatetime: 2024-04-10T19:00:55Z
+modDatetime: 2024-05-16T14:00:41Z
 title: MybatisPlus generator
 featured: false
 draft: false
@@ -15,36 +15,36 @@ description: MybatisPlus 代码生成工具配置(基于 IDEA plugin)
 
 ## IDEA 安装插件 MybatisPlus 生成代码
 
-![202403162046262](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403162046262.png)
+![202403162046262](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403162046262.png)
 
 IDEA 导航栏 tools 找到一些内容
-![202403162046992](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403162046992.png)
+![202403162046992](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403162046992.png)
 
 ### Config Database
 
 点击 Config Database 配置数据库连接
 
-![202403162049146](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403162049146.png)
+![202403162049146](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403162049146.png)
 
 ### Config Generator
 
 配置数据库连接结束，点击 Config Generator
 
-![202403162052413](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403162052413.png)
+![202403162052413](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403162052413.png)
 
 选中需要生成代码的表 点击 code Generator 即可
 
 ## IDEA 结合 EasyCode 生成代码
 
-![202403162055314](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403162055314.png)
+![202403162055314](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403162055314.png)
 
 IDEA setting 配置中找到 EasyCode 可设置作者名称
-![202403162056007](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403162056007.png)
+![202403162056007](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403162056007.png)
 
 ### Template
 
 template 中有多个模版可以选择，若不合适也可以自己配置想要的模版
-![202403162057554](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403162057554.png)
+![202403162057554](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403162057554.png)
 
 以下为自己目前调整的模版
 
@@ -633,7 +633,7 @@ $!callback.setSavePath($tool.append($modulePath, "/src/main/resources/mapper/${m
 
 ### Global Config
 
-![202403162105900](https://cdn.jsdelivr.net/gh/chou401/pic-md@master//img/202403162105900.png)
+![202403162105900](https://cdn.jsdelivr.net/gh/chou401/pic-md@main//img/202403162105900.png)
 
 内容可根据需要自行增加以及调整。
 
