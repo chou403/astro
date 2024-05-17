@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-05-16T14:00:40Z
+modDatetime: 2024-05-17T17:56:33Z
 title: Java SPI
 featured: false
 draft: false
@@ -48,7 +48,7 @@ SPI: Service Provider Interface，它是从 Java6 开始引入的，是一种基
 
 - 首先，不能脱离 springboot 框架另起炉灶
   - 继续使用@Configuration 等已有注解
-- 第二，对用户友好，将“全自动”贯彻到底
+- 第二，对用户友好，将"全自动"贯彻到底
   - 参考 Java SPI 的设计思想
 
 ![image-20230821155311581](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230821155311581.png)

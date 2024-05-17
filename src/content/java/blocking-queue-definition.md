@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-02-22T00:37:27Z
+modDatetime: 2024-05-17T17:56:33Z
 title: 阻塞队列
 featured: false
 draft: false
@@ -354,7 +354,7 @@ void removeAt(final int removeIndex) {
 
 ### SynchronousQueue
 
-单个元素的阻塞队列，队列中只有一个元素，如果想插入多个，必须等队列元素取出后，才能插入，只能有一个“坑位”，用一个插一个。
+单个元素的阻塞队列，队列中只有一个元素，如果想插入多个，必须等队列元素取出后，才能插入，只能有一个"坑位"，用一个插一个。
 
 - 存取调用同一个方法：transfer。
 
@@ -398,17 +398,17 @@ void removeAt(final int removeIndex) {
    - ArrayBlockingQueue在初始化的时候，必须指定队列的大小。
    - LinkedBlockingQueue在初始化的时候，如果没有指定大小，则会默认Integer.MAX_VALUE，是一个很大的值，这样就会导致数据再一个不可控的范围，一旦添加速度大于移除的速度时，可能会有内存泄露的风险。
 
-2. 底层实现不同：
+2. 底层实现不同：  
    ArrayBlockingQueue的底层是一个数组，而LinkedBlockingQueue底层是一个链表结构。官方文档介绍中，LinkedBlockingQueue的吞吐性是高于ArrayBlockingQueue；但是在添加或移除元素，LinkedBlockingQueue则会生成一个额外的Node对象，对GC可能存在影响。
 
    - > 至于为什么说LinkedBlockingQueue的吞吐性高于ArrayBlockingQueue：
 
-   > 吞吐性强是因为有两个锁，Array里面使用的是一个锁，不管put还是take行为，都可能被这个锁卡住，而Linked里put和take是两个锁，put只会被put行为卡住，而不会被take卡住，因此吞吐性能自然强于Array。而“less
-   > predictable performance” 这个也是显而易见的，Array采用的是固定内存，而Linked采用的是动态内存，无论是分配内存还是释放内存（甚至GC）动态内存的性能自然都会比固定内存要差。
+   > 吞吐性强是因为有两个锁，Array里面使用的是一个锁，不管put还是take行为，都可能被这个锁卡住，而Linked里put和take是两个锁，put只会被put行为卡住，而不会被take卡住，因此吞吐性能自然强于Array。而"less  
+   > predictable performance" 这个也是显而易见的，Array采用的是固定内存，而Linked采用的是动态内存，无论是分配内存还是释放内存（甚至GC）动态内存的性能自然都会比固定内存要差。
 
 3. 锁机制不一样：
 
    ArrayBlockingQueue使用的一个锁控制，LinkedBlockingQueue使用两个锁控制，一个putLock，另一个takeLock，但是锁的本质都是ReentrantLock。
 
-LinkedBlockingQueue是一个基于链表实现的阻塞queue，它的性能ArrayBlockingQueue，但是差于ConcurrentLinkedQueue；并且它非常适于生产者消费者的环境中，比Executors.newFixedThreadPool()。
+LinkedBlockingQueue是一个基于链表实现的阻塞queue，它的性能ArrayBlockingQueue，但是差于ConcurrentLinkedQueue；并且它非常适于生产者消费者的环境中，比Executors.newFixedThreadPool()。  
 就是基于这个队列的，使用LinkedBlockingQueue时一定要设置容量，不然会有内存溢出的风险。

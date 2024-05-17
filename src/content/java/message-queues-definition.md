@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2022-09-25T15:20:35Z
-modDatetime: 2024-05-16T14:00:40Z
+modDatetime: 2024-05-17T17:56:34Z
 title: MQ
 featured: true
 draft: false
@@ -115,7 +115,7 @@ JMS具有两种通信模式：
 1. Point-to-Point Messaging Domain （点对点）
 2. Publish/Subscribe Messaging Domain （发布/订阅模式）
 
-在JMS API出现之前，大部分产品使用“点对点”和“发布/订阅”中的任一方式来进行消息通讯。JMS定义了这两种消息发送模型的规范，它们相互独立。任何JMS的提供者可以实现其中的一种或两种模型，这是它们自己的选择。JMS规范提供了通用接口保证我们基于JMS API编写的程序适用于任何一种模型。
+在JMS API出现之前，大部分产品使用"点对点"和"发布/订阅"中的任一方式来进行消息通讯。JMS定义了这两种消息发送模型的规范，它们相互独立。任何JMS的提供者可以实现其中的一种或两种模型，这是它们自己的选择。JMS规范提供了通用接口保证我们基于JMS API编写的程序适用于任何一种模型。
 
 ###### Point-to-Point Messaging Domain（点对点通信模型）
 
@@ -239,7 +239,7 @@ JMS具有两种通信模式：
 
 ### ZeroMQ
 
-ZeroMQ 号称是“史上最快的消息队列”，基于 C 语言开发，可以在任何平台通过任何代码连接，通过 inproc、IPC、TCP、TIPC、多播传送消息，支持发布-订阅、推-拉、共享队列等模式，高速异步 I/O 引擎。
+ZeroMQ 号称是"史上最快的消息队列"，基于 C 语言开发，可以在任何平台通过任何代码连接，通过 inproc、IPC、TCP、TIPC、多播传送消息，支持发布-订阅、推-拉、共享队列等模式，高速异步 I/O 引擎。
 
 根据官方的说法，ZeroMQ 是一个简单好用的传输层，像框架一样的可嵌入的 Socket 类库，使 Socket 编程更加简单、简洁、性能更高，是专门为高吞吐量/低延迟的场景开发。**ZeroMQ 与其他 MQ 有着本质的区别，它根本不是消息队列服务器，更类似于一个底层网络通讯库**，对原有 Socket API 进行封装，在使用引入对应的jar包即可，可谓是相当灵活。
 
@@ -253,7 +253,7 @@ RabbitMQ 2007年发布，是一个在 AMQP 基础上完成的，可复用的企�
 
 代理和负载平衡器在客户端与其目标节点之间引入了额外的网络跃点（甚至多个）。中介也可以成为网络争用点：它们的吞吐量将成为整个系统的限制因素。因此，代理和负载平衡器的网络带宽超额配置和吞吐量监视非常重要。
 
-当中间商在一段时间内没有任何活动时，它们也可以终止“空闲” TCP连接。在大多数情况下，这是不可取的。此类事件将导致服务器端的突然关闭连接日志消息以及客户端的I / O异常。
+当中间商在一段时间内没有任何活动时，它们也可以终止"空闲" TCP连接。在大多数情况下，这是不可取的。此类事件将导致服务器端的突然关闭连接日志消息以及客户端的I / O异常。
 
 在连接上启用心跳后，将导致周期性的轻型网络流量。因此，心跳具有保护客户端连接的副作用，该客户端连接可能会闲置一段时间，以防止代理和负载平衡器过早关闭。
 
@@ -323,7 +323,7 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
 
   路由键与队列完全匹配交换机。此种类型交换机，通过 RoutingKey 路由键将交换机和队列进行绑定，消息被发送到 exchange 时，需要根据消息的 RoutingKey 进行匹配，只将消息发送到完全匹配到此 RoutingKey 的队列（如果匹配了多个队列，则每个队列都会收到相同的消息）。
 
-  比如：如果一个队列绑定到交换机要求路由键为 “key”，则只转发 RoutingKey 标记为 “key” 的消息，不会转发 “key1”，也不会转发 “key2” 等等。它是完全匹配、单播的模式。
+  比如：如果一个队列绑定到交换机要求路由键为 "key"，则只转发 RoutingKey 标记为 "key" 的消息，不会转发 "key1"，也不会转发 "key2" 等等。它是完全匹配、单播的模式。
 
   ![image-20230519161049311](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230519161049311.png)
 
@@ -341,20 +341,20 @@ RabbitMQ 可以运行在 Erlang 语言所支持的平台上：
 
   Topic，主题类型交换机，此种交换机与 Direct 类似，也是需要通过 RoutingKey 路由键进行匹配分发，区别在于 Topic 可以进行模糊匹配，Direct 是完全匹配。
 
-  1. Topic 中，将 RoutingKey 通过 “.” 来分成多个部分。
-  2. “\*” 代表一个部分。
-  3. “#” 代表0个或多个部分（如果绑定的路由键为 “#” 时，则接收所有消息，路由键所有都匹配）。
+  1. Topic 中，将 RoutingKey 通过 "." 来分成多个部分。
+  2. "\*" 代表一个部分。
+  3. "#" 代表0个或多个部分（如果绑定的路由键为 "#" 时，则接收所有消息，路由键所有都匹配）。
 
   ![image-20230519162427816](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230519162427816.png)
 
-  然后发送一条消息，RoutingKey 为 “key1.key2.key3.key4”，那么根据 “.” 将这个路由键分为了四个部分，此条路由键将会匹配：
+  然后发送一条消息，RoutingKey 为 "key1.key2.key3.key4"，那么根据 "." 将这个路由键分为了四个部分，此条路由键将会匹配：
 
   1. key1.key2.key3.\*：成功匹配，因为\*可以代表一个部分。
   2. key1.#：成功匹配，因为 可以代表0或多个部分。
   3. \*.key3.\*.key4：成功匹配，因为第一和第三部分分别为key1和key3，且为四个部分，刚好匹配。
   4. #.key3.key4：成功匹配，#可以代表多个部分，正好匹配中了key1和key2。
 
-  如果发送消息 RoutingKey 为 “key1”，那么将只能匹配中 key1.#，#可以代表0个部分。
+  如果发送消息 RoutingKey 为 "key1"，那么将只能匹配中 key1.#，#可以代表0个部分。
 
 - **Headers Exchange（头交换机）**
 
@@ -438,9 +438,9 @@ RabbitMQ 以队列维度提供高可用的解决方案——镜像队列。
 
 | **ha-mode** | **ha-params** | **结果**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ----------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| exactly     | count         | 集群中队列副本的数量（主队列加上镜像）。count值为1表示一个副本：只有主节点。如果主节点不可用，则其行为取决于队列是否持久化。count值为2表示两个副本：一个队列主队列和一个队列镜像。换句话说:“镜像数=节点数-1”。如果运行队列主服务器的节点变得不可用，队列镜像将根据配置的镜像提升策略自动提升到主服务器。如果集群中的可用节点数少于count，则将队列镜像到所有节点。如果集群中有多个计数节点，并且一个包含镜像的节点宕机，那么将在另一个节点上创建一个新镜像。使用’ exactly ‘模式和’ ha-promot-on-shutdown ': ’ always '可能是危险的，因为队列可以跨集群迁移，并在停机时变得不同步。 |
+| exactly     | count         | 集群中队列副本的数量（主队列加上镜像）。count值为1表示一个副本：只有主节点。如果主节点不可用，则其行为取决于队列是否持久化。count值为2表示两个副本：一个队列主队列和一个队列镜像。换句话说:"镜像数=节点数-1"。如果运行队列主服务器的节点变得不可用，队列镜像将根据配置的镜像提升策略自动提升到主服务器。如果集群中的可用节点数少于count，则将队列镜像到所有节点。如果集群中有多个计数节点，并且一个包含镜像的节点宕机，那么将在另一个节点上创建一个新镜像。使用' exactly '模式和' ha-promot-on-shutdown ': ' always '可能是危险的，因为队列可以跨集群迁移，并在停机时变得不同步。 |
 | all         | 不设置        | 队列跨集群中的所有节点镜像。当一个新节点被添加到集群中时，队列将被镜像到该节点。这个设置非常保守。建议设置的副本值为大多数节点`N / 2 + 1`。镜像到所有节点会给所有集群节点带来额外的负担，包括网络I/O、磁盘I/O和磁盘空间的使用。                                                                                                                                                                                                                                                                                                                                                   |
-| nodes       | 节点名称      | 队列被镜像到节点名中列出的节点。节点名是在rabbitmqctl cluster_status中出现的Erlang节点名；它们的形式通常是“rabbit@hostname”。如果这些节点名中有任何一个不是集群的一部分，则不构成错误。如果在声明队列时列表中的节点都不在线，则将在声明客户机连接的节点上创建队列。                                                                                                                                                                                                                                                                                                               |
+| nodes       | 节点名称      | 队列被镜像到节点名中列出的节点。节点名是在rabbitmqctl cluster_status中出现的Erlang节点名；它们的形式通常是"rabbit@hostname"。如果这些节点名中有任何一个不是集群的一部分，则不构成错误。如果在声明队列时列表中的节点都不在线，则将在声明客户机连接的节点上创建队列。                                                                                                                                                                                                                                                                                                               |
 
 ###### 新镜像同步策略
 
@@ -542,10 +542,10 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
   用来设定全局配置参数，属于进程级的配置，通常和操作系统配置有关。
 
   - **log**：全局的日志配置，local0 是日志设备，info 表示日志级别。其中日志级别有err、warning、info、debug 四种可选。这个配置表示使用 127.0.0.1 上的 rsyslog 服务中的local0 日志设备，记录日志等级为info。
-  - **maxconn**：设定每个 haproxy 进程可接受的最大并发连接数，此选项等同于 Linux命令行选项“ulimit -n”。
+  - **maxconn**：设定每个 haproxy 进程可接受的最大并发连接数，此选项等同于 Linux命令行选项"ulimit -n"。
   - **user/ group**：设置运行 haproxy 进程的用户和组，也可使用用户和组的 uid 和gid 值来替代。
   - **daemon**：设置 HAProxy 进程进入后台运行。这是推荐的运行模式。
-  - **nbproc**：设置 HAProxy 启动时可创建的进程数，此参数要求将HAProxy 运行模式设置为“daemon”，默认只启动一个进程。根据使用经验，该值的设置应该小于服务器的 CPU 核数。创建多个进程，能够减少每个进程的任务队列，但是过多的进程可能会导致进程的崩溃。
+  - **nbproc**：设置 HAProxy 启动时可创建的进程数，此参数要求将HAProxy 运行模式设置为"daemon"，默认只启动一个进程。根据使用经验，该值的设置应该小于服务器的 CPU 核数。创建多个进程，能够减少每个进程的任务队列，但是过多的进程可能会导致进程的崩溃。
   - **pidfile**：指定 HAProxy 进程的 pid 文件。启动进程的用户必须有访问此文件的权限。
 
 - **defaults** 部分
@@ -580,11 +580,11 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
 
   此部分用于设置接收用户请求的前端虚拟节点。frontend 是在 HAProxy1.3 版本之后才引入的一个组件，同时引入的还有 backend 组件。通过引入这些组件，在很大程度上简化了 HAProxy 配置文件的复杂性。frontend 可以根据 ACL 规则直接指定要使用的后端。
 
-  - **bind**：此选项只能在 frontend 和 listen 部分进行定义，用于定义一个或几个监听的套接字。bind 的使用格式为:bind [<address>:<port_range>] interface <interface>其中，address 为可选选项，其可以为主机名或IP 地址，如果将其设置为“\*”或“0.0.0.0”，将监听当前系统的所有 IPv4 地址。port_range 可以是一个特定的 TCP 端口，也可是一个端口范围，小于 1024 的端口需要有特定权限的用户才能使用。interface 为可选选项，用来指定网络接口的名称，只能在 Linux 系统上使用。
+  - **bind**：此选项只能在 frontend 和 listen 部分进行定义，用于定义一个或几个监听的套接字。bind 的使用格式为:bind [<address>:<port_range>] interface <interface>其中，address 为可选选项，其可以为主机名或IP 地址，如果将其设置为"\*"或"0.0.0.0"，将监听当前系统的所有 IPv4 地址。port_range 可以是一个特定的 TCP 端口，也可是一个端口范围，小于 1024 的端口需要有特定权限的用户才能使用。interface 为可选选项，用来指定网络接口的名称，只能在 Linux 系统上使用。
   - **option httplog**：在默认情况下，haproxy 日志是不记录 HTTP 请求的，这样很不方便 HAProxy 问题的排查与监控。通过此选项可以启用日志记录 HTTP 请求。
-  - **option forwardfor**：如果后端服务器需要获得客户端的真实 IP，就需要配置此参数。由于 HAProxy 工作于反向代理模式，因此发往后端真实服务器的请求中的客户端 IP 均为 HAProxy 主机的 IP，而非真正访问客户端的地址，这就导致真实服务器端无法记录客户端真正请求来源的 IP，而“X-Forwarded-For”则可用于解决此问题。通过使用“forwardfor”选项，HAProxy 就可以向每个发往后端真实服务器的请求添加“X-Forwarded-For”记录，这样后端真实服务器日志可以通过“X-Forwarded-For”信息来记录客户端来源 IP。
+  - **option forwardfor**：如果后端服务器需要获得客户端的真实 IP，就需要配置此参数。由于 HAProxy 工作于反向代理模式，因此发往后端真实服务器的请求中的客户端 IP 均为 HAProxy 主机的 IP，而非真正访问客户端的地址，这就导致真实服务器端无法记录客户端真正请求来源的 IP，而"X-Forwarded-For"则可用于解决此问题。通过使用"forwardfor"选项，HAProxy 就可以向每个发往后端真实服务器的请求添加"X-Forwarded-For"记录，这样后端真实服务器日志可以通过"X-Forwarded-For"信息来记录客户端来源 IP。
   - **option httpclose**：此选项表示在客户端和服务器端完成一次连接请求后，HAProxy 将主动关闭此 TCP 连接。这是对性能非常有帮助的一个参数。
-  - **log global**：表示使用全局的日志配置，这里的“ global”表示引用在HAProxy 配置文件 global 部分中定义的 log 选项配置格式。
+  - **log global**：表示使用全局的日志配置，这里的" global"表示引用在HAProxy 配置文件 global 部分中定义的 log 选项配置格式。
   - **default_backend**：#指定默认的后端服务器池，也就是指定一组后端真实服务器，而这些真实服务器组将在 backend 段进行定义。这里的htmpool 就是一个后端服务器组。
 
 - **backend** 部分
@@ -609,7 +609,7 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
 
   - cookie：表示允许向 cookie 插入 SERVERID，每台服务器的 SERVERID 可在下面的 server 关键字中使用 cookie 关键字定义。
 
-  - option httpchk：此选项表示启用 HTTP 的服务状态检测功能。HAProxy 作为一款专业的负载均衡器，它支持对 backend 部分指定的后端服务节点的健康检查，以保证在后端 backend 中某个节点不能服务时，把从 frotend 端进来的客户端请求分配至 backend 中其他健康节点上，从而保证整体服务的可用性。“option httpchk”的用法如下：
+  - option httpchk：此选项表示启用 HTTP 的服务状态检测功能。HAProxy 作为一款专业的负载均衡器，它支持对 backend 部分指定的后端服务节点的健康检查，以保证在后端 backend 中某个节点不能服务时，把从 frotend 端进来的客户端请求分配至 backend 中其他健康节点上，从而保证整体服务的可用性。"option httpchk"的用法如下：
 
     | 参数    | 描述                                                                                                                                                                                                                                        |
     | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -623,9 +623,9 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
 
     - inter：设置健康状态检查的时间间隔，单位为毫秒。
 
-    - rise：设置从故障状态转换至正常状态需要成功检查的次数，例如。“rise 2”表示 2 次检查正确就认为此服务器可用。
+    - rise：设置从故障状态转换至正常状态需要成功检查的次数，例如。"rise 2"表示 2 次检查正确就认为此服务器可用。
 
-    - fall：设置后端服务器从正常状态转换为不可用状态需要检查的次数，例如，“fall 3”表示 3 次检查失败就认为此服务器不可用。
+    - fall：设置后端服务器从正常状态转换为不可用状态需要检查的次数，例如，"fall 3"表示 3 次检查失败就认为此服务器不可用。
 
     - cookie：为指定的后端服务器设定 cookie 值，此处指定的值将在请求入站时被检查，第一次为此值挑选的后端服务器将在后
 
@@ -679,10 +679,10 @@ HAProxy 配置文件根据功能和用途，主要有 5 个部分组成，但有
 
   此部分是 frontend 部分和 backend 部分的结合体。在 HAProxy1.3 版本之前，HAProxy 的所有配置选项都在这个部分中设置。为了保持兼容性，HAProxy 新的版本仍然保留了 listen 组件的配置方式。目前在 HAProxy 中，两种配置方式任选其一即可。
 
-  这个部分通过listen 关键字定义了一个名为“admin_stats”的实例，其实就是定义了一个 HAProxy 的监控页面，每个选项的含义如下：
+  这个部分通过listen 关键字定义了一个名为"admin_stats"的实例，其实就是定义了一个 HAProxy 的监控页面，每个选项的含义如下：
 
   - stats refresh：设置 HAProxy 监控统计页面自动刷新的时间。
-  - stats uri：设置 HAProxy 监控统计页面的URL 路径，可随意指定。例如、指定“stats uri /haproxy-status”，就可以过 <http://IP:9188/haproxy-status> 查看。
+  - stats uri：设置 HAProxy 监控统计页面的URL 路径，可随意指定。例如、指定"stats uri /haproxy-status"，就可以过 <http://IP:9188/haproxy-status> 查看。
   - stats realm：设置登录 HAProxy 统计页面时密码框上的文本提示信息。
   - stats auth：设置登录 HAProxy 统计页面的用户名和密码。用户名和密码通过冒号分割。可为监控页面设置多个用户名和密码，每行一个。
   - stats hide-version：用来隐藏统计页面上 HAProxy 的版本信息。
@@ -907,13 +907,13 @@ Haproxy 解决集群 session 共享问题，二种方法保持客户端 session 
 
 ### ActiveMQ
 
-ActiveMQ 介于 ZeroMQ 和 RabbitMQ 之间。类似于 ZeroMQ，它可以部署于代理模式和 P2P（点对点）模式。类似于 RabbitMQ，它易于实现高级场景，而且只需付出低消耗，被誉为消息中间件的“瑞士军刀”。
+ActiveMQ 介于 ZeroMQ 和 RabbitMQ 之间。类似于 ZeroMQ，它可以部署于代理模式和 P2P（点对点）模式。类似于 RabbitMQ，它易于实现高级场景，而且只需付出低消耗，被誉为消息中间件的"瑞士军刀"。
 
 支持 OpenWire、Stomp、AMQP v1.0、MQTT v3.1、REST、Ajax、Webservice 等多种协议，完全支持 JMS1.1 和 J2EE 1.4规范（事务、持久化、XA消息），支持持久化到数据库。但是 ActiveMQ 不够轻巧，而且对于队列较多的情况支持不好，据说还有丢消息的情况。
 
 ### Apollo
 
-Apache 称 Apollo 为最快、最强健的 STOMP（简单“流”文本定向消息协议，它提供了一个可互操作的连接模式，允许 STOMP 客户端与任意 STOMP 消息代理（Broker）进行交互。STOMP 协议由于设计简单，易于开发客户端，因此在多种语言和多种平台上得到广泛地应用）服务器。支持 STOMP、AMQP、MQTT、OpenWire 协议，支持 Topic、Queue、持久订阅等消费形式，支持对消息的多种处理，支持安全性处理，支持 REST 管理 API。
+Apache 称 Apollo 为最快、最强健的 STOMP（简单"流"文本定向消息协议，它提供了一个可互操作的连接模式，允许 STOMP 客户端与任意 STOMP 消息代理（Broker）进行交互。STOMP 协议由于设计简单，易于开发客户端，因此在多种语言和多种平台上得到广泛地应用）服务器。支持 STOMP、AMQP、MQTT、OpenWire 协议，支持 Topic、Queue、持久订阅等消费形式，支持对消息的多种处理，支持安全性处理，支持 REST 管理 API。
 
 ### Kafka
 
@@ -949,11 +949,11 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 上面我们提到kafka是个中间商，我们为什么不能去掉这个中间商呢，凭着我们的想象也会觉得去掉这些消息引擎系统会更好吧，那我们来谈谈消息引擎系统存在的意义：
 
-原因就是“**削峰填谷**”。这四个字简直比消息引擎本身还要有名气。
+原因就是"**削峰填谷**"。这四个字简直比消息引擎本身还要有名气。
 
-所谓的“削峰填谷”就是指缓冲上下游瞬时突发流量，使其更平滑。特别是对于那种发送能力很强的上游系统，如果没有消息引擎的保护，“脆弱”的下游系统可能会直接被压垮导致全链路服务“雪崩”。但是，一旦有了消息引擎，它能够有效地对抗上游的流量冲击，真正做到将上游的“峰”填满到“谷”中，避免了流量的震荡。消息引擎系统的另一大好处在于发送方和接收方的松耦合，这也在一定程度上简化了应用的开发，减少了系统间不必要的交互。
+所谓的"削峰填谷"就是指缓冲上下游瞬时突发流量，使其更平滑。特别是对于那种发送能力很强的上游系统，如果没有消息引擎的保护，"脆弱"的下游系统可能会直接被压垮导致全链路服务"雪崩"。但是，一旦有了消息引擎，它能够有效地对抗上游的流量冲击，真正做到将上游的"峰"填满到"谷"中，避免了流量的震荡。消息引擎系统的另一大好处在于发送方和接收方的松耦合，这也在一定程度上简化了应用的开发，减少了系统间不必要的交互。
 
-我们想象一下在双11期间我们购物的情景来形象的理解一下削峰填谷，感受一下Kafka在这中间是怎么去“抗”峰值流量的吧：
+我们想象一下在双11期间我们购物的情景来形象的理解一下削峰填谷，感受一下Kafka在这中间是怎么去"抗"峰值流量的吧：
 
 当我们点击某个商品以后进入付费页面，可是这个简单的流程中就可能包含多个子服务，比如点击购买按钮会调用订单系统生成对应的订单，而处理该订单会依次调用下游的多个子系统服务 ，比如调用支付宝和微信支付的接口、查询你的登录信息、验证商品信息等。显然上游的订单操作比较简单，所以它的 TPS（每秒事务处理量） 要远高于处理订单的下游服务，因此如果上下游系统直接对接，势必会出现下游服务无法及时处理上游订单从而造成订单堆积的情形。特别是当出现类似于秒杀这样的业务时，上游订单流量会瞬时增加，可能出现的结果就是直接压跨下游子系统服务。
 
@@ -1038,7 +1038,7 @@ Kafka是一种高吞吐量的分布式发布订阅消息系统（消息引擎系
 
 ##### Follower
 
-- Follower跟随Leader，所有写请求都通过Leader路由，数据变更会广播给所有Follower，Follower与Leader保持数据同步。如果Leader失效，则从Follower中选举出一个新的Leader。当Follower与Leader挂掉、卡住或者同步太慢，leader会把这个follower从“in sync replicas”（ISR）列表中删除，重新创建一个Follower。
+- Follower跟随Leader，所有写请求都通过Leader路由，数据变更会广播给所有Follower，Follower与Leader保持数据同步。如果Leader失效，则从Follower中选举出一个新的Leader。当Follower与Leader挂掉、卡住或者同步太慢，leader会把这个follower从"in sync replicas"（ISR）列表中删除，重新创建一个Follower。
 
 #### Kafka架构
 
@@ -1117,7 +1117,7 @@ producer端设置`request.required.acks`。
 
 ###### ISR 的最坏情况
 
-排除所有 replica 全部故障，ISR 的最坏情况就是 ISR 中只剩 leader 自己一个了。退化成 ack=1 的情况了，甚至还不如 ack=1。ack=1，说的是 producer 不等服务器完全同步完 ISR，只要 leader 写入成功就行了，但是可没说不进行同步了。该有的同步过程还是会进行的，但凡能同步，kafka 肯定会同步的，而 ack=1 的最坏情况，也是 ISR 只剩下 leader 了。换句话说，producer 为了提高吞吐量，没等 ISR 全部同步，但是心里还是希望接口同步完成的。而这种 leader 孤家寡人的最坏情况，书上说“退化成 ack=1”，不足以说明问题的严重性。
+排除所有 replica 全部故障，ISR 的最坏情况就是 ISR 中只剩 leader 自己一个了。退化成 ack=1 的情况了，甚至还不如 ack=1。ack=1，说的是 producer 不等服务器完全同步完 ISR，只要 leader 写入成功就行了，但是可没说不进行同步了。该有的同步过程还是会进行的，但凡能同步，kafka 肯定会同步的，而 ack=1 的最坏情况，也是 ISR 只剩下 leader 了。换句话说，producer 为了提高吞吐量，没等 ISR 全部同步，但是心里还是希望接口同步完成的。而这种 leader 孤家寡人的最坏情况，书上说"退化成 ack=1"，不足以说明问题的严重性。
 
 ISR 的最坏情况，会使 ack=-1 退化成 ack=1 的最坏情况，完全背离我们设置-1 的初衷（因为特定是同步不了了）。
 
@@ -1131,7 +1131,7 @@ ISR 的最坏情况，会使 ack=-1 退化成 ack=1 的最坏情况，完全背�
 
 ![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA5ZSP5ZmX,size_20,color_FFFFFF,t_70,g_se,x_16.jpeg)
 
-Leader维护了⼀个动态的 in-sync replica set（ISR）：和 Leader 保持同步的 Follower 集合。当 ISR 集合中的 Follower 完成数据的同步之后，Leader 就会给 Follower 发送 ACK。如果 Follower ⻓时间未向 Leader 同步数据，则该 Follower 将被踢出 ISR 集合，该时间阈值由replica.lag.time.max.ms 参数设定。Leader 发⽣故障后，就会从 ISR 中选举出新的 Leader。
+Leader维护了⼀个动态的 in-sync replica set（ISR）：和 Leader 保持同步的 Follower 集合。当 ISR 集合中的 Follower 完成数据的同步之后，Leader 就会给 Follower 发送 ACK。如果 Follower ⻓时间未向 Leader 同步数据，则该 Follower 将被踢出 ISR 集合，该时间阈值由replica.lag.time.max.ms 参数设定。Leader 发⽣故障后，就会从 ISR 中选举出新的 Leader。  
 kafka服务端中min.insync.replicas。 如果我们不设置的话，默认这个值是1。一个leader partition会维护一个ISR列表，这个值就是限制ISR列表里面 至少得有几个副本，比如这个值是2，那么当ISR列表里面只有一个副本的时候，往这个分区插入数据的时候会报错。
 
 #### Kafka高可用
@@ -1180,16 +1180,16 @@ Kafka Replication的数据流如下图所示：
 
 2.ACK前需要保证有多少个备份
 
-对于Kafka而言，定义一个Broker是否“活着”包含两个条件：
+对于Kafka而言，定义一个Broker是否"活着"包含两个条件：
 
 - 一是它必须维护与ZooKeeper的session（这个通过ZooKeeper的Heartbeat机制来实现）。
-- 二是Follower必须能够及时将Leader的消息复制过来，不能“落后太多”。
+- 二是Follower必须能够及时将Leader的消息复制过来，不能"落后太多"。
 
-Leader会跟踪与其保持同步的Replica列表，该列表称为ISR（即in-sync Replica）。如果一个Follower宕机，或者落后太多，Leader将把它从ISR中移除。这里所描述的“落后太多”指Follower复制的消息落后于Leader后的条数超过预定值（该值可在\$KAFKA_HOME/config/server.properties中通过replica.lag.max.messages配置，其默认值是4000）或者Follower超过一定时间（该值可在\$KAFKA_HOME/config/server.properties中通过replica.lag.time.max.ms来配置，其默认值是10000）未向Leader发送fetch请求。
+Leader会跟踪与其保持同步的Replica列表，该列表称为ISR（即in-sync Replica）。如果一个Follower宕机，或者落后太多，Leader将把它从ISR中移除。这里所描述的"落后太多"指Follower复制的消息落后于Leader后的条数超过预定值（该值可在\$KAFKA_HOME/config/server.properties中通过replica.lag.max.messages配置，其默认值是4000）或者Follower超过一定时间（该值可在\$KAFKA_HOME/config/server.properties中通过replica.lag.time.max.ms来配置，其默认值是10000）未向Leader发送fetch请求。
 
 Kafka的复制机制既不是完全的同步复制，也不是单纯的异步复制。事实上，完全同步复制要求所有能工作的Follower都复制完，这条消息才会被认为commit，这种复制方式极大的影响了吞吐率（高吞吐率是Kafka非常重要的一个特性）。而异步复制方式下，Follower异步的从Leader复制数据，数据只要被Leader写入log就被认为已经commit，这种情况下如果Follower都复制完都落后于Leader，而如果Leader突然宕机，则会丢失数据。而Kafka的这种使用ISR的方式则很好的均衡了确保数据不丢失以及吞吐率。Follower可以批量的从Leader复制数据，这样极大的提高复制性能（批量写磁盘），极大减少了Follower与Leader的差距。
 
-需要说明的是，Kafka只解决fail/recover，不处理“Byzantine”（“拜占庭”）问题。一条消息只有被ISR里的所有Follower都从Leader复制过去才会被认为已提交。这样就避免了部分数据被写进了Leader，还没来得及被任何Follower复制就宕机了，而造成数据丢失（Consumer无法消费这些数据）。而对于Producer而言，它可以选择是否等待消息commit，这可以通过request.required.acks来设置。这种机制确保了只要ISR有一个或以上的Follower，一条被commit的消息就不会丢失。
+需要说明的是，Kafka只解决fail/recover，不处理"Byzantine"（"拜占庭"）问题。一条消息只有被ISR里的所有Follower都从Leader复制过去才会被认为已提交。这样就避免了部分数据被写进了Leader，还没来得及被任何Follower复制就宕机了，而造成数据丢失（Consumer无法消费这些数据）。而对于Producer而言，它可以选择是否等待消息commit，这可以通过request.required.acks来设置。这种机制确保了只要ISR有一个或以上的Follower，一条被commit的消息就不会丢失。
 
 3.Leader Election算法
 
@@ -1198,7 +1198,7 @@ Leader选举本质上是一个分布式锁，有两种方式实现基于ZooKeepe
 - 节点名称唯一性：多个客户端创建一个节点，只有成功创建节点的客户端才能获得锁。
 - 临时顺序节点：所有客户端在某个目录下创建自己的临时顺序节点，只有序号最小的才获得锁。
 
-一种非常常用的选举leader的方式是“Majority Vote”（“少数服从多数”），但Kafka并未采用这种方式。这种模式下，如果我们有2f+1个Replica（包含Leader和Follower），那在commit之前必须保证有f+1个Replica复制完消息，为了保证正确选出新的Leader，fail的Replica不能超过f个。因为在剩下的任意f+1个Replica里，至少有一个Replica包含有最新的所有消息。这种方式有个很大的优势，系统的latency只取决于最快的几个Broker，而非最慢那个。Majority Vote也有一些劣势，为了保证Leader Election的正常进行，它所能容忍的fail的follower个数比较少。如果要容忍1个follower挂掉，必须要有3个以上的Replica，如果要容忍2个Follower挂掉，必须要有5个以上的Replica。也就是说，在生产环境下为了保证较高的容错程度，必须要有大量的Replica，而大量的Replica又会在大数据量下导致性能的急剧下降。这就是这种算法更多用在ZooKeeper这种共享集群配置的系统中而很少在需要存储大量数据的系统中使用的原因。例如HDFS的HA Feature是基于majority-vote-based journal，但是它的数据存储并没有使用这种方式。
+一种非常常用的选举leader的方式是"Majority Vote"（"少数服从多数"），但Kafka并未采用这种方式。这种模式下，如果我们有2f+1个Replica（包含Leader和Follower），那在commit之前必须保证有f+1个Replica复制完消息，为了保证正确选出新的Leader，fail的Replica不能超过f个。因为在剩下的任意f+1个Replica里，至少有一个Replica包含有最新的所有消息。这种方式有个很大的优势，系统的latency只取决于最快的几个Broker，而非最慢那个。Majority Vote也有一些劣势，为了保证Leader Election的正常进行，它所能容忍的fail的follower个数比较少。如果要容忍1个follower挂掉，必须要有3个以上的Replica，如果要容忍2个Follower挂掉，必须要有5个以上的Replica。也就是说，在生产环境下为了保证较高的容错程度，必须要有大量的Replica，而大量的Replica又会在大数据量下导致性能的急剧下降。这就是这种算法更多用在ZooKeeper这种共享集群配置的系统中而很少在需要存储大量数据的系统中使用的原因。例如HDFS的HA Feature是基于majority-vote-based journal，但是它的数据存储并没有使用这种方式。
 
 Kafka在ZooKeeper中动态维护了一个ISR（in-sync replicas），这个ISR里的所有Replica都跟上了leader，只有ISR里的成员才有被选为Leader的可能。在这种模式下，对于f+1个Replica，一个Partition能在保证不丢失已经commit的消息的前提下容忍f个Replica的失败。在大多数使用场景中，这种模式是非常有利的。事实上，为了容忍f个Replica的失败，Majority Vote和ISR在commit前需要等待的Replica数量是一样的，但是ISR需要的总的Replica的个数几乎是Majority Vote的一半。
 
@@ -1208,10 +1208,10 @@ Kafka在ZooKeeper中动态维护了一个ISR（in-sync replicas），这个ISR�
 
 在ISR中至少有一个follower时，Kafka可以确保已经commit的数据不丢失，但如果某个Partition的所有Replica都宕机了，就无法保证数据不丢失了。这种情况下有两种可行的方案：
 
-1. 等待ISR中的任一个Replica“活”过来，并且选它作为Leader
-2. 选择第一个“活”过来的Replica（不一定是ISR中的）作为Leader
+1. 等待ISR中的任一个Replica"活"过来，并且选它作为Leader
+2. 选择第一个"活"过来的Replica（不一定是ISR中的）作为Leader
 
-这就需要在可用性和一致性当中作出一个简单的折中。如果一定要等待ISR中的Replica“活”过来，那不可用的时间就可能会相对较长。而且如果ISR中的所有Replica都无法“活”过来了，或者数据都丢失了，这个Partition将永远不可用。选择第一个“活”过来的Replica作为Leader，而这个Replica不是ISR中的Replica，那即使它并不保证已经包含了所有已commit的消息，它也会成为Leader而作为consumer的数据源（前文有说明，所有读写都由Leader完成）。Kafka0.8.\*使用了第二种方式。根据Kafka的文档，在以后的版本中，Kafka支持用户通过配置选择这两种方式中的一种，从而根据不同的使用场景选择高可用性还是强一致性。
+这就需要在可用性和一致性当中作出一个简单的折中。如果一定要等待ISR中的Replica"活"过来，那不可用的时间就可能会相对较长。而且如果ISR中的所有Replica都无法"活"过来了，或者数据都丢失了，这个Partition将永远不可用。选择第一个"活"过来的Replica作为Leader，而这个Replica不是ISR中的Replica，那即使它并不保证已经包含了所有已commit的消息，它也会成为Leader而作为consumer的数据源（前文有说明，所有读写都由Leader完成）。Kafka0.8.\*使用了第二种方式。根据Kafka的文档，在以后的版本中，Kafka支持用户通过配置选择这两种方式中的一种，从而根据不同的使用场景选择高可用性还是强一致性。
 
 5.选举Leader
 
@@ -1219,7 +1219,7 @@ Kafka在ZooKeeper中动态维护了一个ISR（in-sync replicas），这个ISR�
 
 但是该方法会有3个问题：
 
-- **split-brain**： 这是由ZooKeeper的特性引起的，虽然ZooKeeper能保证所有Watch按顺序触发，但并不能保证同一时刻所有Replica“看”到的状态是一样的，这就可能造成不同Replica的响应不一致
+- **split-brain**： 这是由ZooKeeper的特性引起的，虽然ZooKeeper能保证所有Watch按顺序触发，但并不能保证同一时刻所有Replica"看"到的状态是一样的，这就可能造成不同Replica的响应不一致
 - **herd effect**： 如果宕机的那个Broker上的Partition比较多，会造成多个Watch被触发，造成集群内大量的调整
 - **ZooKeeper负载过重**： 每个Replica都要为此在ZooKeeper上注册一个Watch，当集群规模增加到几千个Partition时ZooKeeper负载会过重。
 
@@ -1232,9 +1232,9 @@ Kafka 0.8.\*的**Leader Election**方案解决了上述问题，它在所有brok
 - **LEO**：日志末端位移（Log End Offset）的缩写，表示每个partition的log最后一条Message的位置。新消息写入时将分配的偏移量（Offset）值，从0开始，随着消息不断写入递增。
 - **HW**： 高水位（High Watermark）的缩写，是指consumer能够看到的此partition的位置。 取一个partition对应的ISR中最小的LEO作为HW，consumer最多只能消费到HW所在的位置。
 
-kafka 中为了防止 log 文件过大导致数据定位效率低下而采取了分片和索引机制，将每个物理上的 partition 分为多个 segment。每个 segment 对应两个文件--“.index"文件和”.log“文件。”.index“ 文件存储大量的索引信息，”.log" 文件存储大量的数据，索引文件中的元数据指向对应数据文件中 message 的物理偏移地址。
+kafka 中为了防止 log 文件过大导致数据定位效率低下而采取了分片和索引机制，将每个物理上的 partition 分为多个 segment。每个 segment 对应两个文件--".index"文件和".log"文件。".index" 文件存储大量的索引信息，".log" 文件存储大量的数据，索引文件中的元数据指向对应数据文件中 message 的物理偏移地址。
 
-但是对于上层应用来说，可以将partition看成最小的存储单元（一个由多个segment文件拼接而成的“巨型”文件），每个partition都由一些列有序的、不可变的消息组成，这些消息被连续的追加到partition中。
+但是对于上层应用来说，可以将partition看成最小的存储单元（一个由多个segment文件拼接而成的"巨型"文件），每个partition都由一些列有序的、不可变的消息组成，这些消息被连续的追加到partition中。
 
 ![image-20230703112608060](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230703112608060.png)
 
@@ -1246,7 +1246,7 @@ ISR (In-Sync Replicas)，这个是指副本同步队列。副本数对Kafka的�
 
 **为什么在Kafka 0.9.0.0版本后移除了replica.lag.max.messages参数而只保留了replica.lag.time.max.ms作为ISR中副本管理的参数呢？**
 
-replica.lag.max.messages表示当前某个副本落后leader的消息数量超过了这个参数的值，那么leader就会把follower从ISR中删除。假设设置replica.lag.max.messages=4，那么如果producer一次传送至broker的消息数量都小于4条时，因为在leader接受到producer发送的消息之后而follower副本开始拉取这些消息之前，follower落后leader的消息数不会超过4条消息，故此没有follower移出ISR，所以这时候replica.lag.max.message的设置似乎是合理的。但是producer发起瞬时高峰流量，producer一次发送的消息超过4条时，也就是超过replica.lag.max.messages，此时follower都会被认为是与leader副本不同步了，从而被踢出了ISR。但实际上这些follower都是存活状态的且没有性能问题。那么在之后追上leader,并被重新加入了ISR。于是就会出现它们不断地剔出ISR然后重新回归ISR，这无疑增加了无谓的性能损耗。而且这个参数是broker全局的。设置太大了，影响真正“落后”follower的移除；设置的太小了，导致follower的频繁进出。无法给定一个合适的replica.lag.max.messages的值，故此，新版本的Kafka移除了这个参数。
+replica.lag.max.messages表示当前某个副本落后leader的消息数量超过了这个参数的值，那么leader就会把follower从ISR中删除。假设设置replica.lag.max.messages=4，那么如果producer一次传送至broker的消息数量都小于4条时，因为在leader接受到producer发送的消息之后而follower副本开始拉取这些消息之前，follower落后leader的消息数不会超过4条消息，故此没有follower移出ISR，所以这时候replica.lag.max.message的设置似乎是合理的。但是producer发起瞬时高峰流量，producer一次发送的消息超过4条时，也就是超过replica.lag.max.messages，此时follower都会被认为是与leader副本不同步了，从而被踢出了ISR。但实际上这些follower都是存活状态的且没有性能问题。那么在之后追上leader,并被重新加入了ISR。于是就会出现它们不断地剔出ISR然后重新回归ISR，这无疑增加了无谓的性能损耗。而且这个参数是broker全局的。设置太大了，影响真正"落后"follower的移除；设置的太小了，导致follower的频繁进出。无法给定一个合适的replica.lag.max.messages的值，故此，新版本的Kafka移除了这个参数。
 
 ###### HW和LEO
 
@@ -1278,7 +1278,7 @@ Kafka的ISR的管理最终都会反馈到Zookeeper节点上。具体位置为：
 
 ##### HA broker
 
-- 即/brokers/ids/[brokerId]）存储“活着”的broker信息。
+- 即/brokers/ids/[brokerId]）存储"活着"的broker信息。
 - topic注册信息（/brokers/topics/[topic]），存储该topic的所有partition的所有replica所在的broker id，第一个replica即为preferred replica，对一个给定的partition，它在同一个broker上最多只有一个replica,因此broker id可作为replica id。
 
 ##### controller
@@ -1290,15 +1290,15 @@ Kafka的ISR的管理最终都会反馈到Zookeeper节点上。具体位置为：
 
 ##### 写入方式
 
-producer 采用 push 模式将消息发布到 broker，每条消息都被 append 到 patition 中，属于顺序写磁盘（顺序写磁盘效率比随机写内存要高，保障 kafka 吞吐率）。
+producer 采用 push 模式将消息发布到 broker，每条消息都被 append 到 partition 中，属于顺序写磁盘（顺序写磁盘效率比随机写内存要高，保障 kafka 吞吐率）。
 
 ##### 消息路由
 
 producer 发送消息到 broker 时，会根据分区算法选择将其存储到哪一个 partition。其路由机制为：
 
-- 指定了 patition，则直接使用；
-- 未指定 patition 但指定 key，通过对 key 的 value 进行hash 选出一个
-- patition 和 key 都未指定，使用轮询选出一个 patition。
+- 指定了 partition，则直接使用；
+- 未指定 partition 但指定 key，通过对 key 的 value 进行hash 选出一个
+- partition 和 key 都未指定，使用轮询选出一个 partition。
 
 ##### 写入流程
 
@@ -1308,7 +1308,7 @@ producer 写入消息序列图如下所示：
 
 流程说明：
 
-- producer 先从 zookeeper 的 "/brokers/.../state" 节点找到该 partition 的 leader。
+- producer 先从 zookeeper 的 "/brokers/…/state" 节点找到该 partition 的 leader。
 - producer 将消息发送给该 leader。
 - leader 将消息写入本地 log。
 - followers 从 leader pull 消息，写入本地 log 后 leader 发送 ACK。
@@ -1318,7 +1318,7 @@ producer 写入消息序列图如下所示：
 
 ##### 存储方式
 
-物理上把 topic 分成一个或多个 patition（对应 server.properties 中的 num.partitions=3 配置），每个 patition 物理上对应一个文件夹（该文件夹存储该 patition 的所有消息和索引文件），如下：
+物理上把 topic 分成一个或多个 partition（对应 server.properties 中的 num.partitions=3 配置），每个 partition 物理上对应一个文件夹（该文件夹存储该 partition 的所有消息和索引文件），如下：
 
 ![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/90540631f5560f08b643d73401e9e73e.png)
 
@@ -1386,10 +1386,10 @@ kafka broker failover 序列图如下所示：
 4. 通过 partitionStateMachine 在 broker Topics Patch(/brokers/topics) 上注册 watcher。
 5. 若 delete.topic.enable=true（默认值是 false），则 partitionStateMachine 在 Delete Topic Patch(/admin/delete_topics) 上注册 watcher。
 6. 通过 replicaStateMachine在 Broker Ids Patch(/brokers/ids)上注册Watch。
-7. 初始化 ControllerContext 对象，设置当前所有 topic，“活”着的 broker 列表，所有 partition 的 leader 及 ISR等。
+7. 初始化 ControllerContext 对象，设置当前所有 topic，"活"着的 broker 列表，所有 partition 的 leader 及 ISR等。
 8. 启动 replicaStateMachine 和 partitionStateMachine。
 9. 将 brokerState 状态设置为 RunningAsController。
-10. 将每个 partition 的 Leadership 信息发送给所有“活”着的 broker。
+10. 将每个 partition 的 Leadership 信息发送给所有"活"着的 broker。
 11. 若 auto.leader.rebalance.enable=true（默认值是true），则启动 partition-rebalance 线程。
 12. 若 delete.topic.enable=true 且Delete Topic Patch(/admin/delete_topics)中有值，则删除相应的Topic。
 
@@ -1408,7 +1408,7 @@ kafka broker failover 序列图如下所示：
 
 ##### partition状态信息
 
-- /brokers/topics/[topicName]/partitions/[0...N] 其中[0..N]表示partition索引号
+- /brokers/topics/[topicName]/partitions/[0…N] 其中[0..N]表示partition索引号
 - /brokers/topics/[topicName]/partitions/[partitionId]/state
 
 > "controller_epoch": 表示kafka集群中的中央控制器选举次数,
@@ -1423,7 +1423,7 @@ kafka broker failover 序列图如下所示：
 
 ##### Broker注册信息
 
-- /brokers/ids/[0...N]
+- /brokers/ids/[0…N]
 - 每个broker的配置文件中都需要指定一个数字类型的id(全局不可重复),此节点为临时znode(EPHEMERAL)
 
 > "jmx_port": jmx端口号,
@@ -1540,7 +1540,7 @@ Consumer 启动的时候会在 Topic，Consumer group 维度发生负载均衡�
 
 ##### Consumer 端的负载均衡机制
 
-topic 在创建之处可以设置 comsumer queue数量。而 comsumer 在启动时会和comsumer queue绑定，这个绑定策略是咋样的？
+topic 在创建之处可以设置 consumer queue数量。而 consumer 在启动时会和comsumer queue绑定，这个绑定策略是咋样的？
 
 ![img](https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA572X5b-X5a6P,size_20,color_FFFFFF,t_70,g_se,x_16-20240130120814864.png)
 
@@ -1575,7 +1575,7 @@ RocketMQ 底层对 commitLog、consumeQueue 之类的磁盘文件的读写操作
 
 **传统IO，write() 过程是怎样？**
 
-wirte() 写请求 和 read()，需要先写入用户缓存区，然后通过系统调用，CPU 拷贝数据从用户缓存区到内核缓存区，再从内核缓存区拷贝到磁盘文件！
+write() 写请求 和 read()，需要先写入用户缓存区，然后通过系统调用，CPU 拷贝数据从用户缓存区到内核缓存区，再从内核缓存区拷贝到磁盘文件！
 
 - 第一次拷贝，把磁盘上的数据拷贝到操作系统内核的缓冲区里，这个拷贝的过程是通过 DMA 搬运的。
 - 第二次拷贝，把内核缓冲区的数据拷贝到用户的缓冲区里，于是我们应用程序就可以使用这部分数据了，这个拷贝到过程是由 CPU 完成的（用户态不能直接操作内核态缓存区，所以需要拷贝到用户态才能使用）。
@@ -1588,7 +1588,7 @@ wirte() 写请求 和 read()，需要先写入用户缓存区，然后通过系�
 
 所以，要想提高文件传输的性能，就需要**减少「用户态与内核态的上下文切换」和「内存拷贝」的次数**。
 
-**如何优化文件传输的性能？**
+**如何优化文件传输的性能？**  
 先来看看，如何减少「用户态与内核态的上下文切换」的次数呢？
 
 读取磁盘数据的时候，之所以要发生上下文切换，这是因为用户空间没有权限操作磁盘或网卡，内核的权限最高，这些操作设备的过程都需要交由操作系统内核来完成，所以一般要通过内核去完成某些任务的时候，就需要使用操作系统提供的系统调用函数。
@@ -1667,7 +1667,7 @@ Broker针对上述的磁盘文件高性能读写机制做的一些优化：
 
 ###### 消息的全局顺序和局部顺序
 
-- **全局顺序**：一个 Topic 一个队列，Producer 和 Consuemr 的并发都为一。
+- **全局顺序**：一个 Topic 一个队列，Producer 和 Consumer 的并发都为一。
 - **局部顺序**：某个队列消息是顺序的。
 
 ###### 零拷贝（Zero-copy）
@@ -1906,7 +1906,7 @@ mmap的好处是，mmap把设备内存映射到虚拟内存，则用户操作虚
 
 ![img](https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTYwMTE0MjAxMzAzMzkx?x-oss-process=image/format,png)
 
-虚拟空间装的大概是上面那些数据了，内存映射大概就是把设备地址映射到上图的红色段了，暂且称其为“内存映射段”，至于映射到哪个地址，是由操作系统分配的，操作系统会把进程空间划分为三个部分：
+虚拟空间装的大概是上面那些数据了，内存映射大概就是把设备地址映射到上图的红色段了，暂且称其为"内存映射段"，至于映射到哪个地址，是由操作系统分配的，操作系统会把进程空间划分为三个部分：
 
 （1）未分配的，即进程还未使用的地址
 

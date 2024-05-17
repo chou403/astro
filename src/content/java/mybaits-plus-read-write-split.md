@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-01-27T15:56:54Z
-modDatetime: 2024-05-14T09:37:15Z
+modDatetime: 2024-05-17T17:56:34Z
 title: Mybatis Plus
 featured: false
 draft: false
@@ -27,7 +27,7 @@ Dynamic DataSource：4.1.3
 
 Gradle 8.4
 
-...
+…
 
 ### 依赖引用
 
@@ -435,8 +435,8 @@ props:
 
 ## 可能会出现的问题
 
-Cause: javax.xml.bind.JAXBException: Implementation of JAXB-API has not been found on module path or classpath.
-JAXB API是java EE 的API，因此在java SE 9.0 中不再包含这个 Jar 包。java 9 中引入了模块的概念，默认情况下，Java SE中将不再包含java EE 的Jar包 。而在 java 6/7 / 8 时关于这个API 都是捆绑在一起的。
+Cause: javax.xml.bind.JAXBException: Implementation of JAXB-API has not been found on module path or classpath.  
+JAXB API是java EE 的API，因此在java SE 9.0 中不再包含这个 Jar 包。java 9 中引入了模块的概念，默认情况下，Java SE中将不再包含java EE 的Jar包 。而在 java 6/7 / 8 时关于这个API 都是捆绑在一起的。  
 jdk 版本较高，需要单独添加依赖
 
 ```yaml
@@ -445,7 +445,7 @@ implementation 'javax.xml.bind:jaxb-api:2.3.0'
 implementation 'com.sun.xml.bind:jaxb-impl:2.3.0'
 ```
 
-Caused by: org.apache.ibatis.executor.ExecutorException: Error preparing statement. Cause: org.apache.shardingsphere.infra.exception.TableNotExistsException: Table or view `sys_user` does not exist.
+Caused by: org.apache.ibatis.executor.ExecutorException: Error preparing statement. Cause: org.apache.shardingsphere.infra.exception.TableNotExistsException: Table or view `sys_user` does not exist.  
 多数据源，表存在多个，无法识别单表。需添加单表设置。[参考内容](https://shardingsphere.apache.org/document/current/en/user-manual/shardingsphere-jdbc/yaml-config/rules/single/)
 
 ```yaml
@@ -454,8 +454,8 @@ Caused by: org.apache.ibatis.executor.ExecutorException: Error preparing stateme
     - "*.*"
 ```
 
-Caused by: com.github.pagehelper.PageException: When you use the PageHelper pagination plugin, you must set the helper property
-使用 mybatis 分页插件 pagehelper，在不指定方言（dialect）的情况下回直接报错，报错信息是使用 pagehelper 插件必须设置 helper 属性；
+Caused by: com.github.pagehelper.PageException: When you use the PageHelper pagination plugin, you must set the helper property  
+使用 mybatis 分页插件 pagehelper，在不指定方言（dialect）的情况下回直接报错，报错信息是使用 pagehelper 插件必须设置 helper 属性；  
 application.yml 文件中添加
 
 ```yml

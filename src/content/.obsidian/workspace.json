@@ -77,8 +77,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "44ac3376835b9aca",
@@ -151,8 +150,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -167,5 +165,15 @@
     }
   },
   "active": "d6cf263035e75492",
-  "lastOpenFiles": ["java/algorithm-introductory-to-abandoned.md"]
+  "lastOpenFiles": [
+    "java/mybaits-plus-read-write-split.md",
+    "java/jdbc-base-definition.md",
+    "java/java-garbage-collection.md",
+    "java/message-queues-definition.md",
+    "java/java-spi-definition.md",
+    "java/blocking-queue-definition.md",
+    "java/algorithm-introductory-to-abandoned.md",
+    "java/sort.md.md",
+    "java/interview-record.md"
+  ]
 }

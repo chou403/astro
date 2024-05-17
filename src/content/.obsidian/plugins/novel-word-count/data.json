@@ -422,15 +422,15 @@
       "wordCountTowardGoal": 0,
       "wordGoal": null,
       "pageCount": 4.533333333333333,
-      "characterCount": 11628,
-      "nonWhitespaceCharacterCount": 9140,
+      "characterCount": 11636,
+      "nonWhitespaceCharacterCount": 9138,
       "readingTimeInMinutes": 3.6990188679245284,
       "linkCount": 0,
       "embedCount": 0,
       "aliases": null,
-      "createdDate": 1715650635309,
-      "modifiedDate": 1715650635313,
-      "sizeInBytes": 13603
+      "createdDate": 1715939794193,
+      "modifiedDate": 1715939794197,
+      "sizeInBytes": 13613
     },
     "java/message-queues-definition.md": {
       "isCountable": true,
@@ -440,15 +440,15 @@
       "wordCountTowardGoal": 0,
       "wordGoal": null,
       "pageCount": 120.53666666666666,
-      "characterCount": 80511,
-      "nonWhitespaceCharacterCount": 69349,
+      "characterCount": 79325,
+      "nonWhitespaceCharacterCount": 69351,
       "readingTimeInMinutes": 78.67320754716981,
       "linkCount": 0,
       "embedCount": 0,
       "aliases": null,
-      "createdDate": 1715839240873,
-      "modifiedDate": 1715839240878,
-      "sizeInBytes": 152800
+      "createdDate": 1715939745701,
+      "modifiedDate": 1715939745706,
+      "sizeInBytes": 151356
     },
     "java/jdbc-base-definition.md": {
       "isCountable": true,
@@ -465,8 +465,8 @@
       "embedCount": 0,
       "aliases": null,
       "createdDate": 1708533447826,
-      "modifiedDate": 1715835996049,
-      "sizeInBytes": 12372
+      "modifiedDate": 1715931425062,
+      "sizeInBytes": 12360
     },
     "java/java-spi-definition.md": {
       "isCountable": true,
@@ -483,8 +483,8 @@
       "embedCount": 0,
       "aliases": null,
       "createdDate": 1715839240807,
-      "modifiedDate": 1715839240811,
-      "sizeInBytes": 2044
+      "modifiedDate": 1715931423189,
+      "sizeInBytes": 2040
     },
     "java/java-lock-definition.md": {
       "isCountable": true,
@@ -512,33 +512,33 @@
       "wordCountTowardGoal": 0,
       "wordGoal": null,
       "pageCount": 66.41,
-      "characterCount": 39842,
-      "nonWhitespaceCharacterCount": 33893,
+      "characterCount": 39853,
+      "nonWhitespaceCharacterCount": 33894,
       "readingTimeInMinutes": 42.64116981132076,
       "linkCount": 0,
       "embedCount": 0,
       "aliases": null,
       "createdDate": 1715839240669,
-      "modifiedDate": 1715839240673,
-      "sizeInBytes": 80471
+      "modifiedDate": 1715939659854,
+      "sizeInBytes": 80388
     },
     "java/interview-record.md": {
       "isCountable": true,
       "isDirectory": false,
       "noteCount": 1,
-      "wordCount": 15718,
+      "wordCount": 17790,
       "wordCountTowardGoal": 0,
       "wordGoal": null,
-      "pageCount": 52.39333333333333,
-      "characterCount": 29392,
-      "nonWhitespaceCharacterCount": 25616,
-      "readingTimeInMinutes": 34.16732075471698,
+      "pageCount": 59.3,
+      "characterCount": 36190,
+      "nonWhitespaceCharacterCount": 31391,
+      "readingTimeInMinutes": 38.843396226415095,
       "linkCount": 0,
       "embedCount": 0,
       "aliases": null,
-      "createdDate": 1715915809796,
-      "modifiedDate": 1715915811415,
-      "sizeInBytes": 60901
+      "createdDate": 1715939793783,
+      "modifiedDate": 1715939795927,
+      "sizeInBytes": 71583
     },
     "java/feign-and-open-feign-definition.md": {
       "isCountable": true,
@@ -584,15 +584,15 @@
       "wordCountTowardGoal": 0,
       "wordGoal": null,
       "pageCount": 10.28,
-      "characterCount": 9150,
+      "characterCount": 9161,
       "nonWhitespaceCharacterCount": 7063,
       "readingTimeInMinutes": 7.017547169811321,
       "linkCount": 0,
       "embedCount": 0,
       "aliases": null,
       "createdDate": 1708533447478,
-      "modifiedDate": 1708533447481,
-      "sizeInBytes": 15263
+      "modifiedDate": 1715931420649,
+      "sizeInBytes": 15266
     },
     "java/algorithm-introductory-to-abandoned.md": {
       "isCountable": true,
@@ -602,15 +602,15 @@
       "wordCountTowardGoal": 0,
       "wordGoal": null,
       "pageCount": 26.633333333333333,
-      "characterCount": 14147,
-      "nonWhitespaceCharacterCount": 11899,
+      "characterCount": 14165,
+      "nonWhitespaceCharacterCount": 11891,
       "readingTimeInMinutes": 16.996264150943396,
       "linkCount": 0,
       "embedCount": 0,
       "aliases": null,
       "createdDate": 1715843135239,
-      "modifiedDate": 1715843135239,
-      "sizeInBytes": 30776
+      "modifiedDate": 1715931417434,
+      "sizeInBytes": 30792
     },
     "init-blog/terminal-development.md": {
       "isCountable": true,
