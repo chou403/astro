@@ -530,15 +530,15 @@
       "wordCountTowardGoal": 0,
       "wordGoal": null,
       "pageCount": 52.39333333333333,
-      "characterCount": 29363,
+      "characterCount": 29392,
       "nonWhitespaceCharacterCount": 25616,
       "readingTimeInMinutes": 34.16732075471698,
       "linkCount": 0,
       "embedCount": 0,
       "aliases": null,
-      "createdDate": 1715915054156,
-      "modifiedDate": 1715915792127,
-      "sizeInBytes": 60872
+      "createdDate": 1715915809796,
+      "modifiedDate": 1715915811415,
+      "sizeInBytes": 60901
     },
     "java/feign-and-open-feign-definition.md": {
       "isCountable": true,
