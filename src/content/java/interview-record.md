@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-01-30T12:28:25Z
-modDatetime: 2024-05-17T17:56:33Z
+modDatetime: 2024-05-25T17:40:28Z
 title: 面基记录
 featured: false
 draft: false
@@ -1194,3 +1194,1242 @@ Nacos 是一个开源的注册中心和配置中心，它旨在提供服务发�
 通过以上步骤，你可以将 Nacos 从 AP 模式切换到 CP 模式，以满足不同的分布式系统需求。
 
 总的来说，虽然 Nacos 默认是 AP 设计的，但在一些特定场景下，你可以通过适当的配置和架构设计来使其更接近 CP 设计。但需要注意的是，增加一致性往往会降低系统的可用性，因此需要权衡设计的各种因素。
+
+## 拦截器和过滤器的区别拦截器具体实现类是什么
+
+拦截器（Interceptor）和过滤器（Filter）是Java Web开发中用于对请求和响应进行预处理和后处理的两种机制。它们虽然在功能上有些重叠，但在实现原理、使用方式和应用场景上有所不同。
+
+### 拦截器（Interceptor）
+
+#### 拦截器特点
+
+1. **层级**：拦截器是在框架层面上进行的，通常在MVC框架（如Spring MVC）中使用。
+2. **范围**：拦截器可以对Controller层的方法调用进行拦截。
+3. **工作流程**：拦截器在请求进入Controller之前进行处理，可以在请求处理之前和之后执行特定的操作。
+4. **配置**：拦截器通常通过配置文件或注解进行配置。
+5. **实现**：拦截器通常实现特定框架提供的接口，例如在Spring MVC中实现`HandlerInterceptor`接口。
+
+#### 拦截器具体实现类
+
+在Spring MVC中，一个简单的拦截器实现示例如下：
+
+```java
+import org.springframework.web.servlet.HandlerInterceptor;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class MyInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 在请求处理之前执行的逻辑
+        return true; // 返回true继续执行后续处理，返回false中止请求
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        // 在请求处理之后但在视图渲染之前执行的逻辑
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // 在整个请求结束之后，通常用于资源清理
+    }
+}
+```
+
+### 过滤器（Filter）
+
+#### 过滤器特点
+
+1. **层级**：过滤器是在Servlet规范层面上的，属于Servlet容器。
+2. **范围**：过滤器可以对所有进入容器的请求和响应进行过滤。
+3. **工作流程**：过滤器在请求到达Servlet之前进行处理，可以对请求和响应进行修改。
+4. **配置**：过滤器通过在`web.xml`中配置或通过注解（如`@WebFilter`）进行配置。
+5. **实现**：过滤器需要实现`javax.servlet.Filter`接口。
+
+#### 过滤器具体实现类
+
+一个简单的过滤器实现示例如下：
+
+```java
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+
+public class MyFilter implements Filter {
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // 初始化配置
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        // 在请求处理之前执行的逻辑
+        chain.doFilter(request, response); // 继续执行后续处理
+        // 在请求处理之后执行的逻辑
+    }
+
+    @Override
+    public void destroy() {
+        // 资源清理
+    }
+}
+```
+
+### 区别总结
+
+- **拦截器**在更高的框架层面工作，主要用于对Controller的请求进行处理，依赖于特定的框架（如Spring MVC）。
+- **过滤器**在Servlet容器层面工作，可以对所有进入容器的请求和响应进行处理，与具体的框架无关。
+
+## 线程池有几种实现方法具体参数是什么
+
+在Java中，线程池是通过`java.util.concurrent`包中的`Executor`框架实现的。`Executor`框架提供了多种线程池的实现，每种线程池都有不同的参数和用途。以下是几种常见的线程池实现及其具体参数：
+
+### 1. `ThreadPoolExecutor`
+
+这是最灵活和强大的线程池实现，可以通过构造函数来设置各种参数。
+
+#### 构造函数参数
+
+```java
+public ThreadPoolExecutor(int corePoolSize,
+                          int maximumPoolSize,
+                          long keepAliveTime,
+                          TimeUnit unit,
+                          BlockingQueue<Runnable> workQueue,
+                          ThreadFactory threadFactory,
+                          RejectedExecutionHandler handler)
+```
+
+- `corePoolSize`：核心线程数，即使在空闲时也会保留在线程池中的线程数。
+- `maximumPoolSize`：线程池允许的最大线程数。
+- `keepAliveTime`：当线程数超过核心线程数时，多余的空闲线程存活的时间。
+- `unit`：`keepAliveTime`的时间单位。
+- `workQueue`：用于存放等待执行任务的队列。
+- `threadFactory`：用于创建新线程的工厂。
+- `handler`：用于处理任务拒绝的策略。
+
+#### 线程池示例
+
+```java
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+    5,                   // corePoolSize
+    10,                  // maximumPoolSize
+    60,                  // keepAliveTime
+    TimeUnit.SECONDS,    // unit
+    new LinkedBlockingQueue<Runnable>(), // workQueue
+    Executors.defaultThreadFactory(),    // threadFactory
+    new ThreadPoolExecutor.AbortPolicy() // handler
+);
+```
+
+### 2. `Executors`工厂方法
+
+`Executors`类提供了几种便捷的工厂方法来创建常用的线程池。
+
+#### 2.1. `newFixedThreadPool(int nThreads)`
+
+创建一个固定大小的线程池。
+
+#### 固定大小线程池示例
+
+```java
+ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
+```
+
+#### 2.2. `newCachedThreadPool()`
+
+创建一个可缓存的线程池，如果线程池长度超过处理需求，可灵活回收空闲线程，若无可回收线程则新建线程。
+
+#### 可缓存线程池示例
+
+```java
+ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+```
+
+#### 2.3. `newSingleThreadExecutor()`
+
+创建一个单线程的线程池，它会确保所有任务按照指定的顺序（FIFO, LIFO, 优先级）执行。
+
+#### 单线程线程池示例
+
+```java
+ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+```
+
+#### 2.4. `newScheduledThreadPool(int corePoolSize)`
+
+创建一个支持定时及周期性任务执行的线程池。
+
+#### 周期性线程池示例
+
+```java
+ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
+```
+
+### 3. 参数解释和选择
+
+- **`corePoolSize`和`maximumPoolSize`**：决定线程池在不同负载下的行为。对于固定线程池，`corePoolSize`和`maximumPoolSize`是相同的；对于缓存线程池，`maximumPoolSize`是`Integer.MAX_VALUE`。
+- **`keepAliveTime`和`unit`**：用于控制非核心线程的存活时间。
+- **`workQueue`**：选择适当的队列类型（如`LinkedBlockingQueue`, `SynchronousQueue`）对任务的调度策略影响很大。
+- **`threadFactory`**：允许自定义线程的创建方式，通常用于设置线程名称、优先级等。
+- **`handler`**：当任务添加到线程池中被拒绝时的处理策略，如`AbortPolicy`, `CallerRunsPolicy`, `DiscardPolicy`, `DiscardOldestPolicy`。
+
+通过合理设置这些参数，可以创建满足不同并发需求的线程池，实现高效的任务处理。
+
+## threadlocal 是干嘛的如何实现的
+
+`ThreadLocal` 是 Java 中的一种机制，允许你为每个线程创建独立的变量副本。这些变量副本对每个线程是隔离的，因此一个线程无法访问另一个线程的`ThreadLocal`变量。`ThreadLocal`常用于在多线程环境中存储不希望被共享的线程局部变量，例如用户会话、数据库连接等。
+
+### `ThreadLocal`的用途
+
+1. **线程安全**：避免多个线程访问共享变量导致的数据不一致和并发问题。
+2. **状态隔离**：为每个线程提供独立的变量副本，避免不同线程间的相互干扰。
+3. **简化代码**：简化了线程安全类的实现，无需显式使用锁机制。
+
+### `ThreadLocal`的实现
+
+使用`ThreadLocal`非常简单，主要包括以下几个步骤：
+
+1. **创建`ThreadLocal`实例**：
+
+   ```java
+   private static final ThreadLocal<SimpleDateFormat> dateFormatHolder =
+       new ThreadLocal<SimpleDateFormat>() {
+           @Override
+           protected SimpleDateFormat initialValue() {
+               return new SimpleDateFormat("dd-MM-yyyy");
+           }
+       };
+   ```
+
+2. **设置值**：
+
+   ```java
+   dateFormatHolder.set(new SimpleDateFormat("dd-MM-yyyy"));
+   ```
+
+3. **获取值**：
+
+   ```java
+   SimpleDateFormat dateFormat = dateFormatHolder.get();
+   ```
+
+4. **移除值**（推荐使用，以避免内存泄漏）：
+
+   ```java
+   dateFormatHolder.remove();
+   ```
+
+### 示例代码
+
+以下是一个完整的示例，展示如何在多线程环境中使用`ThreadLocal`来存储和获取每个线程的独立变量：
+
+```java
+public class ThreadLocalExample {
+    // 创建一个ThreadLocal变量，用于存储每个线程独立的SimpleDateFormat实例
+    private static final ThreadLocal<SimpleDateFormat> dateFormatHolder =
+        ThreadLocal.withInitial(() -> new SimpleDateFormat("dd-MM-yyyy"));
+
+    public static void main(String[] args) throws InterruptedException {
+        // 创建多个线程，并启动它们
+        Thread t1 = new Thread(() -> printDate("Thread-1"));
+        Thread t2 = new Thread(() -> printDate("Thread-2"));
+        Thread t3 = new Thread(() -> printDate("Thread-3"));
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+        // 等待所有线程执行完毕
+        t1.join();
+        t2.join();
+        t3.join();
+    }
+
+    private static void printDate(String threadName) {
+        // 获取当前线程的SimpleDateFormat实例
+        SimpleDateFormat dateFormat = dateFormatHolder.get();
+        Date now = new Date();
+        // 打印当前线程的日期格式
+        System.out.println(threadName + ": " + dateFormat.format(now));
+        // 移除当前线程的ThreadLocal变量，防止内存泄漏
+        dateFormatHolder.remove();
+    }
+}
+```
+
+在这个示例中，每个线程都会创建自己的`SimpleDateFormat`实例并进行日期格式化操作，互不干扰，确保了线程安全。
+
+### `ThreadLocal`的工作原理
+
+`ThreadLocal`的内部实现依赖于每个线程维护的一个`ThreadLocalMap`对象。每个`ThreadLocal`对象在`ThreadLocalMap`中都有一个独立的条目，该条目的键是`ThreadLocal`对象自身，值是实际的变量副本。
+
+以下是`ThreadLocal`的工作流程：
+
+1. **存储值**：当调用`ThreadLocal.set(T value)`方法时，当前线程的`ThreadLocalMap`会将`ThreadLocal`对象作为键，`value`作为值存储起来。
+2. **获取值**：当调用`ThreadLocal.get()`方法时，当前线程的`ThreadLocalMap`会使用`ThreadLocal`对象作为键，查找对应的值并返回。
+3. **初始化值**：如果在调用`ThreadLocal.get()`方法时当前线程的`ThreadLocalMap`中不存在对应的条目，会调用`initialValue()`方法来初始化值并存储。
+4. **移除值**：调用`ThreadLocal.remove()`方法时，会从当前线程的`ThreadLocalMap`中移除对应的条目，以避免内存泄漏。
+
+通过这种机制，`ThreadLocal`实现了每个线程独立的变量副本，确保了线程安全和数据隔离。
+
+## mq 生产者具体参数是什么传参都有哪些
+
+消息队列（Message Queue, MQ）生产者的具体参数和传参会因所使用的消息队列系统（如 Apache Kafka, RabbitMQ, Apache ActiveMQ 等）而有所不同。下面我将介绍几个常见消息队列系统的生产者参数和传参。
+
+### Apache Kafka 生产者参数
+
+在 Kafka 中，生产者参数可以通过 `Properties` 对象来配置，这些参数控制了消息发送的行为、性能和可靠性。
+
+#### 常见参数
+
+1. **`bootstrap.servers`**：Kafka 集群的地址，格式为 `host1:port1,host2:port2,…`。
+2. **`key.serializer`**：键的序列化器类。
+3. **`value.serializer`**：值的序列化器类。
+4. **`acks`**：指定了生产者在收到服务器完成请求的确认之前发送的记录将被认为已发送的次数。
+   - `acks=0`：生产者不会等待服务器的确认。
+   - `acks=1`：leader 写入日志后即确认。
+   - `acks=all`：所有同步副本确认。
+5. **`retries`**：发送失败时重试的次数。
+6. **`batch.size`**：生产者将尝试批量处理消息记录的大小，以字节为单位。
+7. **`linger.ms`**：生产者在发送一批消息之前等待更多记录加入批次的时间。
+8. **`buffer.memory`**：生产者用来缓冲等待发送到服务器的消息的内存总字节数。
+
+#### Kafka示例代码
+
+```java
+Properties props = new Properties();
+props.put("bootstrap.servers", "localhost:9092");
+props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+props.put("acks", "all");
+props.put("retries", 3);
+props.put("batch.size", 16384);
+props.put("linger.ms", 1);
+props.put("buffer.memory", 33554432);
+
+KafkaProducer<String, String> producer = new KafkaProducer<>(props);
+
+for (int i = 0; i < 100; i++) {
+    producer.send(new ProducerRecord<String, String>("my-topic", Integer.toString(i), Integer.toString(i)));
+}
+
+producer.close();
+```
+
+### RabbitMQ 生产者参数
+
+在 RabbitMQ 中，生产者使用的参数主要通过 AMQP 协议配置，并在发送消息时指定。
+
+#### RabbitMQ常见参数
+
+1. **`host`**：RabbitMQ 服务器的地址。
+2. **`port`**：RabbitMQ 服务器的端口，默认 5672。
+3. **`username`**：登录 RabbitMQ 的用户名。
+4. **`password`**：登录 RabbitMQ 的密码。
+5. **`virtualHost`**：虚拟主机。
+6. **`exchange`**：交换机名称。
+7. **`routingKey`**：路由键。
+8. **`mandatory`**：如果为 true, 当 RabbitMQ 不能根据自身的 Exchange 类型和路由键找到一个符合条件的 Queue 时，会将消息返回给生产者。
+9. **`immediate`**：已被弃用，不再推荐使用。
+
+#### RabbitMQ示例代码
+
+```java
+ConnectionFactory factory = new ConnectionFactory();
+factory.setHost("localhost");
+factory.setPort(5672);
+factory.setUsername("guest");
+factory.setPassword("guest");
+
+try (Connection connection = factory.newConnection();
+     Channel channel = connection.createChannel()) {
+    String exchangeName = "my-exchange";
+    String routingKey = "my-routing-key";
+    String message = "Hello, RabbitMQ!";
+
+    channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
+    System.out.println(" [x] Sent '" + message + "'");
+}
+```
+
+### Apache ActiveMQ 生产者参数
+
+在 ActiveMQ 中，生产者参数通过 JMS API 配置，通常在创建连接和会话时指定。
+
+#### ActiveMQ常见参数
+
+1. **`brokerURL`**：ActiveMQ Broker 的地址，例如 `tcp://localhost:61616`。
+2. **`queueName`**：目标队列名称。
+3. **`deliveryMode`**：消息的持久性（`DeliveryMode.NON_PERSISTENT` 或 `DeliveryMode.PERSISTENT`）。
+4. **`priority`**：消息优先级。
+5. **`timeToLive`**：消息过期时间。
+
+#### ActiveMQ示例代码
+
+```java
+ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+Connection connection = connectionFactory.createConnection();
+connection.start();
+
+Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+Destination destination = session.createQueue("my-queue");
+
+MessageProducer producer = session.createProducer(destination);
+producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+
+TextMessage message = session.createTextMessage("Hello, ActiveMQ!");
+
+producer.send(message);
+System.out.println("Sent message: " + message.getText());
+
+producer.close();
+session.close();
+connection.close();
+```
+
+这些是常见消息队列系统生产者的一些主要参数和使用示例。具体的参数配置可能会根据实际需求进行调整和优化。
+
+## jwt是怎么实现的
+
+JSON Web Token (JWT) 是一种基于 JSON 的开放标准（RFC 7519）用于在网络应用环境间传递声明。JWT 是一种紧凑的、URL 安全的方式，用于表示一组信息。它由三部分组成：头部（Header）、载荷（Payload）和签名（Signature）。以下是 JWT 的实现细节及其工作原理：
+
+### JWT 组成部分
+
+1. **Header**：头部通常包括两部分：令牌类型（即 JWT）和所使用的签名算法（如 HMAC SHA256 或 RSA）。
+
+   ```json
+   {
+     "alg": "HS256",
+     "typ": "JWT"
+   }
+   ```
+
+2. **Payload**：载荷部分包含声明（claims）。声明是有关实体（通常是用户）及其他数据的声明。声明可以分为三类：
+
+   - **Registered claims**：预定义的声明集，但不是强制的，例如 `iss`（发行者），`exp`（过期时间），`sub`（主题），`aud`（受众）。
+   - **Public claims**：可以随意定义的声明，但为了避免冲突，应该在 IANA JSON Web Token Registry 或使用包含倒数域名的自定义名称空间中定义。
+   - **Private claims**：自定义声明，通常是双方协商使用的声明。
+
+   ```json
+   {
+     "sub": "1234567890",
+     "name": "John Doe",
+     "admin": true
+   }
+   ```
+
+3. **Signature**：签名部分是通过将编码后的头部、编码后的载荷，以及一个密钥组合在一起，然后使用指定的签名算法生成的。
+
+   ```java
+   HMACSHA256(
+     base64UrlEncode(header) + "." +
+     base64UrlEncode(payload),
+     secret)
+   ```
+
+### JWT 工作原理
+
+1. **创建 JWT**：服务器在用户登录时验证用户身份，通过使用头部和载荷创建 JWT，然后用签名算法和密钥对其进行签名。生成的 JWT 令牌会返回给客户端。
+2. **存储 JWT**：客户端将收到的 JWT 令牌存储在浏览器的 Local Storage 或 Cookie 中。
+3. **发送 JWT**：客户端在每次请求时，将 JWT 令牌放在 HTTP 请求的 Authorization 头部中发送给服务器。
+
+   ```java
+   Authorization: Bearer <token>
+   ```
+
+4. **验证 JWT**：服务器接收到请求后，会验证 JWT 的签名和声明（例如过期时间）。如果验证通过，则处理请求；否则，返回401未授权状态。
+
+### 实现 JWT 示例（Java）
+
+以下是使用 Java 和 jjwt 库实现 JWT 的一个简单示例：
+
+#### 依赖项（Maven）
+
+```xml
+<dependency>
+  <groupId>io.jsonwebtoken</groupId>
+  <artifactId>jjwt</artifactId>
+  <version>0.9.1</version>
+</dependency>
+```
+
+#### 创建 JWT
+
+```java
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
+import java.util.Date;
+
+public class JwtExample {
+    private static final String SECRET_KEY = "mySecretKey";
+
+    public static String createJwt(String id, String issuer, String subject, long ttlMillis) {
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+
+        // JWT 构建器
+        return Jwts.builder()
+                .setId(id)
+                .setIssuedAt(now)
+                .setSubject(subject)
+                .setIssuer(issuer)
+                .setExpiration(new Date(nowMillis + ttlMillis))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
+
+    public static void main(String[] args) {
+        String jwt = createJwt("123", "issuer", "subject", 3600000);
+        System.out.println("Generated JWT: " + jwt);
+    }
+}
+```
+
+#### 验证 JWT
+
+```java
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+
+public class JwtExample {
+    private static final String SECRET_KEY = "mySecretKey";
+
+    public static Claims decodeJwt(String jwt) {
+        return Jwts.parser()
+                .setSigningKey(SECRET_KEY)
+                .parseClaimsJws(jwt)
+                .getBody();
+    }
+
+    public static void main(String[] args) {
+        String jwt = createJwt("123", "issuer", "subject", 3600000);
+        System.out.println("Generated JWT: " + jwt);
+
+        Claims claims = decodeJwt(jwt);
+        System.out.println("ID: " + claims.getId());
+        System.out.println("Subject: " + claims.getSubject());
+        System.out.println("Issuer: " + claims.getIssuer());
+        System.out.println("Expiration: " + claims.getExpiration());
+    }
+}
+```
+
+### 安全注意事项
+
+1. **密钥管理**：密钥必须安全存储，不能硬编码在代码中，应使用环境变量或安全的配置管理工具。
+2. **过期时间**：设置合理的过期时间，避免长期有效的令牌被滥用。
+3. **HTTPS**：在传输 JWT 时，确保使用 HTTPS 以防止中间人攻击。
+
+通过以上步骤，您可以在 Java 应用中实现 JWT 生成和验证机制。不同语言有不同的库和实现方式，但核心原理是一致的。
+
+## 前后端怎么保证安全性
+
+在前后端分离的架构中，保证安全性是一个综合性的任务，涉及到多种技术和最佳实践。以下是一些关键措施，以确保前后端通信的安全性。
+
+### 1. 使用 HTTPS
+
+确保所有通信使用 HTTPS 而不是 HTTP。HTTPS 加密数据传输，防止中间人攻击（MITM）和数据泄露。
+
+### 2. 身份验证和授权
+
+#### JWT（JSON Web Token）
+
+1. **生成和验证 JWT**：
+
+   - 在用户登录时生成 JWT，并将其返回给客户端。
+   - 客户端将 JWT 存储在 `localStorage` 或 `sessionStorage` 中（请注意，不建议将敏感信息存储在 `localStorage` 中，因为它容易受到 XSS 攻击）。
+   - 每次请求时，客户端在 HTTP 请求头中发送 JWT：
+
+   ```htt
+   Authorization: Bearer <token>
+   ```
+
+   - 服务器端验证 JWT 的签名和有效性。
+
+2. **过期时间**：
+   - 设置 JWT 的过期时间（例如 15 分钟），并使用刷新令牌机制来延长会话。
+
+#### OAuth2
+
+使用 OAuth2 进行授权，特别适用于涉及第三方服务的应用。OAuth2 提供了一种安全的方式来访问用户资源，而无需直接传递用户凭据。
+
+### 3. CSRF 防护
+
+Cross-Site Request Forgery（CSRF）是一种攻击方式，攻击者利用受害者的身份向服务器发送未经授权的请求。防护措施包括：
+
+1. **CSRF 令牌**：
+
+   - 服务器生成一个唯一的 CSRF 令牌，并在表单提交时包含此令牌。
+   - 服务器验证此令牌，以确保请求的合法性。
+
+2. **双重提交 Cookie**：
+   - 服务器生成一个 CSRF 令牌，并将其放入 HTTP 头和 Cookie 中。
+   - 客户端在每次请求时将此令牌从 Cookie 中提取，并在请求头中发送。
+   - 服务器验证这两个令牌是否匹配。
+
+### 4. 防止 XSS 攻击
+
+Cross-Site Scripting（XSS）是一种攻击方式，攻击者注入恶意脚本到网页中。
+
+1. **输入验证和输出编码**：
+
+   - 对所有用户输入进行验证和清理，防止恶意代码注入。
+   - 在输出时对数据进行编码，确保特殊字符不会被浏览器解释为代码。
+
+2. **Content Security Policy (CSP)**：
+   - 设置 CSP 头，限制可以执行的资源来源，从而防止恶意脚本的执行。
+
+### 5. 防止 SQL 注入
+
+SQL 注入是一种攻击方式，攻击者通过操纵 SQL 查询来访问或破坏数据库。
+
+1. **使用参数化查询**：
+
+   - 使用参数化查询或预处理语句，而不是直接拼接 SQL 字符串。
+
+2. **ORM 框架**：
+   - 使用 ORM 框架（如 Hibernate）来自动生成 SQL 语句，减少手动编写 SQL 的机会。
+
+### 6. 安全 HTTP 头
+
+使用安全相关的 HTTP 头可以进一步加强安全性。
+
+1. **Strict-Transport-Security (HSTS)**：
+
+   - 强制客户端（如浏览器）使用 HTTPS 访问资源，防止降级攻击。
+
+2. **X-Content-Type-Options**：
+
+   - 防止浏览器将响应内容类型从声明类型更改为其它类型，防止 MIME 类型混淆攻击。
+
+3. **X-Frame-Options**：
+
+   - 防止网站被嵌入到 `<iframe>` 中，防止点击劫持。
+
+4. **X-XSS-Protection**：
+   - 启用浏览器的 XSS 过滤器，防止某些类型的反射性 XSS 攻击。
+
+### 7. 安全编码和框架配置
+
+1. **使用最新版本的框架和库**：
+
+   - 保持依赖项的更新，确保修复已知的安全漏洞。
+
+2. **安全配置**：
+   - 确保框架和服务器的安全配置，禁用不必要的功能和服务。
+
+### 8. 定期安全审计和测试
+
+1. **代码审计**：
+
+   - 定期进行代码审计，识别和修复潜在的安全漏洞。
+
+2. **渗透测试**：
+
+   - 进行渗透测试，模拟攻击者的行为来发现系统的安全弱点。
+
+3. **自动化安全扫描**：
+   - 使用自动化工具进行安全扫描，发现和修复已知的安全问题。
+
+通过综合采用上述措施，可以在前后端分离的架构中有效地提升安全性，保护应用和用户数据免受各种攻击和威胁。
+
+## openfeign的实现原理如何实现的
+
+## 分库分表如何实现如何进行优化如何确定分到哪张表
+
+## mybatis和mybaits plus区别具体实现
+
+## synchronized和lock的区别具体实现
+
+在 Java 中，`synchronized` 和 `Lock` 是两种常用的并发控制机制，用于管理多线程对共享资源的访问。虽然它们都能实现线程同步，但它们在使用方式、功能和性能上有许多不同之处。
+
+### synchronized
+
+`synchronized` 是 Java 内置的同步机制，可以用来修饰方法或代码块，以确保同一时间只有一个线程可以执行被同步的代码。
+
+#### synchronized特点
+
+1. **内置于 Java 语言**：`synchronized` 是 Java 关键字，使用简单。
+2. **自动释放锁**：当线程退出同步方法或同步代码块时，会自动释放锁。
+3. **无法中断**：线程在等待获取 `synchronized` 锁时，不能被中断。
+4. **锁范围**：可以是方法级别（实例方法或静态方法）或代码块级别。
+
+#### synchronized示例代码
+
+```java
+public class SynchronizedExample {
+    private int count = 0;
+
+    public synchronized void increment() {
+        count++;
+    }
+
+    public void incrementBlock() {
+        synchronized (this) {
+            count++;
+        }
+    }
+
+    public synchronized int getCount() {
+        return count;
+    }
+}
+```
+
+### Lock
+
+`Lock` 是 Java 5 引入的 `java.util.concurrent.locks` 包中的一个接口，提供了比 `synchronized` 更灵活的锁机制。
+
+#### Lock特点
+
+1. **灵活性**：提供了比 `synchronized` 更加丰富的功能，如可中断的锁获取、超时获取锁、非块结构的锁释放等。
+2. **需要手动释放锁**：必须显式调用 `unlock()` 方法来释放锁。
+3. **可响应中断**：线程在等待获取锁时可以被中断。
+4. **多种实现**：例如 `ReentrantLock`，支持公平锁和非公平锁。
+
+#### Lock示例代码
+
+```java
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class LockExample {
+    private final Lock lock = new ReentrantLock();
+    private int count = 0;
+
+    public void increment() {
+        lock.lock();
+        try {
+            count++;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int getCount() {
+        lock.lock();
+        try {
+            return count;
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+### 具体实现细节
+
+#### synchronized 实现
+
+`sychronized` 关键字在 JVM 层面是通过 `monitorenter` 和 `monitorexit` 字节码指令实现的。每个对象都有一个监视器，当一个线程持有了对象的监视器时，其他线程只能等待。
+
+#### Lock（以 ReentrantLock 为例）
+
+`ReentrantLock` 是 `Lock` 的一个实现，提供了更高级的功能。它内部使用了 AQS（AbstractQueuedSynchronizer）来管理锁状态和线程队列。
+
+##### 主要方法
+
+1. **lock()**：获取锁，如果锁不可用，则当前线程将被禁用以进行线程调度，并处于休眠状态，直到锁被获取。
+2. **tryLock()**：尝试获取锁，立即返回，如果锁不可用则返回 `false`。
+3. **tryLock(long timeout, TimeUnit unit)**：在给定的等待时间内获取锁，如果锁不可用则等待指定时间，如果在超时之前获得锁，则返回 `true`，否则返回 `false`。
+4. **lockInterruptibly()**：如果当前线程未被中断，则获取锁。如果锁可用，则获取锁，并立即返回。如果锁不可用，则禁用当前线程进行线程调度，并处于休眠状态，直到发生以下三种情况之一：
+   - 锁由当前线程获得；
+   - 其他某个线程中断当前线程；
+   - 指定的等待时间过去。
+
+##### Lock 示例代码
+
+```java
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class LockExample {
+    private final Lock lock = new ReentrantLock();
+    private int count = 0;
+
+    public void increment() {
+        lock.lock();
+        try {
+            count++;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int getCount() {
+        lock.lock();
+        try {
+            return count;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void tryIncrement() {
+        if (lock.tryLock()) {
+            try {
+                count++;
+            } finally {
+                lock.unlock();
+            }
+        } else {
+            System.out.println("Could not get the lock");
+        }
+    }
+}
+```
+
+### 选择使用 synchronized 还是 Lock
+
+1. **简单同步**：如果只需要简单的同步，`synchronized` 更加方便且性能较好。
+2. **高级功能**：如果需要更高级的功能（如可中断锁获取、超时锁获取等），使用 `Lock` 会更合适。
+3. **性能考虑**：在高并发环境下，`Lock` 可能会有更好的性能和扩展性，特别是使用 `ReentrantLock` 的公平锁机制，可以避免线程饥饿问题。
+
+### 锁选择总结
+
+`synchronized` 和 `Lock` 各有优劣，选择哪种机制取决于具体需求和应用场景。在需要简单、可靠的同步时，`synchronized` 是首选；在需要更灵活的锁控制或在复杂的并发场景中，`Lock`（尤其是 `ReentrantLock`）提供了更丰富的功能和更好的性能。
+
+## 分布式锁是如何实现的具体实现是什么
+
+分布式锁是一种在分布式系统中用于控制对共享资源的并发访问的机制。由于多个节点可能同时访问同一资源，因此需要一种机制来确保这些访问不会产生冲突。分布式锁的实现方式有多种，常见的方法包括基于数据库、Redis 和 Zookeeper 的实现。下面介绍几种常见的分布式锁的实现方法及其具体实现。
+
+### 基于数据库的分布式锁
+
+#### 方法一：使用数据库表
+
+创建一个锁表，通过在该表中插入或删除特定记录来实现分布式锁。
+
+#### 使用数据库表示例代码
+
+```sql
+CREATE TABLE distributed_lock (
+    lock_name VARCHAR(255) PRIMARY KEY,
+    lock_value VARCHAR(255)
+);
+```
+
+```java
+public class DatabaseLock {
+    private static final String LOCK_NAME = "my_lock";
+    private final DataSource dataSource;
+
+    public DatabaseLock(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public boolean lock() {
+        try (Connection connection = dataSource.getConnection()) {
+            String sql = "INSERT INTO distributed_lock (lock_name, lock_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE lock_name=lock_name";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, LOCK_NAME);
+                ps.setString(2, UUID.randomUUID().toString());
+                ps.executeUpdate();
+                return true;
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public void unlock() {
+        try (Connection connection = dataSource.getConnection()) {
+            String sql = "DELETE FROM distributed_lock WHERE lock_name = ?";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, LOCK_NAME);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 基于 Redis 的分布式锁
+
+Redis 提供了 `SET` 命令的扩展，可以使用 `NX`（不存在时设置）和 `EX`（过期时间）参数实现分布式锁。可以通过 `Redisson` 或手动实现 Redis 分布式锁。
+
+#### 示例代码（手动实现）
+
+```java
+import redis.clients.jedis.Jedis;
+
+public class RedisLock {
+    private static final String LOCK_KEY = "distributed_lock";
+    private static final int EXPIRE_TIME = 10; // seconds
+    private final Jedis jedis;
+    private String lockValue;
+
+    public RedisLock(Jedis jedis) {
+        this.jedis = jedis;
+    }
+
+    public boolean lock() {
+        lockValue = UUID.randomUUID().toString();
+        String result = jedis.set(LOCK_KEY, lockValue, "NX", "EX", EXPIRE_TIME);
+        return "OK".equals(result);
+    }
+
+    public void unlock() {
+        String value = jedis.get(LOCK_KEY);
+        if (lockValue.equals(value)) {
+            jedis.del(LOCK_KEY);
+        }
+    }
+}
+```
+
+#### 示例代码（使用 Redisson）
+
+```java
+import org.redisson.Redisson;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
+
+import java.util.concurrent.TimeUnit;
+
+public class RedissonLock {
+    private final RedissonClient redissonClient;
+    private final RLock lock;
+
+    public RedissonLock() {
+        Config config = new Config();
+        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+        redissonClient = Redisson.create(config);
+        lock = redissonClient.getLock("distributed_lock");
+    }
+
+    public boolean lock() {
+        try {
+            return lock.tryLock(100, 10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            return false;
+        }
+    }
+
+    public void unlock() {
+        lock.unlock();
+    }
+}
+```
+
+### 基于 Zookeeper 的分布式锁
+
+Zookeeper 可以通过创建临时有序节点实现分布式锁。Apache Curator 是一个 Zookeeper 客户端库，简化了分布式锁的实现。
+
+#### 基于 Zookeeper 示例代码
+
+```java
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+
+public class ZookeeperLock {
+    private static final String ZK_ADDRESS = "127.0.0.1:2181";
+    private static final String LOCK_PATH = "/distributed_lock";
+    private final InterProcessMutex lock;
+    private final CuratorFramework client;
+
+    public ZookeeperLock() {
+        client = CuratorFrameworkFactory.newClient(ZK_ADDRESS, new ExponentialBackoffRetry(1000, 3));
+        client.start();
+        lock = new InterProcessMutex(client, LOCK_PATH);
+    }
+
+    public boolean lock() {
+        try {
+            return lock.acquire(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void unlock() {
+        try {
+            lock.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 分布式锁总结
+
+上述三种方法展示了在不同环境下实现分布式锁的具体实现方式：
+
+1. **基于数据库**：简单但效率较低，适用于小规模分布式系统。
+2. **基于 Redis**：性能好，使用方便，适用于大部分分布式系统。
+3. **基于 Zookeeper**：提供强一致性和高可用性，适用于需要高可靠性的分布式系统。
+
+选择合适的分布式锁实现方式取决于具体的应用场景和需求。
+
+## 转发和重定向区别 session会不会失效如何保证失效
+
+在 Web 开发中，转发（Forward）和重定向（Redirect）是两种常用的请求处理方式，它们在处理方式和应用场景上有显著区别。
+
+### 转发（Forward）
+
+转发是服务器端的操作，它将请求从一个 Servlet 或 JSP 转发到另一个 Servlet 或 JSP，整个过程发生在服务器端，浏览器不知道这次转发操作。
+
+#### 转发特点
+
+1. **URL 不变**：浏览器地址栏的 URL 不会发生变化。
+2. **共享请求对象**：原始请求和响应对象在整个转发过程中共享，参数和属性可以传递。
+3. **一次请求**：转发在同一次请求和响应的生命周期内完成。
+
+#### 转发示例代码
+
+```java
+RequestDispatcher dispatcher = request.getRequestDispatcher("/anotherPage.jsp");
+dispatcher.forward(request, response);
+```
+
+### 重定向（Redirect）
+
+重定向是服务器通知浏览器重新发送一个新的请求，浏览器会根据服务器返回的重定向地址重新发起请求。
+
+#### 重定向特点
+
+1. **URL 改变**：浏览器地址栏的 URL 会变为重定向的地址。
+2. **无法共享请求对象**：原始请求和响应对象在重定向后不再存在，无法传递参数和属性。
+3. **两次请求**：重定向会导致两次请求和响应。
+
+#### 重定向示例代码
+
+```java
+response.sendRedirect("anotherPage.jsp");
+```
+
+### Session 在转发和重定向中的表现
+
+#### 转发中的 Session
+
+在转发操作中，Session 不会失效。因为转发在同一次请求中处理，Session 信息保持不变。
+
+#### 重定向中的 Session
+
+在重定向操作中，Session 也不会失效。重定向虽然会产生新的请求，但同一个会话仍然存在，浏览器会自动携带原有的 Session ID，因此 Session 信息保持不变。
+
+### 确保 Session 失效的方法
+
+为了确保 Session 在适当的时候失效，可以采取以下几种方法：
+
+1. **手动使 Session 失效**：  
+   可以在特定操作（如用户注销）时手动使 Session 失效。
+
+   ```java
+   HttpSession session = request.getSession();
+   session.invalidate();
+   ```
+
+2. **设置 Session 过期时间**：  
+   可以在 web.xml 中配置 Session 过期时间。
+
+   ```xml
+   <session-config>
+       <session-timeout>30</session-timeout> <!-- 单位为分钟 -->
+   </session-config>
+   ```
+
+3. **配置 Session 过期时间**：  
+   可以在代码中动态设置 Session 的过期时间。
+
+   ```java
+   HttpSession session = request.getSession();
+   session.setMaxInactiveInterval(1800); // 单位为秒
+   ```
+
+4. **使用 Filter**：  
+   通过过滤器检查 Session 状态，决定是否重定向到登录页面或进行其他处理。
+
+   ```java
+   import javax.servlet.*;
+   import javax.servlet.http.HttpServletRequest;
+   import javax.servlet.http.HttpServletResponse;
+   import javax.servlet.http.HttpSession;
+   import java.io.IOException;
+
+   public class SessionFilter implements Filter {
+       @Override
+       public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+               throws IOException, ServletException {
+           HttpServletRequest req = (HttpServletRequest) request;
+           HttpServletResponse res = (HttpServletResponse) response;
+           HttpSession session = req.getSession(false);
+
+           if (session == null || session.getAttribute("user") == null) {
+               res.sendRedirect(req.getContextPath() + "/login.jsp");
+           } else {
+               chain.doFilter(request, response);
+           }
+       }
+
+       @Override
+       public void init(FilterConfig filterConfig) throws ServletException { }
+
+       @Override
+       public void destroy() { }
+   }
+   ```
+
+通过上述措施，可以有效管理和保证 Session 的有效性和失效，确保 Web 应用的安全性和用户体验。
+
+## mybatis plus 如何操作更新创建人这些东西具体实现方法类
+
+在使用 MyBatis-Plus 时，可以通过插件、拦截器和注解来自动处理字段的填充，例如更新和创建人、创建时间和更新时间等。MyBatis-Plus 提供了自动填充功能，通过实现`MetaObjectHandler`接口来实现自动填充功能。
+
+以下是具体实现步骤：
+
+### 1. 引入依赖
+
+确保你的项目中已经引入了 MyBatis-Plus 依赖。以下是 Maven 依赖配置：
+
+```xml
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-boot-starter</artifactId>
+    <version>3.4.3.4</version>
+</dependency>
+```
+
+### 2. 配置自动填充处理器
+
+创建一个类实现 `MetaObjectHandler` 接口，重写 `insertFill` 和 `updateFill` 方法来处理自动填充逻辑。
+
+#### MetaObjectHandler 示例代码
+
+```java
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+
+@Component
+public class MyMetaObjectHandler implements MetaObjectHandler {
+
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        // 自动填充创建时间和创建人
+        this.setFieldValByName("createTime", LocalDateTime.now(), metaObject);
+        this.setFieldValByName("createBy", getCurrentUser(), metaObject);
+        // 如果更新人和更新时间也需要在插入时填充
+        this.setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
+        this.setFieldValByName("updateBy", getCurrentUser(), metaObject);
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+        // 自动填充更新时间和更新人
+        this.setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
+        this.setFieldValByName("updateBy", getCurrentUser(), metaObject);
+    }
+
+    // 获取当前用户的方法（需要自行实现）
+    private String getCurrentUser() {
+        // 示例：从安全上下文中获取当前用户名
+        // return SecurityContextHolder.getContext().getAuthentication().getName();
+        return "system"; // 示例返回固定值
+    }
+}
+```
+
+### 3. 在实体类中使用注解
+
+在需要自动填充的字段上使用 `@TableField` 注解的 `fill` 属性来指定自动填充策略。
+
+#### @TableField 示例代码
+
+```java
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+import java.time.LocalDateTime;
+
+@TableName("your_table_name")
+public class YourEntity {
+
+    @TableId
+    private Long id;
+
+    @TableField(fill = FieldFill.INSERT)
+    private String createBy;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private String updateBy;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    // getters and setters
+}
+```
+
+### 4. 配置 Spring Boot 配置类
+
+确保你的 Spring Boot 配置类中扫描到 `MyMetaObjectHandler` 类。
+
+#### 扫描 @MyMetaObjectHandler 示例代码
+
+```java
+import org.springframework.context.annotation.Configuration;
+import org.mybatis.spring.annotation.MapperScan;
+
+@Configuration
+@MapperScan("com.yourpackage.mapper") // 替换为你的 Mapper 包路径
+public class MyBatisPlusConfig {
+    // 其他配置
+}
+```
+
+### 5. 验证自动填充功能
+
+现在，当你使用 MyBatis-Plus 执行插入或更新操作时，`createBy`、`createTime`、`updateBy` 和 `updateTime` 字段会自动填充，无需手动设置。
+
+### 示例测试代码
+
+```java
+import com.yourpackage.entity.YourEntity;
+import com.yourpackage.mapper.YourEntityMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class YourController {
+
+    @Autowired
+    private YourEntityMapper yourEntityMapper;
+
+    @PostMapping("/testInsert")
+    public void testInsert() {
+        YourEntity entity = new YourEntity();
+        // entity.setCreateBy("user1"); // 不需要手动设置
+        // entity.setCreateTime(LocalDateTime.now()); // 不需要手动设置
+        yourEntityMapper.insert(entity);
+    }
+
+    @PostMapping("/testUpdate")
+    public void testUpdate() {
+        YourEntity entity = yourEntityMapper.selectById(1L);
+        entity.setSomeField("newValue");
+        yourEntityMapper.updateById(entity);
+    }
+}
+```
+
+通过上述步骤，你可以在使用 MyBatis-Plus 时自动填充创建人和更新人等字段，简化开发并提高代码的可维护性。
