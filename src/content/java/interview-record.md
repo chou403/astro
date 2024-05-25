@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-01-30T12:28:25Z
-modDatetime: 2024-05-25T17:40:28Z
+modDatetime: 2024-05-25T21:07:50Z
 title: 面基记录
 featured: false
 draft: false
@@ -1288,7 +1288,7 @@ public class MyFilter implements Filter {
 
 在Java中，线程池是通过`java.util.concurrent`包中的`Executor`框架实现的。`Executor`框架提供了多种线程池的实现，每种线程池都有不同的参数和用途。以下是几种常见的线程池实现及其具体参数：
 
-### 1. `ThreadPoolExecutor`
+### 1. ThreadPoolExecutor
 
 这是最灵活和强大的线程池实现，可以通过构造函数来设置各种参数。
 
@@ -1304,13 +1304,13 @@ public ThreadPoolExecutor(int corePoolSize,
                           RejectedExecutionHandler handler)
 ```
 
-- `corePoolSize`：核心线程数，即使在空闲时也会保留在线程池中的线程数。
-- `maximumPoolSize`：线程池允许的最大线程数。
-- `keepAliveTime`：当线程数超过核心线程数时，多余的空闲线程存活的时间。
-- `unit`：`keepAliveTime`的时间单位。
-- `workQueue`：用于存放等待执行任务的队列。
-- `threadFactory`：用于创建新线程的工厂。
-- `handler`：用于处理任务拒绝的策略。
+- **corePoolSize**：核心线程数，即使在空闲时也会保留在线程池中的线程数。
+- **maximumPoolSize**：线程池允许的最大线程数。
+- **keepAliveTime**：当线程数超过核心线程数时，多余的空闲线程存活的时间。
+- **unit**：`keepAliveTime` 的时间单位。
+- **workQueue**：用于存放等待执行任务的队列。
+- **threadFactory**：用于创建新线程的工厂。
+- **handle**：用于处理任务拒绝的策略。
 
 #### 线程池示例
 
@@ -1326,45 +1326,45 @@ ThreadPoolExecutor executor = new ThreadPoolExecutor(
 );
 ```
 
-### 2. `Executors`工厂方法
+### 2. Executors 工厂方法
 
 `Executors`类提供了几种便捷的工厂方法来创建常用的线程池。
 
-#### 2.1. `newFixedThreadPool(int nThreads)`
+#### 2.1. newFixedThreadPool(int nThreads)
 
 创建一个固定大小的线程池。
 
-#### 固定大小线程池示例
+##### 固定大小线程池示例
 
 ```java
 ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
 ```
 
-#### 2.2. `newCachedThreadPool()`
+#### 2.2. newCachedThreadPool()
 
 创建一个可缓存的线程池，如果线程池长度超过处理需求，可灵活回收空闲线程，若无可回收线程则新建线程。
 
-#### 可缓存线程池示例
+##### 可缓存线程池示例
 
 ```java
 ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 ```
 
-#### 2.3. `newSingleThreadExecutor()`
+#### 2.3. newSingleThreadExecutor()
 
 创建一个单线程的线程池，它会确保所有任务按照指定的顺序（FIFO, LIFO, 优先级）执行。
 
-#### 单线程线程池示例
+##### 单线程线程池示例
 
 ```java
 ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 ```
 
-#### 2.4. `newScheduledThreadPool(int corePoolSize)`
+#### 2.4. newScheduledThreadPool(int corePoolSize)
 
 创建一个支持定时及周期性任务执行的线程池。
 
-#### 周期性线程池示例
+##### 周期性线程池示例
 
 ```java
 ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
@@ -1372,11 +1372,11 @@ ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(
 
 ### 3. 参数解释和选择
 
-- **`corePoolSize`和`maximumPoolSize`**：决定线程池在不同负载下的行为。对于固定线程池，`corePoolSize`和`maximumPoolSize`是相同的；对于缓存线程池，`maximumPoolSize`是`Integer.MAX_VALUE`。
-- **`keepAliveTime`和`unit`**：用于控制非核心线程的存活时间。
-- **`workQueue`**：选择适当的队列类型（如`LinkedBlockingQueue`, `SynchronousQueue`）对任务的调度策略影响很大。
-- **`threadFactory`**：允许自定义线程的创建方式，通常用于设置线程名称、优先级等。
-- **`handler`**：当任务添加到线程池中被拒绝时的处理策略，如`AbortPolicy`, `CallerRunsPolicy`, `DiscardPolicy`, `DiscardOldestPolicy`。
+- **corePoolSize 和 maximumPoolSize**：决定线程池在不同负载下的行为。对于固定线程池，`corePoolSize` 和 `maximumPoolSize` 是相同的；对于缓存线程池，`maximumPoolSize` 是 `Integer.MAX_VALUE`。
+- **keepAliveTime 和 unit**：用于控制非核心线程的存活时间。
+- **workQueue**：选择适当的队列类型（如`LinkedBlockingQueue`, `SynchronousQueue`）对任务的调度策略影响很大。
+- **threadFactory**：允许自定义线程的创建方式，通常用于设置线程名称、优先级等。
+- **handler**：当任务添加到线程池中被拒绝时的处理策略，如`AbortPolicy`, `CallerRunsPolicy`, `DiscardPolicy`, `DiscardOldestPolicy`。
 
 通过合理设置这些参数，可以创建满足不同并发需求的线程池，实现高效的任务处理。
 
