@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-01-30T12:28:25Z
-modDatetime: 2024-05-25T21:07:50Z
+modDatetime: 2024-05-25T22:05:08Z
 title: 面基记录
 featured: false
 draft: false
@@ -27,98 +27,190 @@ Java 中的引用类型分别为**强、软、弱、虚**。
 
 ## Rocketmq 消息堆积 堆积到哪里
 
-在 Apache RocketMQ 中，消息堆积主要发生在以下几个地方：
+在Apache RocketMQ中，消息堆积（backlog）是指消息未能及时消费，积压在某个存储位置的情况。了解消息堆积的存储位置以及如何处理消息堆积对保证消息系统的可靠性和性能非常重要。以下是关于RocketMQ消息堆积的详细解释：
 
-1. **Broker（代理）端的消息队列**：
-   - 当生产者发送消息到 RocketMQ 时，这些消息首先存储在 Broker 端的消息队列中。如果消费者的消费速度跟不上生产者的发送速度，消息会在 Broker 端的消息队列中堆积。
-2. **消息存储（Message Store）**：
-   - Broker 会将接收到的消息持久化到磁盘上（CommitLog 文件）。如果消息没有被及时消费，这些消息会在磁盘的存储文件中积累。
-3. **消息队列文件（ConsumeQueue）**：
-   - 每个主题（Topic）的每个队列（Queue）都有相应的 ConsumeQueue 文件，这些文件记录了消息的物理偏移量和大小。当消息堆积时，这些 ConsumeQueue 文件会变得越来越大，因为记录了大量未消费的消息。
-4. **索引文件（IndexFile）**：
-   - RocketMQ 还会为消息创建索引文件，用于快速查询。如果消息未被消费，索引文件的数量和大小也会增加。
+### 消息堆积的位置
 
-消息堆积的主要原因包括：
+1. **Broker 存储**：
 
-- **消费者处理能力不足**：消费者处理消息的速度低于生产者发送消息的速度。
-- **消费延迟**：网络延迟或消费者应用程序的性能问题导致消息处理延迟。
-- **系统瓶颈**：Broker 或消费者端的硬件资源（如 CPU、内存、磁盘 IO 等）不足。
+   - RocketMQ的Broker节点负责消息的存储和传递。消息首先存储在Broker的磁盘上，具体来说是存储在`CommitLog`文件中。
+   - 消息写入`CommitLog`后，根据配置和主题分区（Topic/Queue）被分发到相应的`ConsumeQueue`中，供消费者消费。
+   - 如果消费者处理消息的速度跟不上生产者发送消息的速度，消息会堆积在Broker的`CommitLog`和`ConsumeQueue`中。
 
-为了解决消息堆积问题，可以采取以下措施：
+2. **消息消费进度**：
+   - RocketMQ通过`Consumer Offset`（消费进度）来追踪每个消费者组的消费位置。
+   - 如果消费进度滞后（例如，由于消费者性能不足或故障），未消费的消息将继续堆积在Broker的存储中。
 
-- **扩展消费者**：增加消费者实例，以提高消息处理能力。
-- **优化消费者代码**：提高消费者应用程序的性能，减少处理单条消息的时间。
-- **调整消费策略**：如批量消费，增加每次拉取的消息数量。
-- **扩展 Broker 集群**：增加 Broker 节点，以分散消息负载。
+### 处理消息堆积的方法
 
-通过这些方法，可以有效地减少或避免消息堆积，提高 RocketMQ 系统的整体性能和稳定性。
+1. **增加消费者实例**：
 
-监控和管理消息堆积是 RocketMQ 运维中的重要任务。可以通过以下方式查看和处理堆积：
+   - 增加消费者实例的数量，提高消费能力。可以通过增加消费者进程或实例来并行处理消息。
 
-- **监控工具**：使用 RocketMQ 提供的监控工具（如 mqadmin 命令行工具）或阿里云控制台来检查 Broker 和 Topic 的消息状态，包括堆积数量、堆积时间等。
-- **报警设置**：配置告警规则，当消息堆积达到一定阈值时，自动触发报警通知。
-- **性能优化**：检查 Consumer 端的消费性能，优化消费逻辑，提高消费速度。  
-  扩展 Consumer：如果需要，可以增加 Consumer 实例来并行消费，分散消费压力。  
-  总之，RocketMQ 消息堆积是由于生产速度大于消费速度导致的，需要通过监控、优化和扩展来避免和解决。
+2. **提升消费者性能**：
 
-## OpenFeign 如何实现的消息间内部调用 重要
+   - 优化消费者的处理逻辑，提高单个消费者的消费速度。
+   - 确保消费者的网络、IO、CPU等资源充足，避免瓶颈。
 
-OpenFeign 是一个基于注解和反射的声明式 HTTP 客户端，用于简化服务之间的 HTTP 调用。它的实现基于 Spring Cloud，并且支持了对服务间内部调用的封装和简化。
+3. **调整消费策略**：
 
-OpenFeign 实现服务间内部调用的基本原理如下：
+   - 调整消费者的并发消费配置，例如`consumeThreadMin`和`consumeThreadMax`参数，允许消费者同时处理更多的消息。
 
-1. **声明式接口定义**：首先，你需要定义一个接口，该接口中声明了你想要调用的服务的 HTTP 接口。这些接口方法使用了标准的 Spring MVC 或 JAX-RS 注解来描述 HTTP 请求。
+4. **扩展Broker集群**：
 
-2. **动态代理**：在 Spring 容器启动时，OpenFeign 会扫描并解析这些带有特定注解的接口，并通过动态代理技术为这些接口生成代理类。
+   - 增加Broker节点，分散消息存储压力。确保Broker集群有足够的存储和处理能力来应对高并发的消息写入和读取。
 
-3. **注解解析**：代理类在执行接口方法时，会根据方法上的注解来构造对应的 HTTP 请求，并将请求发送到目标服务。OpenFeign 支持的注解包括 @RequestMapping、@GetMapping、@PostMapping、@PutMapping、@DeleteMapping 等。
+5. **流控（流量控制）**：
 
-4. **HTTP 客户端**：OpenFeign 内部使用了 Spring 提供的 RestTemplate 或者 WebClient 等 HTTP 客户端来发送 HTTP 请求。
+   - 通过流控手段限制生产者的消息发送速度，避免消息过快堆积。
+   - 可以在生产者端配置发送消息的速率限制。
 
-5. **负载均衡和服务发现**：OpenFeign 集成了 Ribbon 负载均衡器和 Eureka 或者 Consul 等服务发现组件，能够自动地实现服务的负载均衡和服务发现功能。
+6. **监控和报警**：
+   - 监控RocketMQ的各项指标，包括消息堆积情况、消费者消费进度、Broker的存储使用情况等。
+   - 设置报警机制，及时发现和处理消息堆积问题。
 
-总的来说，OpenFeign 使用了动态代理技术和注解解析机制来简化服务间的内部调用。通过在接口方法上使用标准的 Spring MVC 或 JAX-RS 注解来描述 HTTP 请求，开发者可以像调用本地方法一样来调用远程服务。这样就大大简化了服务之间的通信代码，并提高了开发效率。
+### 如何确定消息堆积的位置
 
-OpenFeign 内部使用了同步的 HTTP 客户端，因此它在内部调用时也会是同步的。这种同步的调用方式适用于简单的场景，但如果需要支持高性能或者高并发，那么 OpenFeign 可能就不够用了。
+1. **查看Broker的存储使用情况**：
 
-要实现消息间内部调用，可以使用异步的 HTTP 客户端，例如使用 Spring 的 `AsyncHttpClient`。在异步模式下，客户端会创建一个请求，然后在不同的线程中异步地处理请求。这样可以避免阻塞，提高性能。但同时，这种模式也更加复杂，需要更详细的错误处理和并发控制。
+   - 可以通过RocketMQ的管理控制台（RocketMQ Console）查看各个Broker的`CommitLog`和`ConsumeQueue`的使用情况。
+   - 监控各个Topic的消息堆积量和消费进度。
 
-如果你想要在 OpenFeign 中实现异步内部调用，可以参考以下步骤：
+2. **监控消费者的消费进度**：
 
-1. 引入异步客户端库：在你的项目中引入 Spring 的异步客户端库，例如 spring-web-flux。
+   - 通过RocketMQ提供的命令行工具或管理控制台查看消费者组的消费进度，确定哪些消费者组存在消费滞后。
+   - 检查消费者的消费日志，确认是否存在异常或瓶颈。
 
-2. 创建异步客户端：在你的项目中创建一个异步客户端，可以使用 WebFluxClientTemplate 或者 RestTemplate 的异步版本。
+3. **分析RocketMQ的监控指标**：
+   - RocketMQ集成了多种监控工具（如Prometheus、Grafana等），可以通过这些工具实时监控消息堆积情况和系统性能。
 
-3. 编写异步调用代码：使用异步客户端调用远程服务，并在回调函数中处理结果。例如：
+### 结论
 
-   ```java
-   @Autowired
-   private AsyncHttpClient asyncHttpClient;
+RocketMQ的消息堆积主要发生在Broker的`CommitLog`和`ConsumeQueue`中。处理消息堆积需要从增加消费者实例、提升消费者性能、调整消费策略、扩展Broker集群、实施流控以及加强监控和报警等多方面入手。通过综合运用这些手段，可以有效缓解和处理消息堆积问题，确保消息系统的稳定性和高效性。
 
-   public void asyncInternalCall(String url, String method, Object body) {
-       asyncHttpClient.exchange()
-           .request(method, url, body)
-           .subscribe(response -> {
-               // 处理响应
-               System.out.println("Response: " + response.body());
-           }, error -> {
-               // 处理错误
-               System.err.println("Error: " + error);
-           });
-   }
-   ```
+## OpenFeign 实现消息间内部调用原理
 
-4. 在 OpenFeign 中使用异步客户端：在你的 OpenFeign 接口中，使用异步客户端进行内部调用。例如：
+OpenFeign是一种声明式的HTTP客户端，旨在简化微服务之间的通信。其实现消息间内部调用的原理主要包括以下几个方面：
 
-   ```java
-   @FeignClient("service-name")
-   public interface ServiceFeignClient {
-       @PostMapping("/api/v1/internal-call")
-       AsyncResult<String> asyncInternalCall(@RequestBody Object body);
-   }
-   ```
+### 1. 动态代理
 
-这样，在调用 ServiceFeignClient 的 asyncInternalCall 方法时，异步客户端会自动处理请求的异步执行。
+OpenFeign的核心是利用Java的动态代理机制创建HTTP客户端。在运行时，Feign会为每个定义的接口创建一个代理对象，这个代理对象会拦截接口方法的调用，并将其转换为HTTP请求。
+
+#### 具体过程
+
+- **接口定义**：开发者定义一个接口，使用Feign的注解标注HTTP方法和请求参数。
+
+  ```java
+  @FeignClient(name = "user-service")
+  public interface UserServiceClient {
+      @GetMapping("/users/{id}")
+      User getUserById(@PathVariable("id") Long id);
+  }
+  ```
+
+- **代理对象**：在运行时，Feign会为`UserServiceClient`接口创建一个代理对象。当调用`getUserById`方法时，这个调用会被代理对象拦截。
+
+- **请求构建**：代理对象会根据方法上的注解信息构建HTTP请求，包括请求方法（GET、POST等）、URL、路径参数、请求头和请求体等。
+
+- **请求发送**：构建好的HTTP请求通过HTTP客户端（如Apache HttpClient或OkHttp）发送到指定的远程服务。
+
+### 2. 注解驱动的配置
+
+Feign通过注解（如`@FeignClient`、`@GetMapping`、`@PostMapping`、`@RequestParam`、`@PathVariable`等）来定义客户端接口和请求的详细信息。这些注解使得开发者可以直观地配置HTTP请求，而无需手动处理低层次的HTTP细节。
+
+### 3. 服务发现与负载均衡
+
+Feign可以与Spring Cloud集成，利用服务发现（如Eureka）和负载均衡（如Ribbon）功能：
+
+- **服务发现**：通过`@FeignClient(name = "user-service")`，Feign可以从服务注册中心（如Eureka）获取`user-service`的实例列表。
+- **负载均衡**：Feign会结合Ribbon（默认集成在Spring Cloud中），在多个服务实例之间进行负载均衡。Feign客户端会自动选择一个服务实例，并将请求发送到该实例。
+
+### 4. 请求模板化
+
+Feign使用请求模板（Request Template）来管理和复用请求参数和头信息。每次代理对象拦截方法调用时，都会生成一个对应的请求模板，通过模板填充请求参数，构建最终的HTTP请求。
+
+### 5. 客户端配置
+
+Feign允许高度可配置化，通过配置文件或编程方式定制HTTP客户端的行为，包括超时设置、重试策略、日志记录等。
+
+- **超时设置**：
+
+  ```yaml
+  feign:
+    client:
+      config:
+        default:
+          connectTimeout: 5000
+          readTimeout: 5000
+  ```
+
+- **重试策略**：
+
+  ```yaml
+  feign:
+    client:
+      config:
+        default:
+          retryer:
+            period: 100
+            maxPeriod: 1000
+            maxAttempts: 3
+  ```
+
+### 6. 拦截器与过滤器
+
+Feign支持自定义拦截器和过滤器，允许开发者在请求发送前或响应返回后对请求或响应进行处理。例如，可以添加认证信息、修改请求头等。
+
+```java
+@Component
+public class FeignRequestInterceptor implements RequestInterceptor {
+    @Override
+    public void apply(RequestTemplate template) {
+        template.header("Authorization", "Bearer " + getAuthToken());
+    }
+
+    private String getAuthToken() {
+        // 获取或生成认证令牌
+        return "your-auth-token";
+    }
+}
+```
+
+### 7. 熔断与降级处理
+
+为了增强系统的鲁棒性，Feign集成了熔断和降级处理机制。通过与Hystrix或Resilience4j集成，可以在远程服务不可用或请求失败时提供备选方案。
+
+- **配置熔断**：
+
+  ```java
+  @FeignClient(name = "user-service", fallback = UserServiceClientFallback.class)
+  public interface UserServiceClient {
+      // 方法定义
+  }
+
+  @Component
+  public class UserServiceClientFallback implements UserServiceClient {
+      @Override
+      public User getUserById(Long id) {
+          return new User(); // 返回一个默认的用户对象
+      }
+  }
+  ```
+
+### 8. 日志与调试
+
+Feign支持日志记录，通过配置可以控制日志级别，帮助开发者调试和追踪HTTP请求。
+
+```yaml
+logging:
+  level:
+    feign:
+      client: DEBUG
+```
+
+### 总结
+
+OpenFeign通过动态代理、注解驱动配置、请求模板化、服务发现与负载均衡、客户端配置、拦截器与过滤器、熔断与降级处理、以及日志与调试等机制，实现了消息间的内部调用。它简化了微服务之间的通信，使开发者能够更专注于业务逻辑的实现，同时保证了系统的灵活性和可扩展性。
 
 ## OpenFeign 如何实现负载均衡 重要
 
@@ -351,7 +443,7 @@ Feign.builder()
 
 单例模式确保一个类只有一个实例，并提供一个全局访问点。在 Feign 的实现中，一些核心组件如 `Feign.Builder` 和 `LoadBalancer` 通常作为单例来使用，以确保整个应用程序中共享同一个实例。
 
-### 总结
+### OpenFeign 总结
 
 OpenFeign 通过使用这些设计模式，实现了灵活性、可扩展性和易用性的目标。代理模式是其最核心的设计模式，用于动态生成接口的代理对象。工厂模式、模板模式和策略模式用于构建和配置 Feign 客户端的各个方面。责任链模式和装饰器模式增强了请求处理的灵活性和功能性。构建器模式提供了流畅的 API，用于创建和配置客户端实例。单例模式确保了一些核心组件在整个应用程序中的一致性和共享性。
 
@@ -449,22 +541,118 @@ public class FeignInvocationHandler implements InvocationHandler {
 
 ## 动态代理是什么
 
-动态代理是一种在运行时生成代理类和代理对象的机制。与静态代理相比，动态代理不需要在编译期间就确定代理类的代码，而是在程序运行时动态生成代理类和代理对象，从而可以在不修改原始类的情况下，对原始类的方法进行增强或拦截。
-
 动态代理通常使用 Java 的反射机制来实现。Java 中的动态代理主要有两种实现方式：
 
 1. JDK 动态代理：JDK 动态代理是 Java 标准库提供的一种动态代理实现方式。它基于接口来创建代理类和代理对象，只能代理实现了接口的类。JDK 动态代理主要涉及两个类：java.lang.reflect.Proxy 和 java.lang.reflect.InvocationHandler。开发者通过实现 InvocationHandler 接口来编写代理逻辑，然后使用 Proxy.newProxyInstance() 方法来生成代理对象。代理类在调用方法时，会调用 InvocationHandler 的 invoke 方法，允许在执行真实方法前后插入自定义逻辑。
 
 2. CGLIB 动态代理：CGLIB（Code Generation Library）是一个强大的、高性能的代码生成库，可以在运行时动态生成字节码，从而实现动态代理。CGLIB 动态代理不需要接口，它可以直接代理类，并在运行时生成被代理类的子类作为代理类。CGLIB 动态代理主要涉及到两个类：net.sf.cglib.proxy.Enhancer 和 net.sf.cglib.proxy.MethodInterceptor。开发者通过实现 MethodInterceptor 接口来编写代理逻辑，然后使用 Enhancer.create() 方法来生成代理对象。
 
-动态代理的主要应用场景包括：
+动态代理是一种在运行时创建代理类并代理某个接口或类的方法调用的技术。在Java中，动态代理主要通过`java.lang.reflect.Proxy`类和`InvocationHandler`接口来实现。动态代理允许我们在不编写代理类的情况下，动态地为目标对象创建代理，并在代理对象的方法调用前后进行特定处理。
 
-1. AOP（面向切面编程）
-2. RPC（远程过程调用）
-3. 事务管理
-4. 延迟加载等
+### 动态代理的主要概念
 
-总的来说，动态代理是一种非常灵活和强大的机制，它可以在运行时动态生成代理类和代理对象，并允许开发者在原始类的方法执行前后添加额外的逻辑，从而实现一些通用的功能和处理逻辑。
+1. **代理对象（Proxy Object）**：  
+   代理对象是实现了目标接口的对象。它负责接收客户端的请求，并将请求转发给目标对象。同时，代理对象可以在方法调用前后执行一些额外操作。
+
+2. **目标对象（Target Object）**：  
+   目标对象是实际执行业务逻辑的对象。代理对象会将客户端的请求转发给目标对象。
+
+3. **InvocationHandler**：  
+   `InvocationHandler`是一个接口，用于定义代理对象的方法调用处理逻辑。当代理对象的方法被调用时，调用会被转发到`InvocationHandler`的`invoke`方法中。
+
+### 动态代理的实现步骤
+
+以下是使用Java标准库实现动态代理的步骤：
+
+1. **定义接口**：  
+   定义一个接口，目标对象和代理对象都要实现这个接口。
+
+   ```java
+   public interface UserService {
+       void addUser(String username);
+   }
+   ```
+
+2. **实现目标对象**：  
+   目标对象实现接口并定义具体的业务逻辑。
+
+   ```java
+   public class UserServiceImpl implements UserService {
+       @Override
+       public void addUser(String username) {
+           System.out.println("Adding user: " + username);
+       }
+   }
+   ```
+
+3. **实现InvocationHandler**：  
+   实现`InvocationHandler`接口，定义代理对象的方法调用处理逻辑。
+
+   ```java
+   import java.lang.reflect.InvocationHandler;
+   import java.lang.reflect.Method;
+
+   public class UserServiceInvocationHandler implements InvocationHandler {
+       private Object target;
+
+       public UserServiceInvocationHandler(Object target) {
+           this.target = target;
+       }
+
+       @Override
+       public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+           System.out.println("Before method: " + method.getName());
+           Object result = method.invoke(target, args);
+           System.out.println("After method: " + method.getName());
+           return result;
+       }
+   }
+   ```
+
+4. **创建代理对象**：  
+   使用`Proxy`类的静态方法`newProxyInstance`创建代理对象。
+
+   ```java
+   import java.lang.reflect.Proxy;
+
+   public class Main {
+       public static void main(String[] args) {
+           UserService userService = new UserServiceImpl();
+           UserServiceInvocationHandler handler = new UserServiceInvocationHandler(userService);
+
+           UserService proxy = (UserService) Proxy.newProxyInstance(
+                   userService.getClass().getClassLoader(),
+                   userService.getClass().getInterfaces(),
+                   handler
+           );
+
+           proxy.addUser("Alice");
+       }
+   }
+   ```
+
+在上述代码中，代理对象`proxy`被创建，并实现了`UserService`接口。调用`proxy.addUser("Alice")`时，会触发`UserServiceInvocationHandler`的`invoke`方法，在方法调用前后打印日志。
+
+### 动态代理的优势
+
+1. **解耦业务逻辑与横切关注点**：  
+   动态代理可以将业务逻辑与日志、事务管理、权限校验等横切关注点分离，保持代码的简洁和模块化。
+
+2. **代码复用**：  
+   通过动态代理，可以编写通用的代理逻辑，并在多个代理对象中复用。
+
+3. **灵活性**：  
+   动态代理在运行时创建代理对象，能够根据需求动态地改变代理逻辑，而不需要修改现有代码。
+
+### 动态代理的应用
+
+动态代理在许多Java框架中被广泛使用。例如：
+
+- **Spring AOP**：Spring通过动态代理实现面向切面编程（AOP），在方法调用前后添加额外的行为。
+- **MyBatis**：MyBatis使用动态代理创建Mapper接口的实现类，从而简化数据访问层的代码。
+- **Java RMI**：Java远程方法调用（RMI）使用动态代理生成远程对象的代理。
+
+通过动态代理，开发者可以轻松地在方法调用的前后添加额外的逻辑，极大地增强了代码的可维护性和扩展性。
 
 ## CAS 原理是什么
 
@@ -667,7 +855,7 @@ public class MyService {
 }
 ```
 
-### 结论
+### 依赖注入结论
 
 尽管基于字段的依赖注入在某些情况下可能看起来更简洁，但它在测试性、可维护性、代码清晰度和可靠性方面存在显著缺点。因此，Spring 社区和文档通常推荐使用构造函数注入，或者在需要时使用 Setter 方法注入，以确保代码的质量和可维护性。
 
@@ -827,27 +1015,97 @@ public void doSomething() {
 
 ## Mysql 优化器原理 如何优化的 优化了什么
 
-MySQL 优化器是 MySQL 数据库中的一个组件，负责根据用户提交的 SQL 查询语句生成最优的执行计划，以提高查询性能。优化器的主要目标是尽可能快地执行查询，减少资源消耗，提高系统的吞吐量和响应性。
+MySQL优化器是数据库管理系统中负责查询优化的组件。它的主要功能是解析SQL查询并决定执行这些查询的最佳方式。优化器通过选择适当的执行计划来最小化查询所需的资源和时间。以下是MySQL优化器的工作原理、优化技术以及优化的具体内容。
 
-MySQL 优化器通过以下几种方式来优化查询：
+### MySQL优化器的原理
 
-1. **查询重写（Query Rewriting）**：优化器会尝试对查询语句进行重写，以提高查询的性能。例如，它可能会对 WHERE 子句中的条件进行重排，以减少查询的数据量；或者将某些联接操作改写为更有效率的方式。
+MySQL优化器的核心任务是生成一个高效的执行计划。执行计划包含了执行查询的步骤和顺序，以便以最少的成本（时间和资源）获取结果。优化器的工作流程如下：
 
-2. **索引选择（Index Selection）**：优化器会根据查询语句中的条件和排序要求选择最合适的索引来加速查询。它会分析表的索引统计信息，并根据查询条件的选择性、索引的覆盖度等因素来选择最佳的索引。
+1. **查询解析**：将SQL查询解析成语法树（Parse Tree）。
+2. **语法树转换**：将语法树转换为逻辑查询计划（Logical Query Plan）。
+3. **执行计划生成**：生成多个候选的执行计划。
+4. **成本评估**：评估每个执行计划的成本。
+5. **选择最佳计划**：选择成本最低的执行计划。
 
-3. **连接方式选择（Join Type Selection）**：优化器会根据查询语句中的联接条件和表大小等因素选择最合适的连接方式。例如，它可能会选择使用 Nested Loop Join、Hash Join 或者 Sort Merge Join 等不同的连接算法。
+### 优化器使用的技术
 
-4. **子查询优化（Subquery Optimization）**：优化器会尝试优化查询中的子查询，以减少子查询的执行次数或者将其转换为更高效的连接操作。
+MySQL优化器使用多种技术来优化查询，包括但不限于以下几种：
 
-5. **执行计划估算（Cost Estimation）**：优化器会对多个可能的执行计划进行成本估算，并选择成本最低的执行计划作为最终执行计划。这通常涉及到对表大小、索引选择性、硬件资源等因素的估算。
+1. **基于规则的优化**：使用预定义的一些规则来重写和优化查询。例如，优化器可能会将`WHERE`子句中的谓词重新排序，以便首先处理最有选择性的谓词。
 
-通过这些优化技术，MySQL 优化器可以在保证查询语义不变的前提下，生成高效的执行计划，提高查询的性能。优化器的主要目标是减少查询的成本，包括 CPU 和 IO 资源的消耗，从而提高系统的整体性能。
+2. **基于代价的优化**：优化器会估算每个执行计划的成本（如I/O操作的次数、CPU使用率等），并选择成本最低的执行计划。
 
-MySQL 优化器在处理多列索引时通常遵循最左前缀匹配规则。这意味着当你使用一个多列索引进行查询时，MySQL 会尽可能地利用索引的最左前缀来执行查询，并且只有当查询中的列顺序与索引的最左前缀一致时，索引才能被有效利用。
+3. **索引优化**：选择合适的索引来加速数据访问。例如，优化器可能会选择使用B树索引或哈希索引来加速查询。
 
-例如，假设你有一个复合索引 (col1, col2, col3)，如果你的查询条件中只涉及到 col1，那么这个索引就能被用来加速查询；如果查询条件涉及到了 col1 和 col2，那么索引也能被用来加速查询；但如果查询条件中只涉及到了 col2 或者 col3，那么这个索引就无法被利用了。
+4. **表连接优化**：确定连接表的最佳顺序和连接方法（如嵌套循环连接、排序合并连接、哈希连接等）。
 
-最左前缀匹配规则对于 MySQL 优化器的性能优化是非常重要的，因为它可以帮助 MySQL 优化器选择合适的索引来加速查询，并避免不必要的索引扫描。但是需要注意的是，这种规则并不适用于所有情况，有时候需要根据具体的查询和索引情况进行优化。
+5. **子查询优化**：优化子查询的执行，例如将子查询转换为连接（JOIN）。
+
+6. **查询重写**：优化器可以对查询进行重写，以便更高效地执行。例如，将某些复杂查询重写为更简单的等价查询。
+
+### 优化器优化的内容
+
+优化器优化的具体内容包括以下几个方面：
+
+1. **选择索引**：优化器会选择最适合的索引来加速查询。例如，对于`WHERE`子句中的过滤条件，优化器会选择具有最高选择性的索引。
+
+2. **表连接顺序**：优化器会决定表连接的顺序。不同的连接顺序会显著影响查询的性能。优化器会选择成本最低的连接顺序。
+
+3. **使用索引扫描方式**：优化器会决定使用何种索引扫描方式（如全表扫描、范围扫描、唯一索引扫描等）。
+
+4. **表访问方式**：优化器会选择最优的表访问方式，如顺序扫描、索引扫描、使用覆盖索引等。
+
+5. **子查询优化**：将某些子查询优化为连接查询（JOIN），或对子查询进行去重、合并等优化。
+
+6. **排序和分组优化**：优化排序和分组操作，尽可能使用索引来避免额外的排序和分组操作。
+
+### MySQL查询优化示例
+
+以下是一些常见的查询优化示例：
+
+1. **使用索引优化查询**：
+
+   ```sql
+   -- 原始查询
+   SELECT * FROM employees WHERE department_id = 5 AND hire_date > '2020-01-01';
+
+   -- 优化后：创建复合索引
+   CREATE INDEX idx_dept_hiredate ON employees (department_id, hire_date);
+   ```
+
+2. **优化表连接**：
+
+   ```sql
+   -- 原始查询
+   SELECT e.name, d.name FROM employees e, departments d WHERE e.department_id = d.id;
+
+   -- 优化后：使用适当的连接顺序和索引
+   EXPLAIN SELECT e.name, d.name FROM employees e JOIN departments d ON e.department_id = d.id;
+   ```
+
+3. **优化子查询**：
+
+   ```sql
+   -- 原始查询
+   SELECT name FROM employees WHERE department_id IN (SELECT id FROM departments WHERE location = 'New York');
+
+   -- 优化后：将子查询转换为连接
+   SELECT e.name FROM employees e JOIN departments d ON e.department_id = d.id WHERE d.location = 'New York';
+   ```
+
+4. **避免不必要的排序**：
+
+   ```sql
+   -- 原始查询
+   SELECT * FROM employees ORDER BY last_name;
+
+   -- 优化后：创建索引以避免排序
+   CREATE INDEX idx_lastname ON employees (last_name);
+   ```
+
+### Mysal 查询优化结论
+
+MySQL优化器通过选择最优的执行计划来优化SQL查询，旨在最小化查询的执行时间和资源消耗。通过使用多种优化技术，如基于规则的优化、基于代价的优化、索引优化、表连接优化等，优化器能够显著提升查询性能。理解优化器的工作原理和优化方法，有助于开发者编写更高效的SQL查询，并通过适当的索引和查询重写来进一步优化数据库性能。
 
 ## 以下 mysql 条件哪些会用到索引
 
@@ -1005,59 +1263,75 @@ Java 提供了几种线程安全的集合类，其中常用的有：
 
 ## stw 是什么 哪个垃圾回收器 是 stw 时间最少的
 
-STW (Stop-The-World) 是垃圾回收（GC）过程中一个关键概念。在垃圾回收过程中，所有应用程序线程都会暂停，只有垃圾回收线程在运行。这种暂停称为 STW 事件。STW 事件的持续时间是影响应用程序性能的重要因素，因为在 STW 期间，应用程序无法继续处理请求或执行任务。
+**STW**（Stop-The-World）是指在某些操作期间，Java虚拟机（JVM）会暂停所有的应用程序线程，直到操作完成。这种行为常见于垃圾回收（GC）过程中。在STW期间，应用程序会完全停止运行，等待垃圾回收器完成工作，这可能会导致应用程序的停顿时间增加，影响性能。
 
-在 Java 虚拟机（JVM）中，不同的垃圾回收器有不同的 STW 时间特性。下面是几种常见的垃圾回收器及其 STW 时间特性：
+### STW的来源与影响
 
-1. Serial GC
-   - 特点：适用于单线程环境。
-   - STW 时间：通常较长，因为垃圾回收是单线程执行的。
-2. Parallel GC (Parallel Scavenge)
-   - 特点：使用多线程进行垃圾回收。
-   - STW 时间：较短于 Serial GC，但在较大的堆内存下，STW 时间可能会显著增加。
-3. CMS (Concurrent Mark-Sweep)
-   - 特点：尝试并发执行垃圾回收以减少 STW 时间。
-   - STW 时间：相对较短，但有时会出现"concurrent mode failure"，导致长时间的 STW。
-4. G1 (Garbage-First)
-   - 特点：设计用于大堆内存，尽量减少 STW 时间。
-   - STW 时间：通过区域化垃圾回收和预测性模型，STW 时间通常较短且可控。
-5. ZGC (Z Garbage Collector)
-   - 特点：专为低延迟设计，支持超大堆内存（TB 级）。
-   - STW 时间：非常短，通常在 10 毫秒以下，甚至可以达到微秒级别。
-6. Shenandoah GC
-   - 特点：类似于 ZGC，专为低延迟设计。
-   - STW 时间：非常短，与 ZGC 类似，通常在毫秒级。
+在垃圾回收过程中，STW事件可能会发生在以下情况下：
 
-### 哪个垃圾回收器 STW 时间最少？
+1. **垃圾回收的标记阶段**：需要标记出所有的活动对象。
+2. **对象的复制或压缩**：将存活对象从一个内存区域复制到另一个内存区域。
+3. **堆的重整**：重新安排内存中的对象以减少碎片。
 
-目前，ZGC 和 Shenandoah GC 是 STW 时间最短的垃圾回收器。它们都是为低延迟应用而设计的，能够将 STW 事件时间控制在非常短的范围内，通常在毫秒级甚至微秒级。
+STW时间越长，对应用程序的响应时间和性能影响越大。因此，选择合适的垃圾回收器来最小化STW时间是优化Java应用程序性能的重要步骤。
 
-1. ZGC (Z Garbage Collector)
-   - 特点：支持多 TB 级的堆内存，STW 时间通常在 10 毫秒以下。
-   - 适用场景：需要超低延迟的应用，如实时交易系统、大数据处理等。
-2. Shenandoah GC
-   - 特点：类似于 ZGC，专为低延迟设计，STW 时间通常在毫秒级。
-   - 适用场景：低延迟要求的应用，如响应时间敏感的服务。
+### 不同垃圾回收器的STW时间比较
 
-### 如何选择垃圾回收器？
+1. **Serial GC**：
 
-选择垃圾回收器时，应根据应用程序的具体需求来决定：
+   - 使用单线程进行垃圾回收。
+   - 每次进行垃圾回收时，都会发生STW事件。
+   - 适用于单核CPU的客户端应用。
+   - STW时间较长，适合堆内存较小且对停顿时间不敏感的应用。
 
-- **低延迟要求**：ZGC 或 Shenandoah GC 是最佳选择。
-- **高吞吐量要求**：Parallel GC 或 G1 GC 可能更合适。
-- **内存使用情况**：考虑堆内存大小，选择适当的垃圾回收器。
+2. **Parallel GC**：
 
-例如，在配置 JVM 选项时，可以使用以下命令来选择垃圾回收器：
+   - 使用多线程进行垃圾回收。
+   - 相比Serial GC，能够减少STW时间。
+   - 适用于多核CPU和需要较高吞吐量的应用。
+   - STW时间中等。
 
-```shell
-# 使用 ZGC
-java -XX:+UseZGC -jar your-application.jar
+3. **CMS（Concurrent Mark-Sweep）GC**：
 
-# 使用 Shenandoah GC
-java -XX:+UseShenandoahGC -jar your-application.jar
-```
+   - 大部分垃圾回收过程并发执行。
+   - 主要的STW事件发生在初始标记和重新标记阶段。
+   - 适用于低停顿时间要求的应用。
+   - STW时间较短，但会产生内存碎片，可能需要定期进行堆压缩。
 
-总之，选择合适的垃圾回收器需要考虑应用的性能需求、延迟要求和堆内存大小等因素。ZGC 和 Shenandoah GC 是目前 STW 时间最短的垃圾回收器，非常适合对延迟敏感的应用。
+4. **G1（Garbage-First）GC**：
+
+   - 分区堆内存，并根据预测来选择回收区域。
+   - STW事件发生在年轻代垃圾回收和混合垃圾回收的部分阶段。
+   - 适用于大内存和低停顿时间要求的应用。
+   - STW时间可控且相对较短。
+
+5. **ZGC（Z Garbage Collector）**：
+
+   - 专注于极低的停顿时间。
+   - 通过并发标记和并发压缩来最小化STW时间。
+   - 适用于大堆内存和需要极低停顿时间的应用。
+   - STW时间非常短（通常不超过几毫秒）。
+
+6. **Shenandoah GC**：
+   - 类似于ZGC，专注于极低的停顿时间。
+   - 通过并发标记、并发压缩以及并发重分配来最小化STW时间。
+   - 适用于大堆内存和低停顿时间要求的应用。
+   - STW时间非常短（通常不超过几毫秒）。
+
+### 哪个垃圾回收器的STW时间最少
+
+对于希望将STW时间最小化的应用，**ZGC**和**Shenandoah GC**是最佳选择。它们设计的初衷就是为了提供极低的停顿时间，即使在处理非常大的堆内存时，也能够保持STW时间在几毫秒以内。这使得它们非常适合于对延迟敏感的应用，如实时系统、金融交易平台和高频数据处理应用。
+
+### 选择合适的GC的建议
+
+- **小堆内存、单线程**：Serial GC。
+- **多核CPU、高吞吐量**：Parallel GC。
+- **低停顿时间、适度堆内存**：CMS GC或G1 GC。
+- **超低停顿时间、大堆内存**：ZGC或Shenandoah GC。
+
+### GC 结论
+
+选择合适的垃圾回收器取决于应用的具体需求和环境。对于希望最小化STW时间的应用，ZGC和Shenandoah GC是最优的选择，因为它们能够提供极低的停顿时间，确保应用的高响应性和稳定性。
 
 ## 以下内存是如何进行分配的 String s = new String（"12"）string s = "12"
 
@@ -1843,7 +2117,155 @@ SQL 注入是一种攻击方式，攻击者通过操纵 SQL 查询来访问或�
 
 ## 分库分表如何实现如何进行优化如何确定分到哪张表
 
+分库分表是解决数据库在高并发、大数据量场景下性能瓶颈的常用技术。它通过将数据分散到多个数据库或表中，降低单个数据库或表的负担，提高系统的整体性能。以下是分库分表的实现、优化和如何确定分表的详细说明。
+
+### 分库分表的实现
+
+1. **垂直拆分（纵向拆分）**：
+
+   - **实现方式**：根据业务模块将数据库进行拆分，例如用户模块、订单模块分别使用不同的数据库。
+   - **优点**：不同业务模块的数据独立，减少单库压力，便于扩展和维护。
+   - **缺点**：无法解决单表数据量过大的问题。
+
+2. **水平拆分（横向拆分）**：
+   - **实现方式**：将同一个表的数据按某种规则分到多个表或多个数据库中。
+   - **分表策略**：
+     - **范围分片**：按照某个字段的范围进行拆分，例如按用户ID范围拆分。
+     - **哈希分片**：通过对某个字段进行哈希计算后取模分片，例如`user_id % N`。
+     - **按时间分片**：根据时间区间拆分，例如按月或按年拆分。
+   - **优点**：可以有效解决单表数据量过大的问题。
+   - **缺点**：涉及跨表或跨库查询时，复杂度增加。
+
+### 分库分表的优化
+
+1. **数据均匀分布**：
+
+   - 选择合理的分片字段和分片算法，确保数据均匀分布在各个表或库中，避免数据倾斜。
+   - 常用的分片字段包括用户ID、订单ID等。
+
+2. **查询优化**：
+
+   - 尽量减少跨表或跨库查询，优先选择分片字段进行查询。
+   - 使用缓存机制（如Redis）减少数据库查询压力。
+   - 为常用的查询条件创建索引，提高查询性能。
+
+3. **分片路由**：
+
+   - 通过中间件（如Sharding-JDBC、MyCat）或自定义路由规则，确定请求应该访问哪个库或表。
+   - 使用一致性哈希等算法，确保数据路由的稳定性和均匀性。
+
+4. **分布式事务**：
+   - 通过分布式事务管理器（如Atomikos、Seata）处理跨库事务，确保数据的一致性。
+   - 使用最终一致性策略，降低分布式事务的复杂度和性能开销。
+
+### 确定分到哪张表
+
+确定数据分到哪张表通常依赖于分片字段和分片算法。以下是几种常见的分片方式：
+
+1. **范围分片**：
+
+   - 根据分片字段的范围确定数据的分布。例如，用户ID在0-9999的记录放到user_0表，10000-19999的记录放到user_1表，以此类推。
+   - 实现代码示例：
+
+     ```java
+     int userId = 12345;
+     int tableIndex = userId / 10000;
+     String tableName = "user_" + tableIndex;
+     ```
+
+2. **哈希分片**：
+
+   - 对分片字段进行哈希计算后取模，确定数据的分布。例如，`user_id % N`，N为分表数量。
+   - 实现代码示例：
+
+     ```java
+     int userId = 12345;
+     int tableIndex = userId % 4; // 假设有4个分表
+     String tableName = "user_" + tableIndex;
+     ```
+
+3. **按时间分片**：
+
+   - 根据时间区间确定数据的分布。例如，2024年1月的数据放到user_202401表，2024年2月的数据放到user_202402表。
+   - 实现代码示例：
+
+     ```java
+     LocalDateTime dateTime = LocalDateTime.now();
+     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMM");
+     String tableSuffix = dateTime.format(formatter);
+     String tableName = "user_" + tableSuffix;
+     ```
+
+### 分库分表总结
+
+分库分表是应对大数据量、高并发场景的重要技术手段。通过合理的分片策略和优化措施，可以有效提升系统的性能和可扩展性。在实施分库分表时，需要综合考虑业务需求、数据特点和系统架构，选择合适的方案和工具，确保数据的均匀分布和查询的高效性。
+
 ## mybatis和mybaits plus区别具体实现
+
+MyBatis和MyBatis-Plus是Java中常用的持久层框架，它们用于简化数据库操作。MyBatis-Plus是在MyBatis的基础上进行增强的，因此它们有很多相似之处，但也有一些重要的区别。以下是两者的具体实现和区别：
+
+### MyBatis
+
+1. **基本介绍**：
+
+   - MyBatis是一款持久层框架，支持自定义SQL、存储过程以及高级映射。
+   - 它通过XML或注解配置来将接口和Java对象映射到SQL语句。
+
+2. **特性**：
+
+   - **灵活性**：MyBatis允许开发者手写SQL语句，提供了很大的灵活性。
+   - **映射配置**：通过XML文件或注解，详细配置Java对象与数据库表之间的映射关系。
+   - **事务管理**：支持事务管理，能与Spring等框架无缝集成。
+
+3. **实现细节**：
+   - **Mapper文件**：定义SQL语句和映射关系的XML文件。
+   - **Mapper接口**：与Mapper文件对应的Java接口，用于调用Mapper文件中的SQL语句。
+   - **配置文件**：全局配置文件（如`mybatis-config.xml`）用于配置数据源、事务管理等。
+
+### MyBatis-Plus
+
+1. **基本介绍**：
+
+   - MyBatis-Plus是MyBatis的增强工具，在其基础上增加了一些实用功能，简化了开发。
+   - 目标是"为MyBatis而生"，提高开发效率，减少代码量。
+
+2. **特性**：
+
+   - **CRUD操作**：内置通用的CRUD操作，减少重复的SQL编写。
+   - **代码生成器**：提供代码生成工具，可以根据数据库表快速生成Mapper、Service、Controller等层代码。
+   - **条件构造器**：提供方便的条件构造器，简化复杂SQL的构建。
+   - **插件机制**：支持分页插件、性能分析插件、SQL注入攻击防御插件等。
+   - **Lambda表达式支持**：通过Lambda表达式构建条件，增强代码可读性。
+
+3. **实现细节**：
+   - **通用Mapper**：通过继承MyBatis-Plus提供的基础Mapper类，自动拥有基本的CRUD功能。
+   - **条件构造器**：通过Wrapper类，提供链式调用的方法构建查询条件。
+   - **自动填充**：支持字段自动填充，如创建时间、更新时间等。
+   - **乐观锁**：支持乐观锁机制，避免并发更新问题。
+   - **插件机制**：可以自定义插件扩展MyBatis-Plus的功能。
+
+### 主要区别
+
+1. **代码量**：
+
+   - MyBatis需要手写大量的Mapper XML文件和SQL语句。
+   - MyBatis-Plus通过内置的CRUD方法和代码生成器大大减少了重复的SQL和配置代码。
+
+2. **功能扩展**：
+
+   - MyBatis主要提供基础的ORM功能。
+   - MyBatis-Plus在此基础上增加了很多实用功能，如条件构造器、分页插件、自动填充等。
+
+3. **使用复杂度**：
+   - MyBatis需要手动编写和维护SQL，适合对SQL有高度控制需求的场景。
+   - MyBatis-Plus提供了很多自动化和简化操作，适合快速开发和减少样板代码的场景。
+
+### Mybatis-Plus & Mybatis 选择建议
+
+- **使用MyBatis**：如果你的项目对SQL有严格的要求，需要高度自定义的SQL查询，且愿意手动编写和维护这些SQL，MyBatis是更好的选择。
+- **使用MyBatis-Plus**：如果你希望减少样板代码，快速实现常见的CRUD操作，并且愿意使用框架提供的功能来简化开发工作，MyBatis-Plus是更好的选择。
+
+总的来说，MyBatis-Plus是对MyBatis的增强和扩展，提供了更多的开箱即用的功能，适合快速开发和中小型项目。而MyBatis则适合对SQL和数据库操作有更高控制需求的大型项目。
 
 ## synchronized和lock的区别具体实现
 
