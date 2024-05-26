@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-01-30T12:28:25Z
-modDatetime: 2024-05-26T14:34:22Z
+modDatetime: 2024-05-26T19:46:35Z
 title: 面基记录
 featured: false
 draft: false
@@ -15,15 +15,134 @@ description: 面试经常被问到的问题
 
 ## Java 中的四种引用类型
 
-Java 中的引用类型分别为**强、软、弱、虚**。
+在 Java 中，有四种引用类型，用于管理内存中的对象生命周期和垃圾回收机制。这四种引用类型分别是强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）和虚引用（Phantom Reference）。每种引用类型在内存管理和垃圾回收方面都有不同的用途和特点。
 
-在 Java 中最常见的就是强引用，把一个对系那个赋给一个引用变量，这个引用变量就是一个强引用。当一个对象被强引用变量引用时，它始终处于可达状态，它是不可能被垃圾回收机制回收的，即使该对象以后永远都不会被用到 JVM 也不会回收。因此强引用时造成 Java 内存泄漏的主要原因之一。例如：Object obj = new Object()。
+### 1. 强引用（Strong Reference）
 
-其次是软引用，对于只有软引用的对象来说，当系统内存足够时它不会被回收，当系统内存空间不足时它会被回收。软引用通话吃那个用在对内存敏感的程序中，作为缓存使用。例如：SoftRefenence softRef = new SoftRefenence()。
+**描述**：强引用是 Java 中最常见的引用类型。如果一个对象具有强引用，那么垃圾回收器绝不会回收该对象。
 
-然后是弱引用，它比较引用的生存期更短，对于只有弱引用的对象来说，只要垃圾回收机制已运行，不管 JVM 的内存空间是否足够，总会回收该对象占用的内存。可以解决内存泄漏的问题，ThreadLocal 就是基于弱引用解决内存泄漏的问题。例如：WeakRefenence weakRef = new WeakRefenence()。
+**特点**：
 
-最后是虚引用，它不能单独使用，必须和引用队列联合使用。虚引用的主要作用是跟踪对系那个被垃圾回收的状态。例如：ReferenceQueue queue = new ReferenceQueue()；PhantomReference phantomRef = new PhantomReference(obj,queue)，不过在开发中，我们用的更多的还是强引用。
+- 当内存不足时，JVM 会抛出 `OutOfMemoryError`，也不会回收强引用指向的对象。
+- 强引用是默认的引用类型。
+
+**示例代码**：
+
+```java
+String str = new String("Hello, World!"); // str 是一个强引用
+```
+
+### 2. 软引用（Soft Reference）
+
+**描述**：软引用在内存不足时会被垃圾回收器回收。它适合用来实现内存敏感的缓存机制。
+
+**特点**：
+
+- 当内存充足时，不会回收软引用指向的对象。
+- 当内存不足时，会回收软引用指向的对象，以避免 `OutOfMemoryError`。
+- 软引用在垃圾回收前会被加入到一个引用队列（Reference Queue）中，供程序进一步处理。
+
+**示例代码**：
+
+```java
+import java.lang.ref.SoftReference;
+
+public class SoftReferenceExample {
+    public static void main(String[] args) {
+        String str = new String("Hello, World!");
+        SoftReference<String> softRef = new SoftReference<>(str);
+
+        str = null; // 现在只有软引用指向该对象
+        System.gc(); // 建议垃圾回收
+
+        if (softRef.get() != null) {
+            System.out.println("对象未被回收");
+        } else {
+            System.out.println("对象已被回收");
+        }
+    }
+}
+```
+
+### 3. 弱引用（Weak Reference）
+
+**描述**：弱引用在下一次垃圾回收时会被回收。它适合用来实现一些内存敏感的缓存和映射机制，如 `WeakHashMap`。
+
+**特点**：
+
+- 无论内存是否充足，下一次垃圾回收时，弱引用指向的对象都会被回收。
+- 弱引用在垃圾回收前会被加入到一个引用队列（Reference Queue）中，供程序进一步处理。
+
+**示例代码**：
+
+```java
+import java.lang.ref.WeakReference;
+
+public class WeakReferenceExample {
+    public static void main(String[] args) {
+        String str = new String("Hello, World!");
+        WeakReference<String> weakRef = new WeakReference<>(str);
+
+        str = null; // 现在只有弱引用指向该对象
+        System.gc(); // 建议垃圾回收
+
+        if (weakRef.get() != null) {
+            System.out.println("对象未被回收");
+        } else {
+            System.out.println("对象已被回收");
+        }
+    }
+}
+```
+
+### 4. 虚引用（Phantom Reference）
+
+**描述**：虚引用不能通过 `get()` 方法访问对象。它主要用于跟踪对象被垃圾回收的状态。
+
+**特点**：
+
+- 虚引用本身并不决定对象的生命周期。
+- 在对象被回收时，虚引用会被加入到一个引用队列（Reference Queue）中，通过处理引用队列，可以执行一些清理工作。
+- 虚引用适用于需要在对象被垃圾回收后执行一些特定操作的场景。
+
+**示例代码**：
+
+```java
+import java.lang.ref.PhantomReference;
+import java.lang.ref.ReferenceQueue;
+
+public class PhantomReferenceExample {
+    public static void main(String[] args) {
+        String str = new String("Hello, World!");
+        ReferenceQueue<String> refQueue = new ReferenceQueue<>();
+        PhantomReference<String> phantomRef = new PhantomReference<>(str, refQueue);
+
+        str = null; // 现在只有虚引用指向该对象
+        System.gc(); // 建议垃圾回收
+
+        if (phantomRef.get() != null) {
+            System.out.println("对象未被回收");
+        } else {
+            System.out.println("对象已被回收");
+        }
+
+        if (refQueue.poll() != null) {
+            System.out.println("虚引用已被加入引用队列");
+        } else {
+            System.out.println("虚引用未被加入引用队列");
+        }
+    }
+}
+```
+
+### 总结
+
+- **强引用**：最常见的引用类型，不会被垃圾回收。
+- **软引用**：适用于实现内存敏感的缓存，当内存不足时会被回收。
+- **弱引用**：适用于实现内存敏感的映射，如 `WeakHashMap`，在下一次垃圾回收时会被回收。
+- **虚引用**：用于跟踪对象的垃圾回收状态，在对象被回收后会被加入引用队列，不能通过 `get()` 方法访问对象。
+
+选择适当的引用类型可以帮助更有效地管理内存，优化应用程序的性能和可靠性。
 
 ## Rocketmq 消息堆积 堆积到哪里
 
@@ -1471,32 +1590,89 @@ public class MyService {
 
 ## 事务传播行为有哪些
 
-Spring 中的事务传播行为定义了在方法调用链中不同方法间事务如何进行传播和交互的规则。以下是 Spring 中定义的事务传播行为：
+事务传播行为（Transaction Propagation Behavior）定义了在一个事务中，当方法调用另一个方法时，事务如何传播。Spring 提供了多种事务传播行为，以应对不同的业务场景。以下是 Spring 中常见的事务传播行为：
 
-- **REQUIRED**：如果当前存在事务，则加入该事务；如果当前没有事务，则新建一个事务。这是默认的传播行为。
+### 1. `REQUIRED`
 
-- **SUPPORTS**：支持当前事务，如果当前没有事务，则以非事务的方式执行。
+- **描述**：如果当前没有事务，就新建一个事务。如果已经有一个事务在运行中，加入这个事务。
+- **应用场景**：这是默认的传播行为，适用于大多数情况。通常用于需要确保所有操作在同一个事务中的情况。
 
-- **MANDATORY**：强制要求存在当前事务，如果当前没有事务，则抛出异常。
+### 2. `REQUIRES_NEW`
 
-- **REQUIRES_NEW**：每次都会新建一个事务，如果当前存在事务，则将当前事务挂起。
+- **描述**：总是新建一个新的事务。如果当前已经有一个事务，则先挂起当前事务。
+- **应用场景**：用于需要一个全新事务的情况，即使当前已经存在一个事务。例如，记录审计日志时，不希望日志记录受主事务的影响。
 
-- **NOT_SUPPORTED**：以非事务方式执行操作，如果当前存在事务，则将当前事务挂起。
+### 3. `SUPPORTS`
 
-- **NEVER**：以非事务方式执行操作，如果当前存在事务，则抛出异常。
+- **描述**：如果当前有事务，就在事务中运行。如果当前没有事务，就以非事务方式运行。
+- **应用场景**：用于既可以在事务环境中执行，也可以在非事务环境中执行的情况。
 
-- **NESTED**：如果当前存在事务，则在嵌套事务内执行，如果当前没有事务，则新建一个事务。嵌套事务可以独立提交或回滚，也可以由外部事务一起提交或回滚。
+### 4. `NOT_SUPPORTED`
 
-这些事务传播行为可以通过在 @Transactional 注解中设置 propagation 属性来指定。例如：
+- **描述**：总是以非事务方式运行。如果当前有事务，则挂起当前事务。
+- **应用场景**：用于不需要事务管理的操作，或者操作必须在非事务环境中执行的情况。
+
+### 5. `MANDATORY`
+
+- **描述**：如果当前有事务，就在事务中运行。如果当前没有事务，则抛出异常。
+- **应用场景**：用于必须在现有事务中运行的方法。如果没有事务环境，则认为是错误的调用。
+
+### 6. `NEVER`
+
+- **描述**：总是以非事务方式运行。如果当前有事务，则抛出异常。
+- **应用场景**：用于必须确保方法不在事务中运行的情况。
+
+### 7. `NESTED`
+
+- **描述**：如果当前有事务，则在嵌套事务中运行。如果当前没有事务，则新建一个事务。
+- **应用场景**：用于需要嵌套事务的情况。嵌套事务允许部分回滚，即内部事务可以回滚而外部事务可以继续。
+
+### 示例代码
+
+下面是一个示例代码，展示了如何使用不同的事务传播行为：
 
 ```java
-@Transactional(propagation = Propagation.REQUIRED)
-public void doSomething() {
-    // 方法体
+@Service
+public class TransactionalService {
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void methodWithRequired() {
+        // Method implementation
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void methodWithRequiresNew() {
+        // Method implementation
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void methodWithSupports() {
+        // Method implementation
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void methodWithNotSupported() {
+        // Method implementation
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void methodWithMandatory() {
+        // Method implementation
+    }
+
+    @Transactional(propagation = Propagation.NEVER)
+    public void methodWithNever() {
+        // Method implementation
+    }
+
+    @Transactional(propagation = Propagation.NESTED)
+    public void methodWithNested() {
+        // Method implementation
+    }
 }
 ```
 
-这里 Propagation.REQUIRED 指定了事务传播行为为 REQUIRED。根据不同的业务场景，你可以选择合适的事务传播行为来控制事务的行为。
+这些传播行为提供了灵活的事务管理策略，可以根据具体的业务需求选择合适的传播行为，从而确保数据的一致性和完整性。
 
 ## 事务的隔离级别有哪些
 
@@ -1575,107 +1751,238 @@ public class MyService {
 
 ## Java 什么操作可以多线程共享一块内存
 
-在 Java 中，可以使用多线程共享一块内存的方式主要有两种：
+在 Java 中，多线程可以通过共享一块内存来实现并发操作。共享内存的常见方法包括使用共享变量、共享对象和并发集合。为了保证线程安全，需要使用同步机制或并发工具来避免竞争条件和数据不一致问题。以下是几种常见的实现方法：
 
-1. **共享对象引用**：多个线程可以同时访问和修改同一个对象的状态。通过共享对象引用，多个线程可以共享同一个对象的数据，并且可以通过对象的方法来修改数据。需要注意的是，如果多个线程同时修改同一个对象的状态，可能会导致线程安全问题，因此需要进行适当的同步操作，如使用 synchronized 关键字或者 Lock 接口进行同步。
+### 1. 使用共享变量
 
-2. **使用共享变量**：多个线程可以同时访问和修改同一个变量的值。通过共享变量，多个线程可以共享数据，并且可以直接对变量进行读写操作。需要注意的是，如果多个线程同时修改同一个变量的值，可能会导致竞态条件和数据不一致的问题，因此需要进行适当的同步操作，如使用 volatile 关键字或者 AtomicInteger 等线程安全的类来保证数据的一致性。
+多线程可以通过共享同一个对象的实例变量或静态变量来共享数据。
 
-需要注意的是，多线程共享内存时可能会引发线程安全问题，如竞态条件、数据不一致等问题。因此，在设计多线程程序时，需要特别注意线程安全性，采取适当的同步措施来保护共享数据。
+#### 示例
 
-## Mysql 优化器原理 如何优化的 优化了什么
+```java
+public class SharedVariableExample {
+    private int counter = 0;
 
-MySQL优化器是数据库管理系统中负责查询优化的组件。它的主要功能是解析SQL查询并决定执行这些查询的最佳方式。优化器通过选择适当的执行计划来最小化查询所需的资源和时间。以下是MySQL优化器的工作原理、优化技术以及优化的具体内容。
+    public synchronized void increment() {
+        counter++;
+    }
 
-### MySQL优化器的原理
+    public synchronized int getCounter() {
+        return counter;
+    }
 
-MySQL优化器的核心任务是生成一个高效的执行计划。执行计划包含了执行查询的步骤和顺序，以便以最少的成本（时间和资源）获取结果。优化器的工作流程如下：
+    public static void main(String[] args) {
+        SharedVariableExample example = new SharedVariableExample();
 
-1. **查询解析**：将SQL查询解析成语法树（Parse Tree）。
-2. **语法树转换**：将语法树转换为逻辑查询计划（Logical Query Plan）。
-3. **执行计划生成**：生成多个候选的执行计划。
-4. **成本评估**：评估每个执行计划的成本。
-5. **选择最佳计划**：选择成本最低的执行计划。
+        Runnable task = () -> {
+            for (int i = 0; i < 1000; i++) {
+                example.increment();
+            }
+        };
 
-### 优化器使用的技术
+        Thread thread1 = new Thread(task);
+        Thread thread2 = new Thread(task);
+        thread1.start();
+        thread2.start();
 
-MySQL优化器使用多种技术来优化查询，包括但不限于以下几种：
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-1. **基于规则的优化**：使用预定义的一些规则来重写和优化查询。例如，优化器可能会将`WHERE`子句中的谓词重新排序，以便首先处理最有选择性的谓词。
+        System.out.println("Final counter value: " + example.getCounter());
+    }
+}
+```
 
-2. **基于代价的优化**：优化器会估算每个执行计划的成本（如I/O操作的次数、CPU使用率等），并选择成本最低的执行计划。
+在这个例子中，`counter` 变量被多个线程共享，并通过 `synchronized` 关键字确保线程安全。
 
-3. **索引优化**：选择合适的索引来加速数据访问。例如，优化器可能会选择使用B树索引或哈希索引来加速查询。
+### 2. 使用共享对象
 
-4. **表连接优化**：确定连接表的最佳顺序和连接方法（如嵌套循环连接、排序合并连接、哈希连接等）。
+多个线程可以共享同一个对象，并通过同步方法或代码块来保证线程安全。
 
-5. **子查询优化**：优化子查询的执行，例如将子查询转换为连接（JOIN）。
+#### 示例
 
-6. **查询重写**：优化器可以对查询进行重写，以便更高效地执行。例如，将某些复杂查询重写为更简单的等价查询。
+```java
+public class SharedObjectExample {
+    private static class SharedObject {
+        private int value;
 
-### 优化器优化的内容
+        public synchronized void increment() {
+            value++;
+        }
 
-优化器优化的具体内容包括以下几个方面：
+        public synchronized int getValue() {
+            return value;
+        }
+    }
 
-1. **选择索引**：优化器会选择最适合的索引来加速查询。例如，对于`WHERE`子句中的过滤条件，优化器会选择具有最高选择性的索引。
+    public static void main(String[] args) {
+        SharedObject sharedObject = new SharedObject();
 
-2. **表连接顺序**：优化器会决定表连接的顺序。不同的连接顺序会显著影响查询的性能。优化器会选择成本最低的连接顺序。
+        Runnable task = () -> {
+            for (int i = 0; i < 1000; i++) {
+                sharedObject.increment();
+            }
+        };
 
-3. **使用索引扫描方式**：优化器会决定使用何种索引扫描方式（如全表扫描、范围扫描、唯一索引扫描等）。
+        Thread thread1 = new Thread(task);
+        Thread thread2 = new Thread(task);
+        thread1.start();
+        thread2.start();
 
-4. **表访问方式**：优化器会选择最优的表访问方式，如顺序扫描、索引扫描、使用覆盖索引等。
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-5. **子查询优化**：将某些子查询优化为连接查询（JOIN），或对子查询进行去重、合并等优化。
+        System.out.println("Final value: " + sharedObject.getValue());
+    }
+}
+```
 
-6. **排序和分组优化**：优化排序和分组操作，尽可能使用索引来避免额外的排序和分组操作。
+在这个例子中，`SharedObject` 的实例 `sharedObject` 被多个线程共享，并通过同步方法确保线程安全。
 
-### MySQL查询优化示例
+### 3. 使用并发集合
 
-以下是一些常见的查询优化示例：
+Java 提供了一些线程安全的并发集合，如 `ConcurrentHashMap`、`CopyOnWriteArrayList` 等，它们内部已经实现了线程安全机制。
 
-1. **使用索引优化查询**：
+#### 示例
 
-   ```sql
-   -- 原始查询
-   SELECT * FROM employees WHERE department_id = 5 AND hire_date > '2020-01-01';
+```java
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-   -- 优化后：创建复合索引
-   CREATE INDEX idx_dept_hiredate ON employees (department_id, hire_date);
-   ```
+public class ConcurrentMapExample {
+    public static void main(String[] args) {
+        ConcurrentMap<String, Integer> map = new ConcurrentHashMap<>();
 
-2. **优化表连接**：
+        Runnable task = () -> {
+            for (int i = 0; i < 1000; i++) {
+                map.merge("key", 1, Integer::sum);
+            }
+        };
 
-   ```sql
-   -- 原始查询
-   SELECT e.name, d.name FROM employees e, departments d WHERE e.department_id = d.id;
+        Thread thread1 = new Thread(task);
+        Thread thread2 = new Thread(task);
+        thread1.start();
+        thread2.start();
 
-   -- 优化后：使用适当的连接顺序和索引
-   EXPLAIN SELECT e.name, d.name FROM employees e JOIN departments d ON e.department_id = d.id;
-   ```
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-3. **优化子查询**：
+        System.out.println("Final value: " + map.get("key"));
+    }
+}
+```
 
-   ```sql
-   -- 原始查询
-   SELECT name FROM employees WHERE department_id IN (SELECT id FROM departments WHERE location = 'New York');
+在这个例子中，`ConcurrentHashMap` 被多个线程共享，并且其线程安全操作使得我们无需额外的同步机制。
 
-   -- 优化后：将子查询转换为连接
-   SELECT e.name FROM employees e JOIN departments d ON e.department_id = d.id WHERE d.location = 'New York';
-   ```
+### 4. 使用 `volatile` 关键字
 
-4. **避免不必要的排序**：
+对于需要保证可见性的简单共享变量，可以使用 `volatile` 关键字。这可以确保一个线程对变量的修改对其他线程立即可见。
 
-   ```sql
-   -- 原始查询
-   SELECT * FROM employees ORDER BY last_name;
+#### 示例
 
-   -- 优化后：创建索引以避免排序
-   CREATE INDEX idx_lastname ON employees (last_name);
-   ```
+```java
+public class VolatileExample {
+    private volatile boolean flag = false;
 
-### Mysal 查询优化结论
+    public void setFlag() {
+        flag = true;
+    }
 
-MySQL优化器通过选择最优的执行计划来优化SQL查询，旨在最小化查询的执行时间和资源消耗。通过使用多种优化技术，如基于规则的优化、基于代价的优化、索引优化、表连接优化等，优化器能够显著提升查询性能。理解优化器的工作原理和优化方法，有助于开发者编写更高效的SQL查询，并通过适当的索引和查询重写来进一步优化数据库性能。
+    public boolean isFlag() {
+        return flag;
+    }
+
+    public static void main(String[] args) {
+        VolatileExample example = new VolatileExample();
+
+        Runnable task1 = () -> {
+            while (!example.isFlag()) {
+                // Busy-wait
+            }
+            System.out.println("Flag is set!");
+        };
+
+        Runnable task2 = () -> {
+            try {
+                Thread.sleep(1000); // Simulate some work
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            example.setFlag();
+            System.out.println("Flag has been set.");
+        };
+
+        Thread thread1 = new Thread(task1);
+        Thread thread2 = new Thread(task2);
+        thread1.start();
+        thread2.start();
+    }
+}
+```
+
+在这个例子中，`flag` 变量被声明为 `volatile`，以确保它在不同线程之间的可见性。
+
+### 5. 使用 `Atomic` 类
+
+对于需要原子操作的共享变量，可以使用 `java.util.concurrent.atomic` 包中的原子类，如 `AtomicInteger`、`AtomicLong`、`AtomicReference` 等。
+
+#### 示例
+
+```java
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class AtomicExample {
+    private AtomicInteger counter = new AtomicInteger(0);
+
+    public void increment() {
+        counter.incrementAndGet();
+    }
+
+    public int getCounter() {
+        return counter.get();
+    }
+
+    public static void main(String[] args) {
+        AtomicExample example = new AtomicExample();
+
+        Runnable task = () -> {
+            for (int i = 0; i < 1000; i++) {
+                example.increment();
+            }
+        };
+
+        Thread thread1 = new Thread(task);
+        Thread thread2 = new Thread(task);
+        thread1.start();
+        thread2.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Final counter value: " + example.getCounter());
+    }
+}
+```
+
+在这个例子中，`AtomicInteger` 提供了线程安全的原子操作，无需显式同步。
+
+通过这些方法，Java 可以实现多线程共享内存，并通过适当的同步机制确保线程安全。选择合适的方式取决于具体的使用场景和需求。
 
 ## 以下 mysql 条件哪些会用到索引
 
@@ -1784,56 +2091,277 @@ CREATE TABLE `test_models` (
 
 9. where条件中的顺序不影响索引命中。例如联合索引(col1, col2, col3), where条件为col3=c AND col2=b AND col1=a, MySQL优化器会自行进行优化，可命中联合索引(col1, col2, col3).
 
+## Mysql 优化器原理 如何优化的 优化了什么
+
+MySQL优化器是数据库管理系统中负责查询优化的组件。它的主要功能是解析SQL查询并决定执行这些查询的最佳方式。优化器通过选择适当的执行计划来最小化查询所需的资源和时间。以下是MySQL优化器的工作原理、优化技术以及优化的具体内容。
+
+### MySQL优化器的原理
+
+MySQL优化器的核心任务是生成一个高效的执行计划。执行计划包含了执行查询的步骤和顺序，以便以最少的成本（时间和资源）获取结果。优化器的工作流程如下：
+
+1. **查询解析**：将SQL查询解析成语法树（Parse Tree）。
+2. **语法树转换**：将语法树转换为逻辑查询计划（Logical Query Plan）。
+3. **执行计划生成**：生成多个候选的执行计划。
+4. **成本评估**：评估每个执行计划的成本。
+5. **选择最佳计划**：选择成本最低的执行计划。
+
+### 优化器使用的技术
+
+MySQL优化器使用多种技术来优化查询，包括但不限于以下几种：
+
+1. **基于规则的优化**：使用预定义的一些规则来重写和优化查询。例如，优化器可能会将`WHERE`子句中的谓词重新排序，以便首先处理最有选择性的谓词。
+
+2. **基于代价的优化**：优化器会估算每个执行计划的成本（如I/O操作的次数、CPU使用率等），并选择成本最低的执行计划。
+
+3. **索引优化**：选择合适的索引来加速数据访问。例如，优化器可能会选择使用B树索引或哈希索引来加速查询。
+
+4. **表连接优化**：确定连接表的最佳顺序和连接方法（如嵌套循环连接、排序合并连接、哈希连接等）。
+
+5. **子查询优化**：优化子查询的执行，例如将子查询转换为连接（JOIN）。
+
+6. **查询重写**：优化器可以对查询进行重写，以便更高效地执行。例如，将某些复杂查询重写为更简单的等价查询。
+
+### 优化器优化的内容
+
+优化器优化的具体内容包括以下几个方面：
+
+1. **选择索引**：优化器会选择最适合的索引来加速查询。例如，对于`WHERE`子句中的过滤条件，优化器会选择具有最高选择性的索引。
+
+2. **表连接顺序**：优化器会决定表连接的顺序。不同的连接顺序会显著影响查询的性能。优化器会选择成本最低的连接顺序。
+
+3. **使用索引扫描方式**：优化器会决定使用何种索引扫描方式（如全表扫描、范围扫描、唯一索引扫描等）。
+
+4. **表访问方式**：优化器会选择最优的表访问方式，如顺序扫描、索引扫描、使用覆盖索引等。
+
+5. **子查询优化**：将某些子查询优化为连接查询（JOIN），或对子查询进行去重、合并等优化。
+
+6. **排序和分组优化**：优化排序和分组操作，尽可能使用索引来避免额外的排序和分组操作。
+
+### MySQL查询优化示例
+
+以下是一些常见的查询优化示例：
+
+1. **使用索引优化查询**：
+
+   ```sql
+   -- 原始查询
+   SELECT * FROM employees WHERE department_id = 5 AND hire_date > '2020-01-01';
+
+   -- 优化后：创建复合索引
+   CREATE INDEX idx_dept_hiredate ON employees (department_id, hire_date);
+   ```
+
+2. **优化表连接**：
+
+   ```sql
+   -- 原始查询
+   SELECT e.name, d.name FROM employees e, departments d WHERE e.department_id = d.id;
+
+   -- 优化后：使用适当的连接顺序和索引
+   EXPLAIN SELECT e.name, d.name FROM employees e JOIN departments d ON e.department_id = d.id;
+   ```
+
+3. **优化子查询**：
+
+   ```sql
+   -- 原始查询
+   SELECT name FROM employees WHERE department_id IN (SELECT id FROM departments WHERE location = 'New York');
+
+   -- 优化后：将子查询转换为连接
+   SELECT e.name FROM employees e JOIN departments d ON e.department_id = d.id WHERE d.location = 'New York';
+   ```
+
+4. **避免不必要的排序**：
+
+   ```sql
+   -- 原始查询
+   SELECT * FROM employees ORDER BY last_name;
+
+   -- 优化后：创建索引以避免排序
+   CREATE INDEX idx_lastname ON employees (last_name);
+   ```
+
+### Mysal 查询优化结论
+
+MySQL优化器通过选择最优的执行计划来优化SQL查询，旨在最小化查询的执行时间和资源消耗。通过使用多种优化技术，如基于规则的优化、基于代价的优化、索引优化、表连接优化等，优化器能够显著提升查询性能。理解优化器的工作原理和优化方法，有助于开发者编写更高效的SQL查询，并通过适当的索引和查询重写来进一步优化数据库性能。
+
 ## 10000 取最大 10 个数 用什么算法最好
 
-从10000个数中找出最大的10个数，可以采用多种算法，其中一些更高效的方法包括：
+从一个包含 10,000 个数的集合中取出最大的 10 个数，有几种高效的算法可以选择。以下是几种常用的方法及其适用情况：
 
-1. 堆排序法：
-   - 使用一个小顶堆（min-heap），初始时堆的大小为10，将前10个数构建为小顶堆。
-   - 遍历剩余的数，如果当前数大于堆顶的最小元素，就将堆顶元素替换为当前数，并调整堆以保持堆的性质。
-   - 最终堆中保存的就是最大的10个数。
-   - 时间复杂度为O(n log k)，空间复杂度为O(k)。
-2. 快速选择法：
-   - 基于快速排序的分区操作，但只需要找到第k小的元素，而不是完全排序。
-   - 通过随机选取一个基准值，将数组分为小于和大于基准的两部分，根据k与基准位置的关系，决定在哪一侧继续查找。
-   - 重复此过程直到找到第k小的元素。
-   - 平均时间复杂度为O(n)，最坏情况为O(n^2)，但可以通过随机化基准选择来避免最坏情况。
-3. 计数排序法（非适用）：
-   - 计数排序通常用于非负整数且范围较小的情况，不适用于找出最大的10个数，因为它不是基于比较的排序。
-4. 优先队列（堆）：
-   - 使用一个大小为10的优先队列（大顶堆），每次插入新元素时，如果队列已满，则替换队列顶的最大元素。
-   - 这种方法在Java中可以使用PriorityQueue实现。
-   - 时间复杂度为O(n log k)，空间复杂度为O(k)。
-5. 分治法或随机化算法：
-   - 对数据集进行随机划分，例如分成10个子集，每个子集1000个数。
-   - 在每个子集中找出最大的数，然后对这10个数再进行一次上述的堆排序或快速选择，得到最大的10个数。
-   - 这种方法可以并行化处理，适合大数据量的情况。
-   - 时间复杂度取决于具体实现，但可以优于线性扫描。  
-     在实际应用中，如果内存允许，优先考虑堆排序法和优先队列，因为它们在保证效率的同时，空间复杂度较低。如果需要节省空间，可以考虑快速选择法，特别是对于大规模数据且不需要存储所有元素时。
+### 1. 基于堆的数据结构
+
+**算法：最小堆**
+使用最小堆（Min-Heap）是最常见的解决方案之一。它的时间复杂度为 \(O(n \log k)\)，其中 \(n\) 是集合中的元素个数，\(k\) 是需要取出的最大数的个数（在此情况下，\(k = 10\)）。
+
+**步骤**：
+
+1. 创建一个大小为 10 的最小堆。
+2. 遍历整个集合：
+   - 如果当前元素大于堆顶元素（最小堆的堆顶是堆中最小的元素），则替换堆顶元素，并重新调整堆。
+3. 遍历结束后，堆中的元素即为最大的 10 个数。
+
+**示例代码（Java）**：
+
+```java
+import java.util.PriorityQueue;
+
+public class TopK {
+    public static int[] findTopK(int[] nums, int k) {
+        PriorityQueue<Integer> minHeap = new PriorityQueue<>(k);
+        for (int num : nums) {
+            if (minHeap.size() < k) {
+                minHeap.offer(num);
+            } else if (num > minHeap.peek()) {
+                minHeap.poll();
+                minHeap.offer(num);
+            }
+        }
+        int[] result = new int[k];
+        for (int i = 0; i < k; i++) {
+            result[i] = minHeap.poll();
+        }
+        return result;
+    }
+}
+```
+
+### 2. 快速选择算法
+
+**算法：快速选择（Quickselect）**
+快速选择是一种基于快速排序的选择算法。它的平均时间复杂度为 \(O(n)\)。
+
+**步骤**：
+
+1. 使用快速选择找到第 \(n - k + 1\) 大的元素（即前 9900 个元素）。
+2. 之后，前 9900 个元素中的任何一个都比剩余的 10 个元素小。
+3. 对最后的 10 个元素进行排序或直接获取。
+
+**示例代码（Python）**：
+
+```python
+import random
+
+def quickselect(arr, left, right, k):
+    if left == right:
+        return arr[left]
+
+    pivot_index = random.randint(left, right)
+    pivot_index = partition(arr, left, right, pivot_index)
+
+    if k == pivot_index:
+        return arr[k]
+    elif k < pivot_index:
+        return quickselect(arr, left, pivot_index - 1, k)
+    else:
+        return quickselect(arr, pivot_index + 1, right, k)
+
+def partition(arr, left, right, pivot_index):
+    pivot_value = arr[pivot_index]
+    arr[pivot_index], arr[right] = arr[right], arr[pivot_index]
+    store_index = left
+    for i in range(left, right):
+        if arr[i] < pivot_value:
+            arr[store_index], arr[i] = arr[i], arr[store_index]
+            store_index += 1
+    arr[right], arr[store_index] = arr[store_index], arr[right]
+    return store_index
+
+def findTopK(arr, k):
+    n = len(arr)
+    quickselect(arr, 0, n - 1, n - k)
+    return sorted(arr[-k:])
+
+# 示例使用
+nums = [random.randint(1, 100000) for _ in range(10000)]
+top_10 = findTopK(nums, 10)
+print(top_10)
+```
+
+### 3. 排序后截取
+
+**算法：排序**
+直接对整个集合进行排序，然后截取最大的 10 个数。这种方法在时间复杂度上是 \(O(n \log n)\)，不如堆和快速选择高效，但实现简单，适用于数据量不大时。
+
+**示例代码（Python）**：
+
+```python
+def findTopK(arr, k):
+    return sorted(arr)[-k:]
+
+# 示例使用
+nums = [random.randint(1, 100000) for _ in range(10000)]
+top_10 = findTopK(nums, 10)
+print(top_10)
+```
+
+### 结论
+
+- **最小堆** 是常见和高效的选择，特别适合需要处理实时数据流的情况。
+- **快速选择** 在理论上是最优的（平均 \(O(n)\)），但实现复杂度较高，适合对性能要求极高的情况。
+- **排序** 虽然不如前两种方法高效，但在实现简便性上有优势，适合数据量相对较小时使用。
+
+在你的情况下（从 10,000 个数中取最大 10 个数），最小堆和快速选择都是不错的选择。
 
 ## Arraylist 是不是线程安全的 哪些是线程安全的
 
-ArrayList 不是线程安全的，它是 Java 中的一种动态数组实现，不同步多线程访问时可能会导致不确定的结果或者异常。如果需要在多线程环境下使用列表，应该使用线程安全的集合类。
+`ArrayList` 不是线程安全的。`ArrayList` 是 Java 中常用的动态数组实现，但它不提供内部同步机制，这意味着如果多个线程同时访问和修改同一个 `ArrayList` 实例，而没有适当的同步，就会导致不一致的状态和潜在的竞争条件。
 
-Java 提供了几种线程安全的集合类，其中常用的有：
+### 线程安全的替代方案
 
-- **Vector**：Vector 是一个同步的动态数组实现，它的所有方法都使用 synchronized 关键字进行了同步，因此是线程安全的。但是由于同步的开销，性能可能不如 ArrayList。
+如果需要在多线程环境中使用线程安全的列表，可以考虑以下几种替代方案：
 
-- **Collections.synchronizedList**：Collections 类提供了一个静态方法 synchronizedList，可以将任何普通的 List 转换为线程安全的 List。例如：
+1. **使用同步集合包装器**
 
-  ```java
-  List<String> synchronizedList = Collections.synchronizedList(new ArrayList<>());
-  ```
+   Java 提供了一个实用工具类 `Collections`，可以通过 `Collections.synchronizedList` 方法将普通的 `ArrayList` 包装成一个线程安全的列表。
 
-  使用这种方式，可以获得一个线程安全的 List，但是要注意，虽然它是线程安全的，但在对 List 进行遍历等操作时，仍然需要手动进行同步。
+   ```java
+   List<String> synchronizedList = Collections.synchronizedList(new ArrayList<String>());
 
-- **CopyOnWriteArrayList**：CopyOnWriteArrayList 是一个线程安全的并发集合类，它通过在写入操作时创建一个新的拷贝来保证线程安全性，因此读取操作不会受到写入操作的影响。它适用于读操作远远多于写操作的场景。
+   synchronized (synchronizedList) {
+       // 访问和修改列表的代码块
+       synchronizedList.add("item");
+   }
+   ```
 
-总的来说，如果在多线程环境下需要使用列表，推荐使用线程安全的集合类，以避免线程安全问题。具体选择哪种线程安全集合类取决于应用程序的需求和性能要求。
+   注意：尽管 `Collections.synchronizedList` 提供了同步，但对于迭代操作，仍然需要手动同步。
 
-## stw 是什么 哪个垃圾回收器 是 stw 时间最少的
+2. **使用 `CopyOnWriteArrayList`**
 
-**STW**（Stop-The-World）是指在某些操作期间，Java虚拟机（JVM）会暂停所有的应用程序线程，直到操作完成。这种行为常见于垃圾回收（GC）过程中。在STW期间，应用程序会完全停止运行，等待垃圾回收器完成工作，这可能会导致应用程序的停顿时间增加，影响性能。
+   `CopyOnWriteArrayList` 是 `java.util.concurrent` 包的一部分，它是线程安全的变体，适用于多读少写的场景。写操作时，它会创建底层数组的一个副本，从而避免了并发修改问题。
+
+   ```java
+   List<String> cowList = new CopyOnWriteArrayList<>();
+   cowList.add("item");
+
+   // 迭代时不需要额外同步
+   for (String item : cowList) {
+       System.out.println(item);
+   }
+   ```
+
+3. **使用 `Vector`**
+
+   `Vector` 是一个同步的集合类，但由于同步是粗粒度的，因此性能通常不如 `CopyOnWriteArrayList`。
+
+   ```java
+   List<String> vector = new Vector<>();
+   vector.add("item");
+   ```
+
+### 比较与选择
+
+- **`Collections.synchronizedList`**：适用于需要在现有 `ArrayList` 上添加同步的场景。适合写操作较少但读操作频繁的场景。在迭代时需要手动同步。
+- **`CopyOnWriteArrayList`**：适用于多读少写的场景。写操作较慢（因为每次写操作都会复制整个数组），但读操作性能较好，且迭代器不会抛出 `ConcurrentModificationException`。
+- **`Vector`**：适用于需要简单同步的场景，但性能通常不如 `CopyOnWriteArrayList`。
+
+### 总结
+
+- `ArrayList` 不是线程安全的，不能在多线程环境中直接使用。
+- 线程安全的替代方案包括 `Collections.synchronizedList`、`CopyOnWriteArrayList` 和 `Vector`。
+- 根据具体使用场景选择合适的线程安全集合实现。
+
+选择合适的线程安全集合实现有助于在多线程环境中确保数据的一致性和操作的安全性。
 
 ### STW的来源与影响
 
@@ -2682,8 +3210,6 @@ SQL 注入是一种攻击方式，攻击者通过操纵 SQL 查询来访问或�
    - 使用自动化工具进行安全扫描，发现和修复已知的安全问题。
 
 通过综合采用上述措施，可以在前后端分离的架构中有效地提升安全性，保护应用和用户数据免受各种攻击和威胁。
-
-## openfeign的实现原理如何实现的
 
 ## 分库分表如何实现如何进行优化如何确定分到哪张表
 
