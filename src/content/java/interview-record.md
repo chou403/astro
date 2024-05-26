@@ -1,7 +1,7 @@
 ---
 author: chou401
 pubDatetime: 2024-01-30T12:28:25Z
-modDatetime: 2024-05-25T22:05:08Z
+modDatetime: 2024-05-26T14:34:22Z
 title: 面基记录
 featured: false
 draft: false
@@ -214,240 +214,494 @@ OpenFeign通过动态代理、注解驱动配置、请求模板化、服务发�
 
 ## OpenFeign 如何实现负载均衡 重要
 
-OpenFeign 本身并不直接实现负载均衡，但它可以与 Spring Cloud 的负载均衡器组件结合使用，比如 Ribbon，或者更现代的 Spring Cloud LoadBalancer，来实现服务调用时的负载均衡。以下是使用 OpenFeign 实现负载均衡的步骤：
+在 Spring Cloud 中，OpenFeign 通常与 Ribbon 一起使用来实现负载均衡和失败重试机制。下面是详细的实现步骤，包括如何选择和自定义负载均衡策略，以及配置失败重试机制。
 
-1. **启用 Spring Cloud LoadBalancer**：
+### 1. 引入依赖
 
-   - 在项目中引入 Spring Cloud LoadBalancer 的依赖。
-   - 配置 application.yml 或 application.properties 文件，启用 LoadBalancer：
+在 `pom.xml` 文件中引入所需的依赖：
 
-   ```java
-   spring:
-    cloud:
-      loadbalancer:
-        enabled: true
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+</dependency>
+```
+
+### 2. 启用 Feign 客户端和服务发现
+
+在主应用类上启用 Feign 客户端和 Eureka 客户端：
+
+```java
+@SpringBootApplication
+@EnableFeignClients
+@EnableDiscoveryClient
+public class MyApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MyApplication.class, args);
+    }
+}
+```
+
+### 3. 创建 Feign 客户端接口
+
+定义一个接口来表示你的 Feign 客户端：
+
+```java
+@FeignClient(name = "service-name")
+public interface MyFeignClient {
+    @GetMapping("/endpoint")
+    String getData();
+}
+```
+
+### 4. 配置 Ribbon 负载均衡
+
+Ribbon 会自动根据服务名称实现客户端负载均衡。默认情况下，Ribbon 使用轮询算法，但可以通过配置文件进行自定义。
+
+在 `application.yml` 或 `application.properties` 文件中配置 Ribbon：
+
+```yaml
+service-name:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule
+    # 或者其他负载均衡策略，例如:
+    # NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
+    # NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RetryRule
+```
+
+常用的负载均衡策略包括：
+
+- **RoundRobinRule**：轮询策略，默认策略。
+- **RandomRule**：随机策略。
+- **RetryRule**：重试策略，在指定时间内循环重试选择可用的服务实例。
+- **AvailabilityFilteringRule**：会先过滤掉由于多次访问故障而处于断路器跳闸状态的服务，以及并发连接数量超过阈值的服务，然后对剩余的服务列表进行轮询。
+
+### 5. 自定义负载均衡策略
+
+如果需要自定义负载均衡策略，可以实现 Ribbon 的 `IRule` 接口，并在配置文件中指定自定义策略。
+
+#### 自定义策略实现
+
+创建一个自定义的负载均衡策略：
+
+```java
+import com.netflix.loadbalancer.AbstractLoadBalancerRule;
+import com.netflix.loadbalancer.ClientConfigEnabledRoundRobinRule;
+import com.netflix.loadbalancer.ILoadBalancer;
+import com.netflix.loadbalancer.Server;
+
+public class CustomRule extends AbstractLoadBalancerRule {
+
+    @Override
+    public void initWithNiwsConfig(IClientConfig clientConfig) {
+        // Custom initialization if needed
+    }
+
+    @Override
+    public Server choose(Object key) {
+        ILoadBalancer lb = getLoadBalancer();
+        // Custom logic to choose a server
+        List<Server> servers = lb.getAllServers();
+        // Example: choose the first available server
+        return servers.isEmpty() ? null : servers.get(0);
+    }
+}
+```
+
+#### 在配置文件中指定自定义策略
+
+在 `application.yml` 或 `application.properties` 中配置：
+
+```yaml
+service-name:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.example.CustomRule
+```
+
+### 6. 配置失败重试机制
+
+通过 `Retryer` 配置 Feign 的重试机制。可以在 Feign 客户端接口上使用 `configuration` 属性指定自定义配置：
+
+```java
+@FeignClient(name = "service-name", configuration = FeignConfig.class)
+public interface MyFeignClient {
+    @GetMapping("/endpoint")
+    String getData();
+}
+```
+
+然后在 `FeignConfig` 类中配置重试逻辑：
+
+```java
+import feign.Retryer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class FeignConfig {
+
+    @Bean
+    public Retryer feignRetryer() {
+        return new Retryer.Default(100, 1000, 3);
+    }
+}
+```
+
+上述配置表示初始间隔 100ms，最大间隔 1000ms，重试 3 次。
+
+### 7. 进行请求调用
+
+在服务中注入 Feign 客户端并进行请求调用：
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class MyService {
+    @Autowired
+    private MyFeignClient myFeignClient;
+
+    public String fetchData() {
+        return myFeignClient.getData();
+    }
+}
+```
+
+### 示例项目结构
+
+以下是一个简单的项目结构示例：
+
+```txt
+src/
+├── main/
+│   ├── java/
+│   │   └── com/
+│   │       └── example/
+│   │           ├── MyApplication.java
+│   │           ├── MyFeignClient.java
+│   │           ├── FeignConfig.java
+│   │           ├── CustomRule.java
+│   │           └── MyService.java
+│   └── resources/
+│       └── application.yml
+```
+
+### OpenFeign 负载均衡总结
+
+通过以上步骤，OpenFeign 配合 Ribbon 实现了负载均衡和失败重试机制。Ribbon 提供了多种内置负载均衡策略，并允许自定义负载均衡策略。Feign 的 `Retryer` 提供了灵活的重试机制，以应对请求失败的情况。在生产环境中，还可以结合 Eureka 或其他注册中心动态获取服务实例，从而实现更灵活和高效的负载均衡和重试策略。
+
+## Spring Cloud LoadBalancer 负载均衡 和 ribbon 负载均衡
+
+Spring Cloud 提供了两种负载均衡解决方案：Ribbon 和 Spring Cloud LoadBalancer。以下是它们的定义、配置、比较以及选择意见。
+
+### 定义
+
+#### Ribbon
+
+Ribbon 是 Netflix 提供的一个客户端负载均衡器，Spring Cloud Netflix 包含了 Ribbon 的集成，使得它可以和 Spring Cloud 生态系统中的其他组件（如 Eureka、Feign）无缝集成。Ribbon 提供了多种负载均衡策略，如轮询、随机、加权等，并且可以通过配置或编程自定义负载均衡逻辑。
+
+#### Spring Cloud LoadBalancer
+
+Spring Cloud LoadBalancer 是 Spring Cloud 生态系统中的一个新负载均衡器，它是 Spring Cloud Commons 项目的一部分，用于替代 Ribbon。Spring Cloud LoadBalancer 提供了更现代化的架构和更灵活的配置方式，同时减少了对外部依赖的需求。它也集成了 Spring Cloud Discovery Client 来实现服务发现和负载均衡。
+
+### 配置
+
+#### 配置 Ribbon
+
+1. **引入依赖**
+   在 `pom.xml` 中引入 Ribbon 和 Feign 的依赖：
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+   </dependency>
+   <dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-starter-openfeign</artifactId>
+   </dependency>
    ```
 
-2. **使用 FeignClient**：
-
-   - 定义 FeignClient 接口，并指定服务实例的名称，而不是具体的 URL。Spring Cloud LoadBalancer 将根据服务实例名称来选择一个可用的服务实例。
-
-   ```java
-   @FeignClient(name = "target-service")
-   public interface TargetServiceClient {
-       @GetMapping("/api")
-       String getSomeData();
-   }
-   ```
-
-3. **Ribbon 集成（可选，适用于旧版）**：
-
-   - 如果你使用的是 Spring Cloud 早期版本，需要集成 Ribbon 来实现负载均衡。在 pom.xml 或 build.gradle 文件中添加 Ribbon 的依赖。
-   - 在 @FeignClient 注解中，可以配置负载均衡策略。Ribbon 负载均衡器会根据选择的负载均衡算法（如轮询、随机、权重等）选择一个服务提供者，并将请求转发给选中的服务提供者。例如，如果你想要使用轮询策略，可以在配置中指定：
+2. **启用 Ribbon**
+   在 Spring Boot 应用主类上启用 Ribbon 和 Feign：
 
    ```java
-   @FeignClient(name = "target-service", configuration = MyFeignConfig.class)
-   public interface TargetServiceClient {
-       // ...
-   }
-
-   @Configuration
-   public class MyFeignConfig {
-       @Bean
-       public Client feignClient() {
-           return new RibbonClient(RibbonConfig.builder().build());
+   @SpringBootApplication
+   @EnableFeignClients
+   public class MyApplication {
+       public static void main(String[] args) {
+           SpringApplication.run(MyApplication.class, args);
        }
    }
    ```
 
-4. **配置负载均衡策略**：
-   - 如果需要自定义负载均衡策略，可以通过实现 org.springframework.cloud.loadbalancer.core.ServiceInstanceChooser 接口来自定义选择服务实例的方式。
-5. **运行应用**：
-   - 启动应用，OpenFeign 会利用 Spring Cloud LoadBalancer 自动选择一个可用的服务实例进行请求，每次请求可能会选择不同的实例，从而实现负载均衡。
-6. **失败重试**：
+3. **配置负载均衡策略**
+   在 `application.yml` 或 `application.properties` 中配置 Ribbon：
 
-   在 Spring Cloud LoadBalancer 中，失败重试功能是通过 Retry 实现的。Retry 是 Spring Cloud 提供的一个通用的重试机制，它能够在请求失败时自动地进行重试操作。Spring Cloud LoadBalancer 集成了 Retry，因此可以方便地在负载均衡器中实现失败重试功能。
+   ```yaml
+   service-name:
+     ribbon:
+       NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
+   ```
 
-   使用 Spring Cloud LoadBalancer 实现失败重试的步骤如下：
+#### 配置 Spring Cloud LoadBalancer
 
-   - **配置 Retry**：首先，需要在应用程序中配置 Retry 的相关参数，如重试次数、重试间隔等。可以通过 Spring Cloud 提供的 @LoadBalancerClient 注解或者配置文件来配置 Retry。
+1. **引入依赖**
+   在 `pom.xml` 中引入 Spring Cloud LoadBalancer 和 Feign 的依赖：
 
-   - **启用 Retry**：在使用 Spring Cloud LoadBalancer 时，需要启用 Retry 功能。可以通过配置文件或者 Spring Boot 配置属性来启用 Retry。
+   ```xml
+   <dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+   </dependency>
+   <dependency>
+       <groupId>org.springframework.cloud</groupId>
+       <artifactId>spring-cloud-starter-openfeign</artifactId>
+   </dependency>
+   ```
 
-   - **触发重试**：当发起请求时，如果请求失败了（如连接超时、服务不可用等），Spring Cloud LoadBalancer 会自动触发 Retry，尝试重新选择另一个可用的服务实例，并重新发送请求。Retry 会根据配置的重试策略进行重试，直到达到最大重试次数或者请求成功为止。
+2. **启用 Spring Cloud LoadBalancer**
+   在 Spring Boot 应用主类上启用 Feign：
 
-   通过以上步骤，可以在 Spring Cloud LoadBalancer 中实现失败重试功能。这样可以提高服务消费者对服务提供者的容错能力，增强系统的稳定性和可靠性。
+   ```java
+   @SpringBootApplication
+   @EnableFeignClients
+   public class MyApplication {
+       public static void main(String[] args) {
+           SpringApplication.run(MyApplication.class, args);
+       }
+   }
+   ```
 
-请注意，从 Spring Cloud Hoxton 版本开始，推荐使用 Spring Cloud LoadBalancer 替换 Ribbon，因为它提供了更现代的负载均衡解决方案，并且与 Netflix Ribbon 不再有直接关联。
+3. **配置负载均衡策略**
+   创建一个自定义的 `LoadBalancerConfiguration` 类：
 
-## Spring Cloud LoadBalancer 负载均衡 和 ribbon 负载均衡
+   ```java
+   import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+   import org.springframework.context.annotation.Bean;
+   import org.springframework.context.annotation.Configuration;
+   import reactor.core.publisher.Flux;
+   import org.springframework.cloud.client.ServiceInstance;
 
-在 Spring Cloud 中，负载均衡是一种分配客户端请求到多个服务实例的技术。Spring Cloud 提供了两种负载均衡实现：Ribbon 和 Spring Cloud LoadBalancer。以下是对这两种负载均衡的详细比较和介绍。
+   @Configuration
+   public class LoadBalancerConfiguration {
 
-### Ribbon
+       @Bean
+       public ServiceInstanceListSupplier serviceInstanceListSupplier() {
+           return new ServiceInstanceListSupplier() {
+               @Override
+               public Flux<List<ServiceInstance>> get() {
+                   // 自定义负载均衡逻辑
+                   return Flux.just(Collections.singletonList(new DefaultServiceInstance(
+                       "service-instance-id", "service-name", "localhost", 8080, false)));
+               }
 
-1. **概述**：
-
-   - Ribbon 是 Netflix 开源的一个负载均衡客户端库，广泛用于 Spring Cloud Netflix 组件中。
-
-2. **特点**：
-
-   - **客户端负载均衡**：Ribbon 在客户端实现负载均衡逻辑，客户端决定将请求发送到哪个服务实例。
-   - **多种负载均衡策略**：Ribbon 提供了多种负载均衡策略，如轮询、随机、权重等。
-   - **自定义负载均衡规则**：可以通过实现 `IRule` 接口自定义负载均衡规则。
-
-3. **配置**：
-
-   - Ribbon 配置通过 `application.yml` 或 `application.properties` 文件进行，例如：
-
-     ```yaml
-     my-service:
-       ribbon:
-         NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule
-     ```
-
-4. **集成**：
-   - Ribbon 通常与 Eureka、Feign 等其他 Spring Cloud Netflix 组件结合使用。
-
-### Spring Cloud LoadBalancer
-
-1. **概述**：
-
-   - Spring Cloud LoadBalancer 是 Spring Cloud 提供的新一代负载均衡解决方案，旨在取代 Ribbon。
-   - 自 Spring Cloud Hoxton 版本起，Spring Cloud LoadBalancer 成为推荐的负载均衡解决方案。
-
-2. **特点**：
-
-   - **轻量级**：比 Ribbon 更轻量级，适合 Spring Boot 和 Spring Cloud 应用。
-   - **服务实例选择器**：使用 `ServiceInstanceListSupplier` 接口定义服务实例选择逻辑。
-   - **可扩展性**：允许开发者通过自定义 `ServiceInstanceListSupplier` 和 `ReactorLoadBalancer` 实现扩展和定制。
-
-3. **配置**：
-
-   - 配置通常通过 Java 配置类或属性文件进行，例如：
-
-     ```java
-     @Bean
-     public ReactorLoadBalancer<ServiceInstance> loadBalancer(ClientHttpConnector clientHttpConnector) {
-         return new RandomLoadBalancer();
-     }
-     ```
-
-4. **集成**：
-   - Spring Cloud LoadBalancer 与 Spring Cloud Discovery Client 集成，可以与 Consul、Eureka 等服务发现组件一起使用。
+               @Override
+               public String getServiceId() {
+                   return "service-name";
+               }
+           };
+       }
+   }
+   ```
 
 ### 比较
 
-- **成熟度**：
+#### 1. 依赖性
 
-  - Ribbon 是一个成熟的解决方案，已被广泛使用和验证。
-  - Spring Cloud LoadBalancer 是较新的解决方案，随着 Spring Cloud 的发展而不断改进。
+- **Ribbon**：依赖于 Netflix 生态系统，有较多外部依赖（如 Archaius）。
+- **Spring Cloud LoadBalancer**：依赖于 Spring Cloud Commons，减少了外部依赖，更加轻量级。
 
-- **灵活性和扩展性**：
+#### 2. 配置灵活性
 
-  - Ribbon 提供了多种内置的负载均衡策略，并允许自定义策略。
-  - Spring Cloud LoadBalancer 通过更现代和灵活的方式允许开发者扩展和定制负载均衡逻辑。
+- **Ribbon**：提供多种内置负载均衡策略，可以通过配置文件或编程方式进行定制。
+- **Spring Cloud LoadBalancer**：提供更灵活的编程方式进行自定义，可以利用 Spring 的强大生态进行扩展和定制。
 
-- **配置和使用**：
-  - Ribbon 配置主要通过配置文件，集成较为复杂。
-  - Spring Cloud LoadBalancer 配置更加简洁，易于与 Spring Boot 和 Spring Cloud 生态系统集成。
+#### 3. 社区支持
 
-### 选择建议
+- **Ribbon**：由于 Netflix 停止了对 Ribbon 的积极维护，社区逐渐转向 Spring Cloud LoadBalancer。
+- **Spring Cloud LoadBalancer**：作为 Spring Cloud 的新标准，得到了 Spring 社区的积极支持和发展。
 
-- **现有应用**：
-  - 如果你已经在使用 Ribbon 并且它满足你的需求，可以继续使用 Ribbon。
-- **新项目**：
-  - 对于新的 Spring Cloud 项目，建议使用 Spring Cloud LoadBalancer，因为它是未来的发展方向，并且与 Spring Cloud 生态系统更好地集成。
+#### 4. 迁移和兼容性
 
-总结来说，虽然 Ribbon 是一个成熟且功能丰富的负载均衡库，但 Spring Cloud LoadBalancer 提供了更现代、更轻量级的负载均衡解决方案，适合与最新的 Spring Cloud 组件和实践一起使用。
+- **Ribbon**：在已有 Netflix 生态系统中广泛使用，迁移成本可能较高。
+- **Spring Cloud LoadBalancer**：推荐用于新项目，对于老项目可以逐步迁移以获得更好的支持和性能。
+
+### 选择意见
+
+- **新项目**：建议使用 Spring Cloud LoadBalancer。它更现代化，具有更少的外部依赖，并且得到了 Spring 社区的积极支持。
+- **已有项目**：如果你的项目已经使用了 Ribbon，并且运行稳定，可以暂时继续使用，但应考虑未来逐步迁移到 Spring Cloud LoadBalancer 以获得更好的长期支持和新特性。
+
+通过上述步骤和比较，你可以根据项目需求选择合适的负载均衡器，并配置相应的策略和失败重试机制，以确保服务的高可用性和性能优化。
 
 ## OpenFeign 用到了哪些设计模式 重要
 
-OpenFeign 在其实现中使用了多种设计模式，以实现其灵活、可扩展且易于使用的 HTTP 客户端。这些设计模式包括但不限于：
+OpenFeign 是一个声明式的 HTTP 客户端，它使用了多种设计模式来实现其功能。以下是 OpenFeign 中使用的一些主要设计模式及其应用场景：
 
-### 1. **代理模式（Proxy Pattern）**
+### 1. 代理模式 (Proxy Pattern)
 
-OpenFeign 最核心的设计模式是代理模式。代理模式用于为其他对象提供一种代理以控制对这个对象的访问。Feign 使用 Java 的动态代理机制为每个标注了 `@FeignClient` 的接口生成一个代理对象。当调用接口的方法时，代理对象会拦截方法调用并执行相应的 HTTP 请求。
+**应用场景**：Feign 客户端接口
+
+**解释**：代理模式允许一个对象作为另一个对象的代理，以控制对这个对象的访问。Feign 使用代理模式创建接口的实现类，允许开发者仅通过定义接口即可发出 HTTP 请求，而不需要手动编写实现。
+
+**代码示例**：
 
 ```java
-@FeignClient(name = "my-service")
-public interface MyServiceClient {
+@FeignClient(name = "service-name")
+public interface MyFeignClient {
     @GetMapping("/endpoint")
-    String getEndpoint();
+    String getData();
 }
 ```
 
-### 2. **工厂模式（Factory Pattern）**
+### 2. 工厂模式 (Factory Pattern)
 
-工厂模式在 Feign 的构建过程中被广泛使用。例如，`Feign.builder()` 方法用于创建 Feign 客户端的实例。通过工厂模式，Feign 可以灵活地配置和创建不同类型的客户端。
+**应用场景**：Feign Builder
 
-```java
-Feign.builder()
-     .decoder(new GsonDecoder())
-     .target(MyServiceClient.class, "http://my-service");
-```
+**解释**：工厂模式通过定义一个用于创建对象的接口，让子类决定实例化哪个类。Feign 使用工厂模式来创建 Feign 客户端实例。
 
-### 3. **模板模式（Template Pattern）**
-
-Feign 的 `RequestTemplate` 类使用了模板模式。模板模式定义了一个操作中的算法骨架，而将一些步骤延迟到子类中。`RequestTemplate` 类定义了如何构建 HTTP 请求的基本流程，但具体的请求构建细节可以在不同的实现中进行定制。
-
-### 4. **策略模式（Strategy Pattern）**
-
-策略模式在 Feign 中用于处理各种不同的行为。例如，Feign 使用策略模式来选择不同的编码器和解码器。开发者可以通过提供不同的编码器和解码器来定制请求和响应的处理方式。
+**代码示例**：
 
 ```java
-Feign.builder()
-     .encoder(new GsonEncoder())
-     .decoder(new GsonDecoder())
-     .target(MyServiceClient.class, "http://my-service");
+Feign.Builder builder = Feign.builder();
+MyFeignClient client = builder.target(MyFeignClient.class, "http://service-url");
 ```
 
-### 5. **责任链模式（Chain of Responsibility Pattern）**
+### 3. 单例模式 (Singleton Pattern)
 
-责任链模式在 Feign 的请求拦截器（Request Interceptors）中得到了体现。多个请求拦截器可以组成一个链，按照顺序对请求进行处理。这使得请求的预处理和后处理变得灵活且可扩展。
+**应用场景**：Feign 的内部组件
+
+**解释**：单例模式确保一个类只有一个实例，并提供一个全局访问点。Feign 的一些内部组件如编码器、解码器、契约等，通常作为单例来管理，以减少资源消耗和确保一致性。
+
+**代码示例**：
 
 ```java
-Feign.builder()
-     .requestInterceptor(new CustomInterceptor())
-     .target(MyServiceClient.class, "http://my-service");
+public class MyDecoder implements Decoder {
+    private static final MyDecoder INSTANCE = new MyDecoder();
+
+    private MyDecoder() {
+        // private constructor
+    }
+
+    public static MyDecoder getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public Object decode(Response response, Type type) throws IOException {
+        // decoding logic
+    }
+}
 ```
 
-### 6. **装饰器模式（Decorator Pattern）**
+### 4. 适配器模式 (Adapter Pattern)
 
-装饰器模式允许动态地将责任附加到对象上。在 Feign 中，装饰器模式用于增强 HTTP 客户端的功能，例如通过日志记录器（Logger）记录请求
+**应用场景**：编码器、解码器
 
-和响应的详细信息。通过使用装饰器模式，Feign 可以在不修改原始对象的情况下添加额外的功能。
+**解释**：适配器模式将一个类的接口转换成客户希望的另一个接口。Feign 使用适配器模式将请求和响应适配到用户定义的编码器和解码器上。
+
+**代码示例**：
 
 ```java
-Feign.builder()
-     .logger(new Slf4jLogger())
-     .logLevel(Logger.Level.FULL)
-     .target(MyServiceClient.class, "http://my-service");
+public class MyEncoder implements Encoder {
+    @Override
+    public void encode(Object object, Type bodyType, RequestTemplate template) {
+        // encoding logic
+    }
+}
 ```
 
-### 7. **构建器模式（Builder Pattern）**
+### 5. 装饰器模式 (Decorator Pattern)
 
-构建器模式在 Feign 的客户端构建过程中得到了广泛应用。`Feign.builder()` 提供了一种流畅的 API 来配置和创建 Feign 客户端实例。通过构建器模式，开发者可以逐步设置客户端的各种属性和选项。
+**应用场景**：请求拦截器
+
+**解释**：装饰器模式通过一系列的装饰对象来动态地为对象添加职责。Feign 使用装饰器模式允许开发者定义一系列请求拦截器来在请求发送之前或之后添加额外的行为。
+
+**代码示例**：
 
 ```java
-Feign.builder()
-     .encoder(new GsonEncoder())
-     .decoder(new GsonDecoder())
-     .requestInterceptor(new CustomInterceptor())
-     .logger(new Slf4jLogger())
-     .logLevel(Logger.Level.FULL)
-     .target(MyServiceClient.class, "http://my-service");
+public class MyRequestInterceptor implements RequestInterceptor {
+    @Override
+    public void apply(RequestTemplate template) {
+        template.header("Authorization", "Bearer my-token");
+    }
+}
 ```
 
-### 8. **单例模式（Singleton Pattern）**
+### 6. 策略模式 (Strategy Pattern)
 
-单例模式确保一个类只有一个实例，并提供一个全局访问点。在 Feign 的实现中，一些核心组件如 `Feign.Builder` 和 `LoadBalancer` 通常作为单例来使用，以确保整个应用程序中共享同一个实例。
+**应用场景**：负载均衡策略、重试策略
 
-### OpenFeign 总结
+**解释**：策略模式定义了一系列算法，并将每一个算法封装起来，使它们可以相互替换。Feign 可以使用策略模式来定义不同的负载均衡策略和重试策略。
 
-OpenFeign 通过使用这些设计模式，实现了灵活性、可扩展性和易用性的目标。代理模式是其最核心的设计模式，用于动态生成接口的代理对象。工厂模式、模板模式和策略模式用于构建和配置 Feign 客户端的各个方面。责任链模式和装饰器模式增强了请求处理的灵活性和功能性。构建器模式提供了流畅的 API，用于创建和配置客户端实例。单例模式确保了一些核心组件在整个应用程序中的一致性和共享性。
+**代码示例**：
 
-通过结合这些设计模式，OpenFeign 提供了一个强大且易于使用的 HTTP 客户端库，能够满足各种复杂的分布式系统需求。
+```java
+@Bean
+public Retryer feignRetryer() {
+    return new Retryer.Default(100, 1000, 3);
+}
+```
+
+### 7. 模板方法模式 (Template Method Pattern)
+
+**应用场景**：自定义契约
+
+**解释**：模板方法模式在一个方法中定义一个算法的骨架，而将一些步骤延迟到子类中。Feign 使用模板方法模式来实现自定义契约，通过扩展 `Contract.BaseContract` 来定义解析接口的方法签名的规则。
+
+**代码示例**：
+
+```java
+public class MyContract extends Contract.BaseContract {
+    @Override
+    protected void processAnnotationOnMethod(MethodMetadata data, Annotation annotation, Method method) {
+        // custom processing logic
+    }
+}
+```
+
+### 8. 责任链模式 (Chain of Responsibility Pattern)
+
+**应用场景**：拦截器链
+
+**解释**：责任链模式为请求创建一条处理链，每个处理者都有机会处理请求或将其传递给下一个处理者。Feign 的请求拦截器链就是责任链模式的一个例子，每个拦截器按顺序处理请求。
+
+**代码示例**：
+
+```java
+public class MyRequestInterceptor1 implements RequestInterceptor {
+    @Override
+    public void apply(RequestTemplate template) {
+        template.header("Header1", "Value1");
+    }
+}
+
+public class MyRequestInterceptor2 implements RequestInterceptor {
+    @Override
+    public void apply(RequestTemplate template) {
+        template.header("Header2", "Value2");
+    }
+}
+
+// Configuration
+@Bean
+public Feign.Builder feignBuilder() {
+    return Feign.builder()
+                .requestInterceptor(new MyRequestInterceptor1())
+                .requestInterceptor(new MyRequestInterceptor2());
+}
+```
+
+通过使用这些设计模式，OpenFeign 实现了灵活、可扩展和易于使用的 HTTP 客户端功能，使开发者能够方便地进行微服务之间的通信。
 
 ## OpenFeign 动态代理做了什么
 
@@ -656,38 +910,210 @@ public class FeignInvocationHandler implements InvocationHandler {
 
 ## CAS 原理是什么
 
-CAS（Compare and Swap，比较并交换）是无锁编程中的一种原子操作，它通过硬件层面的支持来保证操作的原子性。CAS操作包含三个操作数：
+CAS（Compare-And-Swap）是一种常见的原子操作原理，用于实现无锁编程。它允许多个线程并发地操作共享数据而不会引起数据不一致。CAS 是许多现代并发编程库（如 Java 的 `java.util.concurrent` 包）中用来实现线程安全的基础。
 
-1. **内存位置（Memory Location）V**：这是要修改的内存地址。
-2. **预期值（Expected Value）A**：这是当前线程期望内存位置V的值。
-3. **更新值（Update Value）B**：这是当预期值A与内存位置V的值相等时，想要写入的新值。
+### CAS 的基本原理
 
-CAS的工作原理如下：
+CAS 操作涉及三个操作数：
 
-- 当一个线程试图更新V的位置时，它首先读取V的当前值。
-- 然后，它检查这个值是否与预期值A匹配。
-- 如果值匹配，那么V的值被更新为B，这个过程是原子的，即不会被其他线程中断。
-- 如果值不匹配，说明在读取V之后有其他线程改变了V的值，那么当前线程不会更新V，而是返回V的最新值。  
-  CAS操作是循环进行的，直到更新成功。这种机制被称为自旋锁，因为线程会不断地重试直到成功，而不会阻塞。如果多个线程都尝试更新同一个变量，只有一个线程能成功，其他线程会持续循环检查并重试。  
-  在Java中，`java.util.concurrent.atomic` 包提供了CAS操作的类，如`AtomicInteger`、`AtomicLong`等，它们的方法如`compareAndSet()`、`compareAndExchange()`等就是基于CAS的。  
-  由于CAS是硬件级别的操作，它通常比使用锁更高效，因为它避免了线程上下文切换和锁的开销。但是，如果存在大量的竞争（即多个线程反复尝试更新同一个值），CAS可能导致自旋次数过多，消耗CPU资源。此外，如果多个线程试图改变不同的值，但这些值相互依赖，那么CAS可能无法解决这个问题，因为它只检查单个值的更新。
+1. **内存位置**（V）：要更新的变量的内存地址。
+2. **预期值**（A）：线程期望变量目前持有的值。
+3. **新值**（B）：需要设置的新值。
 
-## 线程池 内存分配 紧密型如何分配线程数
+CAS 操作的步骤如下：
 
-对于CPU密集型任务，线程池的线程数配置应该考虑到以下几点：
+1. 读取变量当前的值。
+2. 比较当前值与预期值（A）。
+3. 如果当前值等于预期值，将其更新为新值（B）；否则，不做任何操作。
 
-1. **CPU 核心数**：
-   - CPU 密集型任务主要是利用CPU进行计算，因此线程数通常建议设置为等于或略小于CPU核心数。这是因为每个线程都在进行计算，过多的线程会导致上下文切换开销增大，反而降低整体性能。
-2. **系统负载**：
-   - 除了CPU核心数，还需要考虑系统中其他正在运行的进程和线程对CPU的占用。如果系统上还有其他高优先级或CPU密集型的服务，可能需要适当减少线程池的线程数，以避免争抢资源。
-3. **任务特性**：
-   - 任务本身的计算量和执行时间也是决定因素。如果任务执行非常快，可以考虑稍微增加线程数，以便更好地利用CPU。反之，如果任务执行较慢，过多的线程可能导致CPU等待时间过长，这时应减少线程数。
-4. **线程同步和阻塞**：
-   - 如果任务中包含大量的线程同步或阻塞操作，如等待I/O或其他资源，那么线程池的大小可以适当增加，因为这些任务在等待期间不会占用CPU资源。
-5. **系统资源限制**：
-   - 考虑到内存限制，如果每个线程占用大量内存，线程池的大小不能无限制增加，以免超出系统内存承受范围，导致性能下降甚至系统崩溃。  
-     一个常见的经验公式是：`线程池大小 = CPU核心数 + 1` 或 ``，并发系数通常在1到2之间，取决于任务特性和系统负载。  
-     但是，最佳的线程池大小可能需要通过实际测试和监控来进行调整，以找到最佳的平衡点，兼顾CPU利用率和上下文切换的开销。在生产环境中，可以考虑使用动态调整线程池大小的策略，以适应负载的变化。
+CAS 操作是原子的，即在整个过程中不会被中断。
+
+### 实现 CAS 的伪代码
+
+以下是 CAS 操作的伪代码：
+
+```java
+boolean compareAndSwap(int* V, int A, int B) {
+    if (*V == A) {
+        *V = B;
+        return true;
+    } else {
+        return false;
+    }
+}
+```
+
+### CAS 在 Java 中的实现
+
+在 Java 中，CAS 操作通常由 `sun.misc.Unsafe` 类提供，但在高层次上，Java 的 `java.util.concurrent` 包封装了这些底层操作。例如，`AtomicInteger` 类使用 CAS 来实现无锁的原子递增操作。
+
+```java
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class CASExample {
+    private AtomicInteger value = new AtomicInteger(0);
+
+    public void increment() {
+        int oldValue;
+        int newValue;
+        do {
+            oldValue = value.get();
+            newValue = oldValue + 1;
+        } while (!value.compareAndSet(oldValue, newValue));
+    }
+
+    public int getValue() {
+        return value.get();
+    }
+}
+```
+
+### CAS 的优缺点
+
+**优点：**
+
+1. **高效性**：CAS 操作是无锁的，不会引起线程挂起和上下文切换，通常比锁机制更高效。
+2. **并发性**：CAS 允许多个线程同时执行，而不会相互阻塞，从而提高并发性。
+
+**缺点：**
+
+1. **ABA 问题**：如果一个变量从 A 变为 B，然后又变回 A，CAS 无法察觉这种变化，会误认为值没有改变。可以通过增加版本号来解决这个问题（例如，使用 `AtomicStampedReference`）。
+2. **自旋开销**：在高竞争的情况下，CAS 可能会导致自旋多次，从而浪费 CPU 资源。
+
+### CAS 总结
+
+CAS 是一种高效的无锁同步机制，广泛应用于并发编程中。通过比较和交换操作，CAS 保证了共享数据在多线程环境下的原子性更新，避免了传统锁机制的开销和复杂性。然而，它也有其局限性，需要结合具体场景加以权衡使用。
+
+## 线程池 内存分配 密集型有几种情况 如何分配对应的线程数
+
+在并发编程中，线程池的内存分配和线程数配置需要根据任务的类型进行调整。任务主要可以分为三种情况：
+
+1. **CPU 密集型任务（CPU-bound tasks）**：主要消耗 CPU 资源。
+2. **I/O 密集型任务（I/O-bound tasks）**：主要消耗 I/O 资源，如文件读写、网络通信等。
+3. **混合型任务（Mixed tasks）**：同时消耗 CPU 和 I/O 资源。
+
+针对这些不同类型的任务，线程池的配置也有所不同。
+
+### 1. CPU 密集型任务
+
+对于 CPU 密集型任务，线程数应与可用的 CPU 核心数（Ncpu）相匹配或略少于核心数。这样可以确保 CPU 被充分利用而不会因过多的线程切换而降低效率。
+
+推荐公式：
+\[ \text{线程数} = \text{Ncpu} + 1 \]
+
+示例代码：
+
+```java
+int cpuCores = Runtime.getRuntime().availableProcessors();
+int threadPoolSize = cpuCores + 1;
+ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+```
+
+### 2. I/O 密集型任务
+
+对于 I/O 密集型任务，线程在等待 I/O 操作完成时会被阻塞，因此需要更多的线程来保持 CPU 的繁忙。线程数应远大于 CPU 核心数，具体数值可以根据 I/O 操作的阻塞程度和系统的 I/O 吞吐量来调整。
+
+推荐公式：
+\[ \text{线程数} = \text{Ncpu} \times (1 + \frac{\text{等待时间}}{\text{计算时间}}) \]
+
+示例代码：
+
+```java
+int cpuCores = Runtime.getRuntime().availableProcessors();
+int waitTime = ... // 平均等待时间
+int computeTime = ... // 平均计算时间
+int threadPoolSize = cpuCores * (1 + waitTime / computeTime);
+ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+```
+
+### 3. 混合型任务
+
+混合型任务同时消耗 CPU 和 I/O 资源，线程池配置需要根据任务的具体情况进行调整。一般来说，可以结合 CPU 密集型和 I/O 密集型任务的配置方法，通过性能测试来找到最佳的线程数。
+
+### 示例代码
+
+以下是一个示例，展示如何根据任务类型来配置线程池：
+
+```java
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class ThreadPoolConfig {
+
+    public static void main(String[] args) {
+        int cpuCores = Runtime.getRuntime().availableProcessors();
+
+        // CPU 密集型任务
+        int cpuBoundThreadPoolSize = cpuCores + 1;
+        ExecutorService cpuBoundExecutor = Executors.newFixedThreadPool(cpuBoundThreadPoolSize);
+
+        // I/O 密集型任务
+        int waitTime = 100; // 假设等待时间为 100ms
+        int computeTime = 20; // 假设计算时间为 20ms
+        int ioBoundThreadPoolSize = cpuCores * (1 + waitTime / computeTime);
+        ExecutorService ioBoundExecutor = Executors.newFixedThreadPool(ioBoundThreadPoolSize);
+
+        // 混合型任务
+        int mixedThreadPoolSize = (cpuBoundThreadPoolSize + ioBoundThreadPoolSize) / 2;
+        ExecutorService mixedExecutor = Executors.newFixedThreadPool(mixedThreadPoolSize);
+
+        // 示例任务提交
+        for (int i = 0; i < 10; i++) {
+            cpuBoundExecutor.submit(new CpuBoundTask());
+            ioBoundExecutor.submit(new IoBoundTask());
+            mixedExecutor.submit(new MixedTask());
+        }
+
+        cpuBoundExecutor.shutdown();
+        ioBoundExecutor.shutdown();
+        mixedExecutor.shutdown();
+    }
+
+    static class CpuBoundTask implements Runnable {
+        @Override
+        public void run() {
+            // 模拟 CPU 密集型任务
+            for (int i = 0; i < 1000000; i++) {
+                Math.sqrt(i);
+            }
+            System.out.println(Thread.currentThread().getName() + " finished CPU-bound task.");
+        }
+    }
+
+    static class IoBoundTask implements Runnable {
+        @Override
+        public void run() {
+            try {
+                // 模拟 I/O 密集型任务
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            System.out.println(Thread.currentThread().getName() + " finished I/O-bound task.");
+        }
+    }
+
+    static class MixedTask implements Runnable {
+        @Override
+        public void run() {
+            // 模拟混合型任务
+            for (int i = 0; i < 100000; i++) {
+                Math.sqrt(i);
+            }
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            System.out.println(Thread.currentThread().getName() + " finished mixed task.");
+        }
+    }
+}
+```
+
+### 线程数分配总结
+
+针对不同类型的任务，线程池的线程数配置需要有所区别。CPU 密集型任务的线程数应接近 CPU 核心数，I/O 密集型任务则需要更多的线程来掩盖 I/O 等待时间，而混合型任务则需要根据具体情况进行调整。通过合理配置线程池，可以最大限度地提高系统性能和资源利用效率。
 
 ## spring cloud resource 和 Autowired 什么区别
 
@@ -925,31 +1351,123 @@ CAP 定理指出，在一个分布式系统中，当网络分区发生时，必�
 
 ## Hashmap 的时间复杂度是多少？如果出现hash 碰撞如何处理？hashmap 最极端的时间复杂度是多少？
 
-HashMap 的时间复杂度取决于具体的操作：
+在 Java 中，`HashMap` 是一个常用的数据结构，它的时间复杂度在大多数情况下都是非常高效的。然而，了解它的时间复杂度以及如何处理哈希碰撞和极端情况是非常重要的。
 
-1. **插入（Insertion）和查找（Retrieval）**：在平均情况下，HashMap 的插入和查找操作的时间复杂度为 O(1)。这是因为 HashMap 使用了哈希表作为底层数据结构，在理想情况下，哈希表可以在常数时间内完成插入和查找操作。
+### HashMap 的时间复杂度
 
-2. **删除（Deletion）**：HashMap 的删除操作的时间复杂度也是 O(1)，与插入和查找类似。
+1. **插入（put）操作**：平均时间复杂度为 O(1)。
+2. **查找（get）操作**：平均时间复杂度为 O(1)。
+3. **删除（remove）操作**：平均时间复杂度为 O(1)。
 
-如果出现哈希碰撞（Hash Collision），即不同的键映射到了哈希表中的同一个位置，HashMap 会使用链表或者红黑树来解决碰撞问题。具体处理方式如下：
+这些操作的平均时间复杂度为 O(1)，是因为 `HashMap` 使用哈希表来存储数据，通过计算键的哈希码来快速定位存储位置。
 
-1. **链表法**：当发生哈希碰撞时，HashMap 会将碰撞的键值对存储在同一个位置的链表中。在这种情况下，插入、查找和删除操作的时间复杂度会退化为 O(n/k)，其中 n 是键值对的数量，k 是桶的数量。这是因为需要遍历链表来查找或删除特定的键值对。
+### 处理哈希碰撞
 
-2. **红黑树**：从 JDK 8 开始，当链表长度超过一定阈值（默认为 8）时，HashMap 会将链表转换为红黑树，以提高性能。在红黑树中，插入、查找和删除操作的时间复杂度为 O(log n)，其中 n 是键值对的数量。
+哈希碰撞是指不同的键具有相同的哈希值，并且它们被分配到哈希表的同一个桶中。Java 的 `HashMap` 通过以下方式处理哈希碰撞：
 
-因此，当发生哈希碰撞时，HashMap 会根据具体情况采用链表法或者红黑树来解决碰撞问题，从而保证了插入、查找和删除操作的时间复杂度。在极端情况下，如果所有的键都映射到了同一个位置，那么链表法和红黑树都可能退化为 O(n)，即最坏情况下的时间复杂度为 O(n)。
+1. **链地址法（Separate Chaining）**：
+
+   - 初期使用链表：当两个键的哈希值相同时，它们会被存储在同一个链表中。
+   - 链表转为红黑树：如果单个桶中的元素数量过多（默认阈值为 8），链表会被转换为红黑树，以优化查找性能，红黑树的查找时间复杂度为 O(log n)。
+
+2. **开放地址法（Open Addressing）**：
+   - `HashMap` 主要使用链地址法，但在某些情况下，哈希表也可以使用开放地址法，其中包括线性探测、二次探测或双重散列等策略来解决碰撞。
+
+### HashMap 的最极端时间复杂度
+
+在最坏的情况下，`HashMap` 的时间复杂度可能会退化为 O(n)。这通常发生在以下几种情况下：
+
+1. **所有键的哈希值都相同**：如果所有插入的键都映射到哈希表的同一个桶中，所有元素将会存储在同一个链表或红黑树中。
+
+   - 在链表的情况下，插入、查找和删除的时间复杂度将变为 O(n)。
+   - 在红黑树的情况下，时间复杂度将变为 O(log n)。
+
+2. **大量哈希碰撞**：虽然不太常见，但如果发生大量哈希碰撞，导致许多元素集中在少数几个桶中，性能也会大幅下降。
+
+### 小结
+
+- **平均情况**：`HashMap` 的插入、查找和删除操作的时间复杂度为 O(1)。
+- **最坏情况**：`HashMap` 的时间复杂度可能退化为 O(n)，具体情况取决于哈希碰撞的处理方式和碰撞的数量。
+- **处理哈希碰撞**：`HashMap` 主要使用链地址法，通过链表和红黑树来处理碰撞。
+
+通过了解这些复杂度和处理方式，可以更好地使用 `HashMap` 以及应对潜在的性能问题。
 
 ## @Transactional 原理 为什么加上这个 就会实现所有数据库操作在一起
 
-`@Transactional` 是 Spring 框架提供的一个非常强大的注解，用于实现声明式事务管理。当你在类或方法上添加 `@Transactional` 注解时，Spring 会自动为你管理事务边界，确保一系列数据库操作要么全部成功，要么全部失败，这也就是常说的"事务的原子性"。以下是其背后的工作原理概览：
+`@Transactional` 是 Spring 中用于声明式事务管理的注解。当在方法或类上使用 `@Transactional` 时，Spring 会确保该方法内的所有数据库操作在一个事务中执行。实现这个功能的原理涉及到 Spring 的事务管理机制、AOP（面向切面编程）和代理模式。
 
-1. 代理机制：Spring 使用 AOP（面向切面编程）来实现 `@Transactional` 的功能。具体来说，如果你使用的是 Spring 的代理模式（比如基于JDK动态代理或CGLIB），Spring 会在运行时创建一个代理对象来包裹你的实际业务对象。这个代理对象会在调用业务方法前后插入事务管理的逻辑。
-2. 事务开始与提交/回滚：当代理对象检测到一个标有 `@Transactional` 的方法被调用时，它首先会开启一个新的数据库事务（如果当前没有事务，则新建；如果有，则根据事务传播行为决定是否加入当前事务）。然后执行业务方法。如果方法正常执行结束，代理会提交事务；如果方法执行过程中抛出未被捕获的异常，代理会自动回滚事务。
-3. 事务属性配置：`@Transactional` 支持配置多种事务属性，如隔离级别、传播行为、超时时间及是否为只读事务等。这些属性允许你细粒度地控制事务的行为。
-4. 异常处理：Spring 通过检查方法执行过程中抛出的异常类型来决定是否需要回滚事务。默认情况下，任何未被捕获的 RuntimeException 或其子类以及 Error 都会导致事务回滚。而受检异常（checked exceptions）不会触发自动回滚，除非你通过 rollbackFor 或 noRollbackFor 显式指定了异常类。
-5. 资源管理：Spring 事务管理器与不同的持久化技术（如JDBC, JPA, Hibernate等）集成，负责底层的事务生命周期管理，包括获取和释放数据库连接等资源。
+### @Transactional 的工作原理
 
-综上所述，`@Transactional` 能够简化事务管理，使得开发者无需手动编写开启事务、提交或回滚的代码，从而提高了代码的可读性和可维护性。这一切的背后，都是Spring框架通过强大的AOP和事务管理机制自动完成的。
+1. **AOP（面向切面编程）**：
+
+   - `@Transactional` 注解使用 AOP 来拦截方法调用。
+   - Spring AOP 通过动态代理拦截目标方法的执行，在方法执行之前、之后以及异常发生时，插入事务管理逻辑。
+
+2. **代理模式**：
+
+   - Spring 使用 JDK 动态代理或 CGLIB 代理来创建目标对象的代理实例。
+   - 当调用代理对象的方法时，代理对象会拦截调用，并在适当的时机管理事务。
+
+3. **事务管理器**：
+   - `@Transactional` 依赖于 Spring 的 `PlatformTransactionManager` 来管理事务。
+   - 事务管理器负责开启、提交和回滚事务，具体实现包括 `DataSourceTransactionManager`（用于 JDBC）、`JpaTransactionManager`（用于 JPA）等。
+
+### 事务传播机制
+
+`@Transactional` 提供多种事务传播机制，决定了当一个事务方法调用另一个事务方法时，事务如何传播。常见的传播行为包括：
+
+- **REQUIRED**（默认）：如果当前没有事务，就新建一个事务；如果已经存在一个事务中，加入到这个事务中。
+- **REQUIRES_NEW**：总是新建一个事务。如果当前已经存在一个事务，暂停当前事务。
+- **MANDATORY**：使用当前的事务，如果当前没有事务，就抛出异常。
+- **SUPPORTS**：如果当前有事务，就使用事务；如果当前没有事务，就以非事务方式执行。
+- **NOT_SUPPORTED**：总是以非事务方式执行，如果当前存在事务，就暂停当前事务。
+- **NEVER**：总是以非事务方式执行，如果当前存在事务，则抛出异常。
+- **NESTED**：如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则新建一个事务。
+
+### 实现原理详解
+
+1. **代理对象的创建**：
+
+   - Spring 在创建 Bean 的时候，会检测 Bean 类或其方法是否标注了 `@Transactional` 注解。
+   - 如果检测到 `@Transactional` 注解，Spring 会为该 Bean 创建一个代理对象。
+   - 代理对象可以是基于接口的 JDK 动态代理，也可以是基于类的 CGLIB 代理。
+
+2. **拦截方法调用**：
+
+   - 当调用 `@Transactional` 标注的方法时，代理对象会拦截方法调用。
+   - 代理对象会在方法执行前调用事务管理器，开启一个新的事务（如果没有事务存在）。
+   - 然后调用目标方法。
+
+3. **事务的提交与回滚**：
+   - 如果目标方法执行成功，代理对象会在方法执行后提交事务。
+   - 如果目标方法抛出异常，代理对象会回滚事务。
+
+### @Transactional 示例代码
+
+下面是一个简单的示例，展示了 `@Transactional` 的使用和事务管理的过程：
+
+```java
+@Service
+public class MyService {
+
+    @Autowired
+    private MyRepository myRepository;
+
+    @Transactional
+    public void performDatabaseOperations() {
+        myRepository.save(new Entity(...));
+        myRepository.update(...);
+        myRepository.delete(...);
+        // 其他数据库操作
+    }
+}
+```
+
+在这个例子中，`performDatabaseOperations` 方法上的 `@Transactional` 注解确保了所有的数据库操作在一个事务中执行。如果方法执行过程中出现异常，事务会回滚，所有操作都会撤销。
+
+### @Transactional 总结
+
+`@Transactional` 通过 AOP、代理模式和事务管理器的结合，确保标注的方法在一个事务中执行，从而实现了所有数据库操作要么一起成功，要么一起失败的事务特性。这种机制大大简化了开发者的工作，使得事务管理变得更加透明和易于使用。
 
 ## 事务传播行为有哪些
 
@@ -982,26 +1500,78 @@ public void doSomething() {
 
 ## 事务的隔离级别有哪些
 
-数据库事务的隔离级别定义了在多线程或多用户环境下的事务之间如何隔绝彼此的操作，以防止并发问题。四种主要的事务隔离级别按照从低到高安全性的顺序如下：
+事务的隔离级别定义了一个事务与另一个事务隔离的程度。它们决定了一个事务在被其他并发事务影响的程度。不同的隔离级别可以防止不同类型的并发问题。SQL 标准定义了四种隔离级别，从最低到最高分别是：读未提交（Read Uncommitted）、读已提交（Read Committed）、可重复读（Repeatable Read）和串行化（Serializable）。每种隔离级别的特性如下：
 
-1. **读未提交（Read Uncommitted）**
-   - **说明**：事务可以读取到其他事务未提交的数据。
-   - **优点**：并发性能高，因为事务间几乎没有等待。
-   - **缺点**：可能出现脏读（Dirty Read）、不可重复读（Non-repeatable Read）和幻读（Phantom Read）的问题。
-2. **读已提交（Read Committed）**
-   - **说明**：事务只能读取到其他事务已经提交的数据。
-   - **优点**：避免了脏读问题，提高了数据的一致性。
-   - **缺点**：仍然可能遇到不可重复读和幻读问题。
-3. **可重复读（Repeatable Read）**
-   - **说明**：在一个事务内，多次读取同一数据的结果是一致的，不会受到其他事务的影响。即使其他事务提交了更新。
-   - **优点**：解决了不可重复读的问题。
-   - **缺点**：仍可能遇到幻读问题，在某些数据库系统中（如MySQL的InnoDB引擎），通过Next-Key Locks机制可以避免幻读。
-4. **串行化（Serializable）**
-   - **说明**：最严格的隔离级别，通过完全序列化事务的执行，避免了脏读、不可重复读和幻读的所有问题。
-   - **优点**：提供了最高的数据一致性。
-   - **缺点**：并发性能极低，因为事务通常是串行执行的，等待时间长。
+### 1. 读未提交 (Read Uncommitted)
 
-选择适当的隔离级别需要权衡事务的隔离性和并发性能。通常，应用程序会根据业务需求和数据敏感性选择合适的隔离级别，以达到既保证数据一致性又维持良好性能的目的
+- **特性**：允许事务读取尚未提交的数据。这意味着一个事务可以读取到另一个事务尚未提交的修改。
+- **并发问题**：
+  - **脏读（Dirty Read）**：一个事务读到另一个事务未提交的数据。
+  - **不可重复读（Non-repeatable Read）**：一个事务在两次读取之间，读到了其他事务已提交的不同数据。
+  - **幻读（Phantom Read）**：一个事务在两次读取之间，读到了其他事务插入的新数据。
+
+### 2. 读已提交 (Read Committed)
+
+- **特性**：只能读取到已经提交的数据。这意味着一个事务只能读取到其他事务已提交的数据。
+- **并发问题**：
+  - **脏读（Dirty Read）**：被防止。
+  - **不可重复读（Non-repeatable Read）**：一个事务在两次读取之间，读到了其他事务已提交的不同数据。
+  - **幻读（Phantom Read）**：一个事务在两次读取之间，读到了其他事务插入的新数据。
+
+### 3. 可重复读 (Repeatable Read)
+
+- **特性**：保证在同一个事务内多次读取同一数据的结果是一致的。一个事务在读取数据时，会锁住读取的数据，防止其他事务修改或删除这些数据。
+- **并发问题**：
+  - **脏读（Dirty Read）**：被防止。
+  - **不可重复读（Non-repeatable Read）**：被防止。
+  - **幻读（Phantom Read）**：一个事务在两次读取之间，读到了其他事务插入的新数据。
+
+### 4. 串行化 (Serializable)
+
+- **特性**：提供最高的隔离级别。所有事务串行执行，完全隔离。这种隔离级别防止了所有类型的并发问题。
+- **并发问题**：
+  - **脏读（Dirty Read）**：被防止。
+  - **不可重复读（Non-repeatable Read）**：被防止。
+  - **幻读（Phantom Read）**：被防止。
+
+### 并发问题总结
+
+- **脏读（Dirty Read）**：一个事务读到了另一个事务尚未提交的数据。
+- **不可重复读（Non-repeatable Read）**：一个事务在两次读取之间，读到了其他事务已提交的不同数据。
+- **幻读（Phantom Read）**：一个事务在两次读取之间，读到了其他事务插入的新数据。
+
+### 配置事务隔离级别
+
+在 Spring 中，可以通过 `@Transactional` 注解配置事务的隔离级别。以下是一个示例：
+
+```java
+@Service
+public class MyService {
+
+    @Autowired
+    private MyRepository myRepository;
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void performDatabaseOperations() {
+        myRepository.save(new Entity(...));
+        myRepository.update(...);
+        myRepository.delete(...);
+        // 其他数据库操作
+    }
+}
+```
+
+常见的隔离级别枚举值包括：
+
+- `Isolation.DEFAULT`：使用数据库默认的隔离级别。
+- `Isolation.READ_UNCOMMITTED`：读未提交。
+- `Isolation.READ_COMMITTED`：读已提交。
+- `Isolation.REPEATABLE_READ`：可重复读。
+- `Isolation.SERIALIZABLE`：串行化。
+
+### 隔离级别总结
+
+不同的隔离级别提供不同程度的并发控制和性能权衡。选择适当的隔离级别需要权衡数据一致性要求和系统性能。理解事务隔离级别和它们之间的区别，对于设计和实现高效、安全的并发应用程序至关重要。
 
 ## Java 什么操作可以多线程共享一块内存
 
@@ -1698,7 +2268,7 @@ ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(
    dateFormatHolder.remove();
    ```
 
-### 示例代码
+### TrealLocal 示例代码
 
 以下是一个完整的示例，展示如何在多线程环境中使用`ThreadLocal`来存储和获取每个线程的独立变量：
 
@@ -2705,13 +3275,13 @@ response.sendRedirect("anotherPage.jsp");
 
 通过上述措施，可以有效管理和保证 Session 的有效性和失效，确保 Web 应用的安全性和用户体验。
 
-## mybatis plus 如何操作更新创建人这些东西具体实现方法类
+## Mybatis-Plus 如何操作更新创建人这些东西具体实现方法类
 
 在使用 MyBatis-Plus 时，可以通过插件、拦截器和注解来自动处理字段的填充，例如更新和创建人、创建时间和更新时间等。MyBatis-Plus 提供了自动填充功能，通过实现`MetaObjectHandler`接口来实现自动填充功能。
 
 以下是具体实现步骤：
 
-### 1. 引入依赖
+### 1. MyBatis-Plus 引入依赖
 
 确保你的项目中已经引入了 MyBatis-Plus 依赖。以下是 Maven 依赖配置：
 
