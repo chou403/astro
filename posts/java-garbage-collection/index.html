@@ -1,0 +1,1059 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"><head><meta charset="UTF-8"><style>:where(img){height:auto}</style><meta name="viewport" content="width=device-width"><link rel="icon" type="image" href="/astro/favicon.ico"><link rel="canonical" href="https://chou401.github.io/astro/posts/java-garbage-collection/"><meta name="generator" content="Astro v4.9.2"><!-- General Meta Tags --><title>垃圾回收 | 知道的越多，才知知道的越少</title><meta name="title" content="垃圾回收 | 知道的越多，才知知道的越少"><meta name="description" content="三种垃圾回收算法 &amp; 三色标记算法 &amp; 五种垃圾回收器及选择"><meta name="author" content="chou401"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph / Facebook --><meta property="og:title" content="垃圾回收 | 知道的越多，才知知道的越少"><meta property="og:description" content="三种垃圾回收算法 &amp; 三色标记算法 &amp; 五种垃圾回收器及选择"><meta property="og:url" content="https://chou401.github.io/astro/posts/java-garbage-collection/"><meta property="og:image" content="https://chou401.github.io/posts/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6.png"><!-- Article Published/Modified time --><meta property="article:published_time" content="2022-09-25T15:20:35.000Z"><meta property="article:modified_time" content="2024-05-17T17:56:33.000Z"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://chou401.github.io/astro/posts/java-garbage-collection/"><meta property="twitter:title" content="垃圾回收 | 知道的越多，才知知道的越少"><meta property="twitter:description" content="三种垃圾回收算法 &amp; 三色标记算法 &amp; 五种垃圾回收器及选择"><meta property="twitter:image" content="https://chou401.github.io/posts/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6.png"><!-- Google Font --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;display=swap" rel="stylesheet"><meta name="theme-color" content=""><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script src="/astro/toggle-theme.js"></script><style>*,:before,:after{box-sizing:border-box;border:0 solid #e5e7eb}:before,:after{--tw-content:""}html,:host{-webkit-text-size-adjust:100%;tab-size:4;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;line-height:1.5}body{line-height:inherit;margin:0}hr{color:inherit;border-top-width:1px;height:0}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-feature-settings:normal;font-variation-settings:normal;font-family:IBM Plex Mono,monospace;font-size:1em}small{font-size:80%}sub,sup{vertical-align:baseline;font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-feature-settings:inherit;font-variation-settings:inherit;font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:#0000;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button{height:auto}::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dl,dd,h1,h2,h3,h4,h5,h6,hr,figure,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}ol,ul,menu{margin:0;padding:0;list-style:none}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder{opacity:1;color:#9ca3af}textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}button,[role=button]{cursor:pointer}:disabled{cursor:default}img,svg,video,canvas,audio,iframe,embed,object{vertical-align:middle;display:block}img,video{max-width:100%;height:auto}[hidden]{display:none}:root,html[data-theme=light]{--color-fill:251,254,251;--color-text-base:40,39,40;--color-accent:0,108,172;--color-card:230,230,230;--color-card-muted:205,205,205;--color-border:236,233,233}html[data-theme=dark]{--color-fill:33,39,55;--color-text-base:234,237,243;--color-accent:255,107,1;--color-card:52,63,96;--color-card-muted:138,51,2;--color-border:171,75,8}#sun-svg,html[data-theme=dark] #moon-svg{display:none}#moon-svg,html[data-theme=dark] #sun-svg{display:block}body{--tw-bg-opacity:1;background-color:rgba(var(--color-fill),var(--tw-bg-opacity));--tw-text-opacity:1;color:rgba(var(--color-text-base),var(--tw-text-opacity));flex-direction:column;min-height:100svh;font-family:IBM Plex Mono,monospace;display:flex}body ::selection{background-color:rgba(var(--color-accent),var(--tw-bg-opacity));--tw-bg-opacity:.7;--tw-text-opacity:1;color:rgba(var(--color-fill),var(--tw-text-opacity))}body::selection{background-color:rgba(var(--color-accent),var(--tw-bg-opacity));--tw-bg-opacity:.7;--tw-text-opacity:1;color:rgba(var(--color-fill),var(--tw-text-opacity))}section,footer{max-width:48rem;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}a{outline-offset:1px;outline-width:2px;outline-color:rgb(var(--color-accent))}a:focus-visible{outline-style:dashed;text-decoration-line:none}svg{fill:rgb(var(--color-text-base));width:1.5rem;height:1.5rem;display:inline-block}.group:hover svg{fill:rgb(var(--color-accent))}svg.icon-tabler{--tw-scale-x:1.25;--tw-scale-y:1.25;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y));fill:#0000;stroke:currentColor;stroke-width:2px;opacity:.9;width:1.5rem;height:1.5rem;display:inline-block}.group:hover svg.icon-tabler{fill:#0000}@media (min-width:640px){svg.icon-tabler{--tw-scale-x:1.1;--tw-scale-y:1.1;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}}.prose :where(h1,h2,h3,h4,h5,h6,th):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-text-opacity:1!important;color:rgba(var(--color-text-base),var(--tw-text-opacity))!important;margin-bottom:.75rem!important}.prose :where(h3):not(:where([class~=not-prose],[class~=not-prose] *)){font-style:italic}.prose :where(p):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-text-opacity:1!important;color:rgba(var(--color-text-base),var(--tw-text-opacity))!important}.prose :where(a):not(:where([class~=not-prose],[class~=not-prose] *)){text-underline-offset:8px;--tw-text-opacity:1!important;color:rgba(var(--color-text-base),var(--tw-text-opacity))!important;text-decoration-style:dashed!important}.prose :where(a):not(:where([class~=not-prose],[class~=not-prose] *)):hover{--tw-text-opacity:1;color:rgba(var(--color-accent),var(--tw-text-opacity))}.prose :where(blockquote):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-border-opacity:.5;opacity:.8;border-left-color:rgba(var(--color-accent),var(--tw-border-opacity))!important}.prose :where(figcaption):not(:where([class~=not-prose],[class~=not-prose] *)){opacity:.7;--tw-text-opacity:1!important;color:rgba(var(--color-text-base),var(--tw-text-opacity))!important}.prose :where(strong):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-text-opacity:1!important;color:rgba(var(--color-text-base),var(--tw-text-opacity))!important}.prose :where(code):not(:where([class~=not-prose],[class~=not-prose] *)){background-color:rgba(var(--color-card),var(--tw-bg-opacity));--tw-bg-opacity:.75;border-radius:.25rem;padding:.25rem}.prose :where(code):not(:where([class~=not-prose],[class~=not-prose] *)):before,.prose :where(code):not(:where([class~=not-prose],[class~=not-prose] *)):after{--tw-content:none!important;content:var(--tw-content)!important}.prose :where(ol):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-text-opacity:1!important;color:rgba(var(--color-text-base),var(--tw-text-opacity))!important}.prose :where(ul):not(:where([class~=not-prose],[class~=not-prose] *)){overflow-x:clip;--tw-text-opacity:1!important;color:rgba(var(--color-text-base),var(--tw-text-opacity))!important}.prose * :where(li):not(:where([class~=not-prose],[class~=not-prose] *))::marker,.prose :where(li):not(:where([class~=not-prose],[class~=not-prose] *))::marker{color:rgba(var(--color-accent),var(--tw-text-opacity))!important}.prose :where(table):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-text-opacity:1;color:rgba(var(--color-text-base),var(--tw-text-opacity))}.prose :where(th):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(td):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-border-opacity:1;border-width:1px;border-color:rgba(var(--color-border),var(--tw-border-opacity))}.prose :where(img):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-border-opacity:1;border-width:2px;border-color:rgba(var(--color-border),var(--tw-border-opacity));margin-left:auto;margin-right:auto;margin-top:.5rem!important;margin-bottom:.5rem!important}.prose :where(hr):not(:where([class~=not-prose],[class~=not-prose] *)){--tw-border-opacity:1!important;border-color:rgba(var(--color-border),var(--tw-border-opacity))!important}.prose a{overflow-wrap:break-word}.prose a:hover{--tw-text-opacity:1!important;color:rgba(var(--color-accent),var(--tw-text-opacity))!important}.prose thead th:first-child,tbody td:first-child,tfoot td:first-child{padding-left:.571429em}.prose h2#table-of-contents{margin-bottom:.5rem}.prose details{cursor:pointer;-webkit-user-select:none;user-select:none;--tw-text-opacity:1;color:rgba(var(--color-text-base),var(--tw-text-opacity));display:inline-block}.prose summary{outline-offset:1px;outline-width:2px;outline-color:rgb(var(--color-accent))}.prose summary:focus-visible{outline-style:dashed;text-decoration-line:none}.prose h2#table-of-contents+p{display:none}html{overflow-y:scroll}::-webkit-scrollbar{width:.75rem}::-webkit-scrollbar-track{--tw-bg-opacity:1;background-color:rgba(var(--color-fill),var(--tw-bg-opacity))}::-webkit-scrollbar-thumb{--tw-bg-opacity:1;background-color:rgba(var(--color-card),var(--tw-bg-opacity))}::-webkit-scrollbar-thumb:hover{--tw-bg-opacity:1;background-color:rgba(var(--color-card-muted),var(--tw-bg-opacity))}code,blockquote{word-wrap:break-word}pre>code{white-space:pre}*,:before,:after,::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:#3b82f680;--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }.container{width:100%}@media (min-width:640px){.container{max-width:640px}}.prose{color:var(--tw-prose-body);max-width:65ch}.prose :where(p):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:1.25em;margin-bottom:1.25em}.prose :where([class~=lead]):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-lead);margin-top:1.2em;margin-bottom:1.2em;font-size:1.25em;line-height:1.6}.prose :where(a):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-links);font-weight:500;text-decoration:underline}.prose :where(strong):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-bold);font-weight:600}.prose :where(a strong):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(blockquote strong):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(thead th strong):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit}.prose :where(ol):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:1.25em;margin-bottom:1.25em;padding-inline-start:1.625em;list-style-type:decimal}.prose :where(ol[type=A]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:upper-alpha}.prose :where(ol[type=a]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:lower-alpha}.prose :where(ol[type=A s]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:upper-alpha}.prose :where(ol[type=a s]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:lower-alpha}.prose :where(ol[type=I]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:upper-roman}.prose :where(ol[type=i]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:lower-roman}.prose :where(ol[type=I s]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:upper-roman}.prose :where(ol[type=i s]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:lower-roman}.prose :where(ol[type="1"]):not(:where([class~=not-prose],[class~=not-prose] *)){list-style-type:decimal}.prose :where(ul):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:1.25em;margin-bottom:1.25em;padding-inline-start:1.625em;list-style-type:disc}.prose :where(ol>li):not(:where([class~=not-prose],[class~=not-prose] *))::marker{color:var(--tw-prose-counters);font-weight:400}.prose :where(ul>li):not(:where([class~=not-prose],[class~=not-prose] *))::marker{color:var(--tw-prose-bullets)}.prose :where(dt):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-headings);margin-top:1.25em;font-weight:600}.prose :where(hr):not(:where([class~=not-prose],[class~=not-prose] *)){border-color:var(--tw-prose-hr);border-top-width:1px;margin-top:3em;margin-bottom:3em}.prose :where(blockquote):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-quotes);border-inline-start-width:.25rem;border-inline-start-color:var(--tw-prose-quote-borders);quotes:"“""”""‘""’";margin-top:1.6em;margin-bottom:1.6em;padding-inline-start:1em;font-style:italic;font-weight:500}.prose :where(blockquote p:first-of-type):not(:where([class~=not-prose],[class~=not-prose] *)):before{content:open-quote}.prose :where(blockquote p:last-of-type):not(:where([class~=not-prose],[class~=not-prose] *)):after{content:close-quote}.prose :where(h1):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-headings);margin-top:0;margin-bottom:.888889em;font-size:2.25em;font-weight:800;line-height:1.11111}.prose :where(h1 strong):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit;font-weight:900}.prose :where(h2):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-headings);margin-top:2em;margin-bottom:1em;font-size:1.5em;font-weight:700;line-height:1.33333}.prose :where(h2 strong):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit;font-weight:800}.prose :where(h3):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-headings);margin-top:1.6em;margin-bottom:.6em;font-size:1.25em;font-weight:600;line-height:1.6}.prose :where(h3 strong):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit;font-weight:700}.prose :where(h4):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-headings);margin-top:1.5em;margin-bottom:.5em;font-weight:600;line-height:1.5}.prose :where(h4 strong):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit;font-weight:700}.prose :where(img):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:2em;margin-bottom:2em}.prose :where(picture):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:2em;margin-bottom:2em;display:block}.prose :where(video):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:2em;margin-bottom:2em}.prose :where(kbd):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-kbd);box-shadow:0 0 0 1px rgb(var(--tw-prose-kbd-shadows)/10%),0 3px rgb(var(--tw-prose-kbd-shadows)/10%);padding-top:.1875em;padding-inline-end:.375em;padding-bottom:.1875em;border-radius:.3125rem;padding-inline-start:.375em;font-family:inherit;font-size:.875em;font-weight:500}.prose :where(code):not(:where([class~=not-prose],[class~=not-prose] *)){font-size:.875em;font-weight:600}.prose :where(code):not(:where([class~=not-prose],[class~=not-prose] *)):before,.prose :where(code):not(:where([class~=not-prose],[class~=not-prose] *)):after{content:"`"}.prose :where(a code):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(h1 code):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit}.prose :where(h2 code):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit;font-size:.875em}.prose :where(h3 code):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit;font-size:.9em}.prose :where(h4 code):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(blockquote code):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(thead th code):not(:where([class~=not-prose],[class~=not-prose] *)){color:inherit}.prose :where(pre):not(:where([class~=not-prose],[class~=not-prose] *)){background-color:var(--tw-prose-pre-bg);padding-top:.857143em;padding-inline-end:1.14286em;padding-bottom:.857143em;border-radius:.375rem;margin-top:1.71429em;margin-bottom:1.71429em;padding-inline-start:1.14286em;font-size:.875em;font-weight:400;line-height:1.71429;overflow-x:auto}.prose :where(pre code):not(:where([class~=not-prose],[class~=not-prose] *)){font-weight:inherit;color:inherit;font-size:inherit;font-family:inherit;line-height:inherit;background-color:#0000;border-width:0;border-radius:0;padding:0}.prose :where(pre code):not(:where([class~=not-prose],[class~=not-prose] *)):before,.prose :where(pre code):not(:where([class~=not-prose],[class~=not-prose] *)):after{content:none}.prose :where(table):not(:where([class~=not-prose],[class~=not-prose] *)){table-layout:auto;text-align:start;width:100%;margin-top:2em;margin-bottom:2em;font-size:.875em;line-height:1.71429}.prose :where(thead):not(:where([class~=not-prose],[class~=not-prose] *)){border-bottom-width:1px;border-bottom-color:var(--tw-prose-th-borders)}.prose :where(thead th):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-headings);vertical-align:bottom;padding-inline-end:.571429em;padding-bottom:.571429em;padding-inline-start:.571429em;font-weight:600}.prose :where(tbody tr):not(:where([class~=not-prose],[class~=not-prose] *)){border-bottom-width:1px;border-bottom-color:var(--tw-prose-td-borders)}.prose :where(tbody tr:last-child):not(:where([class~=not-prose],[class~=not-prose] *)){border-bottom-width:0}.prose :where(tbody td):not(:where([class~=not-prose],[class~=not-prose] *)){vertical-align:baseline}.prose :where(tfoot):not(:where([class~=not-prose],[class~=not-prose] *)){border-top-width:1px;border-top-color:var(--tw-prose-th-borders)}.prose :where(tfoot td):not(:where([class~=not-prose],[class~=not-prose] *)){vertical-align:top}.prose :where(figure>*):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:0;margin-bottom:0}.prose :where(figcaption):not(:where([class~=not-prose],[class~=not-prose] *)){color:var(--tw-prose-captions);margin-top:.857143em;font-size:.875em;line-height:1.42857}.prose{--tw-prose-body:#374151;--tw-prose-headings:#111827;--tw-prose-lead:#4b5563;--tw-prose-links:#111827;--tw-prose-bold:#111827;--tw-prose-counters:#6b7280;--tw-prose-bullets:#d1d5db;--tw-prose-hr:#e5e7eb;--tw-prose-quotes:#111827;--tw-prose-quote-borders:#e5e7eb;--tw-prose-captions:#6b7280;--tw-prose-kbd:#111827;--tw-prose-kbd-shadows:17 24 39;--tw-prose-code:#111827;--tw-prose-pre-code:#e5e7eb;--tw-prose-pre-bg:#1f2937;--tw-prose-th-borders:#d1d5db;--tw-prose-td-borders:#e5e7eb;--tw-prose-invert-body:#d1d5db;--tw-prose-invert-headings:#fff;--tw-prose-invert-lead:#9ca3af;--tw-prose-invert-links:#fff;--tw-prose-invert-bold:#fff;--tw-prose-invert-counters:#9ca3af;--tw-prose-invert-bullets:#4b5563;--tw-prose-invert-hr:#374151;--tw-prose-invert-quotes:#f3f4f6;--tw-prose-invert-quote-borders:#374151;--tw-prose-invert-captions:#9ca3af;--tw-prose-invert-kbd:#fff;--tw-prose-invert-kbd-shadows:255 255 255;--tw-prose-invert-code:#fff;--tw-prose-invert-pre-code:#d1d5db;--tw-prose-invert-pre-bg:#00000080;--tw-prose-invert-th-borders:#4b5563;--tw-prose-invert-td-borders:#374151;font-size:1rem;line-height:1.75}.prose :where(picture>img):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:0;margin-bottom:0}.prose :where(li):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:.5em;margin-bottom:.5em}.prose :where(ol>li):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(ul>li):not(:where([class~=not-prose],[class~=not-prose] *)){padding-inline-start:.375em}.prose :where(.prose>ul>li p):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:.75em;margin-bottom:.75em}.prose :where(.prose>ul>li>p:first-child):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:1.25em}.prose :where(.prose>ul>li>p:last-child):not(:where([class~=not-prose],[class~=not-prose] *)){margin-bottom:1.25em}.prose :where(.prose>ol>li>p:first-child):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:1.25em}.prose :where(.prose>ol>li>p:last-child):not(:where([class~=not-prose],[class~=not-prose] *)){margin-bottom:1.25em}.prose :where(ul ul,ul ol,ol ul,ol ol):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:.75em;margin-bottom:.75em}.prose :where(dl):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:1.25em;margin-bottom:1.25em}.prose :where(dd):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:.5em;padding-inline-start:1.625em}.prose :where(hr+*):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(h2+*):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(h3+*):not(:where([class~=not-prose],[class~=not-prose] *)),.prose :where(h4+*):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:0}.prose :where(thead th:first-child):not(:where([class~=not-prose],[class~=not-prose] *)){padding-inline-start:0}.prose :where(thead th:last-child):not(:where([class~=not-prose],[class~=not-prose] *)){padding-inline-end:0}.prose :where(tbody td,tfoot td):not(:where([class~=not-prose],[class~=not-prose] *)){padding-top:.571429em;padding-inline-end:.571429em;padding-bottom:.571429em;padding-inline-start:.571429em}.prose :where(tbody td:first-child,tfoot td:first-child):not(:where([class~=not-prose],[class~=not-prose] *)){padding-inline-start:0}.prose :where(tbody td:last-child,tfoot td:last-child):not(:where([class~=not-prose],[class~=not-prose] *)){padding-inline-end:0}.prose :where(figure):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:2em;margin-bottom:2em}.prose :where(.prose>:first-child):not(:where([class~=not-prose],[class~=not-prose] *)){margin-top:0}.prose :where(.prose>:last-child):not(:where([class~=not-prose],[class~=not-prose] *)){margin-bottom:0}.display-none{display:none}.focus-outline{outline-offset:1px;outline-width:2px;outline-color:rgb(var(--color-accent))}.focus-outline:focus-visible{outline-style:dashed;text-decoration-line:none}.sr-only{clip:rect(0,0,0,0);white-space:nowrap;border-width:0;width:1px;height:1px;margin:-1px;padding:0;position:absolute;overflow:hidden}.pointer-events-none{pointer-events:none}.visible{visibility:visible}.invisible{visibility:hidden}.static{position:static}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-y-0{top:0;bottom:0}.-top-3{top:-.75rem}.-top-full{top:-100%}.left-0{left:0}.left-16{left:4rem}.right-3{right:.75rem}.z-50{z-index:50}.col-span-2{grid-column:span 2/span 2}.m-1{margin:.25rem}.mx-1{margin-left:.25rem;margin-right:.25rem}.mx-auto{margin-left:auto;margin-right:auto}.my-1{margin-top:.25rem;margin-bottom:.25rem}.my-2{margin-top:.5rem;margin-bottom:.5rem}.my-3{margin-top:.75rem;margin-bottom:.75rem}.my-4{margin-top:1rem;margin-bottom:1rem}.my-6{margin-top:1.5rem;margin-bottom:1.5rem}.my-8{margin-top:2rem;margin-bottom:2rem}.-mr-5{margin-right:-1.25rem}.mb-1{margin-bottom:.25rem}.mb-14{margin-bottom:3.5rem}.mb-2{margin-bottom:.5rem}.mb-28{margin-bottom:7rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.ml-2{margin-left:.5rem}.ml-4{margin-left:1rem}.mr-2{margin-right:.5rem}.mr-4{margin-right:1rem}.mt-2{margin-top:.5rem}.mt-4{margin-top:1rem}.mt-8{margin-top:2rem}.mt-auto{margin-top:auto}.block{display:block}.inline-block{display:inline-block}.inline{display:inline}.flex{display:flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.h-6{height:1.5rem}.w-44{width:11rem}.w-6{width:1.5rem}.w-full{width:100%}.min-w-\[1\.375rem\]{min-width:1.375rem}.max-w-3xl{max-width:48rem}.flex-1{flex:1}.rotate-90{--tw-rotate:90deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.scale-100{--tw-scale-x:1;--tw-scale-y:1;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.scale-110{--tw-scale-x:1.1;--tw-scale-y:1.1;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.scale-125{--tw-scale-x:1.25;--tw-scale-y:1.25;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.scale-75{--tw-scale-x:.75;--tw-scale-y:.75;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.scale-90{--tw-scale-x:.9;--tw-scale-y:.9;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.scale-95{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.select-none{-webkit-user-select:none;user-select:none}.resize{resize:both}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-rows-4{grid-template-rows:repeat(4,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-col-reverse{flex-direction:column-reverse}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-start{justify-content:flex-start}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-6{gap:1.5rem}.gap-x-2{-moz-column-gap:.5rem;column-gap:.5rem}.gap-y-2{row-gap:.5rem}.space-x-2>:not([hidden])~:not([hidden]){--tw-space-x-reverse:0;margin-right:calc(.5rem*var(--tw-space-x-reverse));margin-left:calc(.5rem*calc(1 - var(--tw-space-x-reverse)))}.self-end{align-self:flex-end}.scroll-smooth{scroll-behavior:smooth}.whitespace-nowrap{white-space:nowrap}.text-nowrap{text-wrap:nowrap}.rounded{border-radius:.25rem}.border{border-width:1px}.border-skin-fill{--tw-border-opacity:1;border-color:rgba(var(--color-text-base),var(--tw-border-opacity))}.border-skin-line{--tw-border-opacity:1;border-color:rgba(var(--color-border),var(--tw-border-opacity))}.border-opacity-40{--tw-border-opacity:.4}.bg-skin-accent{--tw-bg-opacity:1;background-color:rgba(var(--color-accent),var(--tw-bg-opacity))}.bg-skin-card{--tw-bg-opacity:1;background-color:rgba(var(--color-card),var(--tw-bg-opacity))}.bg-skin-fill{--tw-bg-opacity:1;background-color:rgba(var(--color-fill),var(--tw-bg-opacity))}.fill-skin-accent{fill:rgb(var(--color-accent))}.fill-skin-base{fill:rgb(var(--color-text-base))}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.px-0{padding-left:0;padding-right:0}.px-2{padding-left:.5rem;padding-right:.5rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-6{padding-bottom:1.5rem}.pl-10{padding-left:2.5rem}.pl-2{padding-left:.5rem}.pr-2{padding-right:.5rem}.pr-3{padding-right:.75rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-9xl{font-size:8rem;line-height:1}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.lowercase{text-transform:lowercase}.capitalize{text-transform:capitalize}.italic{font-style:italic}.leading-4{line-height:1rem}.tracking-wider{letter-spacing:.05em}.text-skin-accent{--tw-text-opacity:1;color:rgba(var(--color-accent),var(--tw-text-opacity))}.text-skin-base{--tw-text-opacity:1;color:rgba(var(--color-text-base),var(--tw-text-opacity))}.text-skin-inverted{--tw-text-opacity:1;color:rgba(var(--color-fill),var(--tw-text-opacity))}.underline{text-decoration-line:underline}.decoration-dashed{text-decoration-style:dashed}.decoration-wavy{text-decoration-style:wavy}.decoration-2{text-decoration-thickness:2px}.underline-offset-4{text-underline-offset:4px}.underline-offset-8{text-underline-offset:8px}.opacity-50{opacity:.5}.opacity-75{opacity:.75}.opacity-80{opacity:.8}.filter{filter:var(--tw-blur)var(--tw-brightness)var(--tw-contrast)var(--tw-grayscale)var(--tw-hue-rotate)var(--tw-invert)var(--tw-saturate)var(--tw-sepia)var(--tw-drop-shadow)}.transition-all{transition-property:all;transition-duration:.15s;transition-timing-function:cubic-bezier(.4,0,.2,1)}.transition-opacity{transition-property:opacity;transition-duration:.15s;transition-timing-function:cubic-bezier(.4,0,.2,1)}.duration-75{transition-duration:75ms}.placeholder\:italic::placeholder{font-style:italic}.placeholder\:text-opacity-75::placeholder{--tw-text-opacity:.75}.hover\:-top-0:hover{top:0}.hover\:-top-0\.5:hover{top:-.125rem}.hover\:rotate-12:hover{--tw-rotate:12deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.hover\:rotate-6:hover{--tw-rotate:6deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.hover\:text-skin-accent:hover{--tw-text-opacity:1;color:rgba(var(--color-accent),var(--tw-text-opacity))}.hover\:text-skin-base:hover{--tw-text-opacity:1;color:rgba(var(--color-text-base),var(--tw-text-opacity))}.hover\:underline:hover{text-decoration-line:underline}.hover\:opacity-75:hover{opacity:.75}.focus\:border-skin-accent:focus{--tw-border-opacity:1;border-color:rgba(var(--color-accent),var(--tw-border-opacity))}.focus\:outline-none:focus{outline-offset:2px;outline:2px solid #0000}.focus-visible\:no-underline:focus-visible{text-decoration-line:none}.focus-visible\:underline-offset-0:focus-visible{text-underline-offset:0px}.group:hover .group-hover\:inline-block{display:inline-block}.prose-img\:border-0 :where(img):not(:where([class~=not-prose],[class~=not-prose] *)){border-width:0}@media (min-width:640px){.sm\:static{position:static}.sm\:my-0{margin-top:0;margin-bottom:0}.sm\:my-8{margin-top:2rem;margin-bottom:2rem}.sm\:mb-3{margin-bottom:.75rem}.sm\:ml-0{margin-left:0}.sm\:ml-2{margin-left:.5rem}.sm\:mt-0{margin-top:0}.sm\:inline{display:inline}.sm\:flex{display:flex}.sm\:hidden{display:none}.sm\:w-1\/2{width:50%}.sm\:w-auto{width:auto}.sm\:scale-100{--tw-scale-x:1;--tw-scale-y:1;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.sm\:flex-row{flex-direction:row}.sm\:flex-row-reverse{flex-direction:row-reverse}.sm\:items-end{align-items:flex-end}.sm\:items-center{align-items:center}.sm\:justify-end{justify-content:flex-end}.sm\:gap-4{gap:1rem}.sm\:gap-x-5{-moz-column-gap:1.25rem;column-gap:1.25rem}.sm\:space-x-4>:not([hidden])~:not([hidden]){--tw-space-x-reverse:0;margin-right:calc(1rem*var(--tw-space-x-reverse));margin-left:calc(1rem*calc(1 - var(--tw-space-x-reverse)))}.sm\:p-1{padding:.25rem}.sm\:px-2{padding-left:.5rem;padding-right:.5rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}}.astro-route-announcer{clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;width:1px;height:1px;position:absolute;top:0;left:0;overflow:hidden}#skip-to-content:where(.astro-3ef6ksr2){z-index:50;--tw-bg-opacity:1;background-color:rgba(var(--color-accent),var(--tw-bg-opacity));--tw-text-opacity:1;color:rgba(var(--color-fill),var(--tw-text-opacity));padding:.5rem .75rem;transition-property:all;transition-duration:.15s;transition-timing-function:cubic-bezier(.4,0,.2,1);position:absolute;top:-100%;left:4rem}#skip-to-content:where(.astro-3ef6ksr2):focus{top:1rem}.nav-container:where(.astro-3ef6ksr2){flex-direction:column;justify-content:space-between;align-items:center;max-width:48rem;margin-left:auto;margin-right:auto;display:flex}@media (min-width:640px){.nav-container:where(.astro-3ef6ksr2){flex-direction:row}}.top-nav-wrap:where(.astro-3ef6ksr2){justify-content:space-between;align-items:flex-start;width:100%;padding:1rem;display:flex;position:relative}@media (min-width:640px){.top-nav-wrap:where(.astro-3ef6ksr2){align-items:center;padding-top:2rem;padding-bottom:2rem}}.logo:where(.astro-3ef6ksr2){padding-top:.25rem;padding-bottom:.25rem;font-size:1.25rem;font-weight:600;line-height:1.75rem;position:absolute}@media (min-width:640px){.logo:where(.astro-3ef6ksr2){font-size:1.5rem;line-height:2rem;position:static}}.hamburger-menu:where(.astro-3ef6ksr2){align-self:flex-end;padding:.5rem}@media (min-width:640px){.hamburger-menu:where(.astro-3ef6ksr2){display:none}}.hamburger-menu:where(.astro-3ef6ksr2) svg:where(.astro-3ef6ksr2){--tw-scale-x:1.25;--tw-scale-y:1.25;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y));fill:rgb(var(--color-text-base));width:1.5rem;height:1.5rem}nav:where(.astro-3ef6ksr2){flex-direction:column;align-items:center;width:100%;display:flex}@media (min-width:640px){nav:where(.astro-3ef6ksr2){flex-direction:row;justify-content:flex-end;margin-left:.5rem}nav:where(.astro-3ef6ksr2)>:not([hidden]):where(.astro-3ef6ksr2)~:not([hidden]):where(.astro-3ef6ksr2){--tw-space-x-reverse:0;margin-right:calc(1rem*var(--tw-space-x-reverse));margin-left:calc(1rem*calc(1 - var(--tw-space-x-reverse)))}nav:where(.astro-3ef6ksr2){padding-top:0;padding-bottom:0}}nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2){-moz-column-gap:.5rem;grid-template-rows:repeat(4,minmax(0,1fr));grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;width:11rem;margin-top:1rem;display:grid}@media (min-width:640px){nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2){-moz-column-gap:1.25rem;gap:0 1.25rem;width:auto;margin-top:0;margin-left:0}}nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2) li:where(.astro-3ef6ksr2){grid-column:span 2/span 2;justify-content:center;align-items:center;display:flex}nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2) li:where(.astro-3ef6ksr2) a:where(.astro-3ef6ksr2){text-align:center;width:100%;padding:.75rem 1rem;font-weight:500}nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2) li:where(.astro-3ef6ksr2) a:where(.astro-3ef6ksr2):hover{--tw-text-opacity:1;color:rgba(var(--color-accent),var(--tw-text-opacity))}@media (min-width:640px){nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2) li:where(.astro-3ef6ksr2) a:where(.astro-3ef6ksr2){margin-top:0;margin-bottom:0;padding:.25rem .5rem}}nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2) li:where(.astro-3ef6ksr2):nth-last-child(2) a:where(.astro-3ef6ksr2){width:auto}nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2) li:where(.astro-3ef6ksr2):last-child,nav:where(.astro-3ef6ksr2) ul:where(.astro-3ef6ksr2) li:where(.astro-3ef6ksr2):nth-last-child(2){grid-column:span 1/span 1}nav:where(.astro-3ef6ksr2) a:where(.astro-3ef6ksr2).active{text-underline-offset:4px;text-decoration-line:underline;text-decoration-style:wavy;text-decoration-thickness:2px}nav:where(.astro-3ef6ksr2) a:where(.astro-3ef6ksr2).active svg:where(.astro-3ef6ksr2){fill:rgb(var(--color-accent))}nav:where(.astro-3ef6ksr2) button:where(.astro-3ef6ksr2){padding:.25rem}nav:where(.astro-3ef6ksr2) button:where(.astro-3ef6ksr2) svg:where(.astro-3ef6ksr2){fill:rgb(var(--color-text-base));width:1.5rem;height:1.5rem}nav:where(.astro-3ef6ksr2) button:where(.astro-3ef6ksr2) svg:where(.astro-3ef6ksr2):hover{fill:rgb(var(--color-accent))}#theme-btn:where(.astro-3ef6ksr2){padding:.75rem}@media (min-width:640px){#theme-btn:where(.astro-3ef6ksr2){padding:.25rem}}#theme-btn:where(.astro-3ef6ksr2) svg:where(.astro-3ef6ksr2){--tw-scale-x:1.25;--tw-scale-y:1.25;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}#theme-btn:where(.astro-3ef6ksr2) svg:where(.astro-3ef6ksr2):hover{--tw-rotate:12deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}@media (min-width:640px){#theme-btn:where(.astro-3ef6ksr2) svg:where(.astro-3ef6ksr2){--tw-scale-x:1;--tw-scale-y:1;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}}.menu-icon:where(.astro-3ef6ksr2) line:where(.astro-3ef6ksr2){transition-property:opacity;transition-duration:75ms;transition-timing-function:cubic-bezier(.4,0,.2,1)}.menu-icon:where(.astro-3ef6ksr2) .close:where(.astro-3ef6ksr2),.menu-icon:where(.astro-3ef6ksr2).is-active .line:where(.astro-3ef6ksr2){opacity:0}.menu-icon:where(.astro-3ef6ksr2).is-active .close:where(.astro-3ef6ksr2){opacity:1}.social-icons:where(.astro-upu6fzxr){flex-wrap:wrap;justify-content:center;gap:.25rem}.link-button:where(.astro-upu6fzxr){padding:.5rem}.link-button:where(.astro-upu6fzxr):hover{--tw-rotate:6deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}@media (min-width:640px){.link-button:where(.astro-upu6fzxr){padding:.25rem}}footer:where(.astro-sz7xmlte){width:100%}.footer-wrapper:where(.astro-sz7xmlte){flex-direction:column;justify-content:space-between;align-items:center;padding-top:1.5rem;padding-bottom:1.5rem;display:flex}@media (min-width:640px){.footer-wrapper:where(.astro-sz7xmlte){flex-direction:row-reverse;padding-top:1rem;padding-bottom:1rem}}.link-button:where(.astro-sz7xmlte){margin-top:.25rem;margin-bottom:.25rem;padding:.5rem}.link-button:where(.astro-sz7xmlte):hover{--tw-rotate:6deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.link-button:where(.astro-sz7xmlte) svg:where(.astro-sz7xmlte){--tw-scale-x:1.25;--tw-scale-y:1.25;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}.copyright-wrapper:where(.astro-sz7xmlte){white-space:nowrap;flex-direction:column;align-items:center;margin-top:.5rem;margin-bottom:.5rem;display:flex}@media (min-width:640px){.copyright-wrapper:where(.astro-sz7xmlte){flex-direction:row}}.separator:where(.astro-sz7xmlte){display:none}@media (min-width:640px){.separator:where(.astro-sz7xmlte){display:inline}}#main-content:where(.astro-hsp6otuf){width:100%;max-width:48rem;margin-left:auto;margin-right:auto;padding-bottom:1rem;padding-left:1rem;padding-right:1rem}#main-content:where(.astro-hsp6otuf) h1:where(.astro-hsp6otuf){font-size:1.5rem;font-weight:600;line-height:2rem}@media (min-width:640px){#main-content:where(.astro-hsp6otuf) h1:where(.astro-hsp6otuf){font-size:1.875rem;line-height:2.25rem}}#main-content:where(.astro-hsp6otuf) p:where(.astro-hsp6otuf){margin-top:.5rem;margin-bottom:1.5rem;font-style:italic}.breadcrumb:where(.astro-ilhxcym7){width:100%;max-width:48rem;margin:2rem auto .25rem;padding-left:1rem;padding-right:1rem}.breadcrumb:where(.astro-ilhxcym7) ul:where(.astro-ilhxcym7) li:where(.astro-ilhxcym7){display:inline}.breadcrumb:where(.astro-ilhxcym7) ul:where(.astro-ilhxcym7) li:where(.astro-ilhxcym7) a:where(.astro-ilhxcym7){text-transform:capitalize;opacity:.7}.breadcrumb:where(.astro-ilhxcym7) ul:where(.astro-ilhxcym7) li:where(.astro-ilhxcym7) span:where(.astro-ilhxcym7){opacity:.7}.breadcrumb:where(.astro-ilhxcym7) ul:where(.astro-ilhxcym7) li:where(.astro-ilhxcym7):not(:last-child) a:where(.astro-ilhxcym7):hover{opacity:1}a:where(.astro-blwjyjpt){text-decoration-line:underline;text-decoration-style:dashed;position:relative}a:where(.astro-blwjyjpt):hover{--tw-text-opacity:1;color:rgba(var(--color-accent),var(--tw-text-opacity));top:-.125rem}a:where(.astro-blwjyjpt):focus-visible{padding:.25rem}a:where(.astro-blwjyjpt) svg:where(.astro-blwjyjpt){--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y));--tw-text-opacity:1;color:rgba(var(--color-text-base),var(--tw-text-opacity));opacity:.8;width:1.5rem;height:1.5rem;margin-right:-1.25rem}.group:where(.astro-blwjyjpt):hover a:where(.astro-blwjyjpt) svg:where(.astro-blwjyjpt){fill:rgb(var(--color-accent))}@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0}}@keyframes astroFadeOut{to{opacity:0}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media (prefers-reduced-motion){::view-transition-group(*){animation:none!important}::view-transition-old(*){animation:none!important}::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}.pagination-wrapper:where(.astro-d776pwuy){justify-content:center;margin-top:auto;margin-bottom:2rem;display:flex}.disabled:where(.astro-d776pwuy){pointer-events:none;-webkit-user-select:none;user-select:none;opacity:.5}.disabled:where(.astro-d776pwuy):hover{--tw-text-opacity:1;color:rgba(var(--color-text-base),var(--tw-text-opacity))}.group:where(.astro-d776pwuy):hover .disabled:where(.astro-d776pwuy){fill:rgb(var(--color-text-base))}.group:where(.astro-d776pwuy):hover .disabled-svg:where(.astro-d776pwuy){fill:rgb(var(--color-text-base))!important}.social-icons:where(.astro-wkojbtzc){flex-flow:column wrap;justify-content:center;align-items:center;gap:.25rem;display:flex}@media (min-width:640px){.social-icons:where(.astro-wkojbtzc){align-items:flex-start}}.link-button:where(.astro-wkojbtzc){--tw-scale-x:.9;--tw-scale-y:.9;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y));padding:.5rem}.link-button:where(.astro-wkojbtzc):hover{--tw-rotate:6deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y))scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y))}@media (min-width:640px){.link-button:where(.astro-wkojbtzc){padding:.25rem}}main:where(.astro-vj4tpspi){width:100%;max-width:48rem;margin-left:auto;margin-right:auto;padding-bottom:3rem;padding-left:1rem;padding-right:1rem}.post-title:where(.astro-vj4tpspi){--tw-text-opacity:1;color:rgba(var(--color-accent),var(--tw-text-opacity));font-size:1.5rem;font-weight:600;line-height:2rem}</style><script type="module" src="/astro/static/hoisted.sO-65EBM.js"></script><style>[data-astro-transition-scope=astro-plk3gbjq-1]{view-transition-name:垃圾回收}@layer astro{::view-transition-old(垃圾回收){animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}::view-transition-new(垃圾回收){animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back]::view-transition-old(垃圾回收){animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back]::view-transition-new(垃圾回收){animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}}[data-astro-transition-fallback=old] [data-astro-transition-scope=astro-plk3gbjq-1],[data-astro-transition-fallback=old][data-astro-transition-scope=astro-plk3gbjq-1]{animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition-fallback=new] [data-astro-transition-scope=astro-plk3gbjq-1],[data-astro-transition-fallback=new][data-astro-transition-scope=astro-plk3gbjq-1]{animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back][data-astro-transition-fallback=old] [data-astro-transition-scope=astro-plk3gbjq-1],[data-astro-transition=back][data-astro-transition-fallback=old][data-astro-transition-scope=astro-plk3gbjq-1]{animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back][data-astro-transition-fallback=new] [data-astro-transition-scope=astro-plk3gbjq-1],[data-astro-transition=back][data-astro-transition-fallback=new][data-astro-transition-scope=astro-plk3gbjq-1]{animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}</style><style>[data-astro-transition-scope=astro-36ssibgs-2]{view-transition-name:java}@layer astro{::view-transition-old(java){animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}::view-transition-new(java){animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back]::view-transition-old(java){animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back]::view-transition-new(java){animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}}[data-astro-transition-fallback=old] [data-astro-transition-scope=astro-36ssibgs-2],[data-astro-transition-fallback=old][data-astro-transition-scope=astro-36ssibgs-2]{animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition-fallback=new] [data-astro-transition-scope=astro-36ssibgs-2],[data-astro-transition-fallback=new][data-astro-transition-scope=astro-36ssibgs-2]{animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back][data-astro-transition-fallback=old] [data-astro-transition-scope=astro-36ssibgs-2],[data-astro-transition=back][data-astro-transition-fallback=old][data-astro-transition-scope=astro-36ssibgs-2]{animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back][data-astro-transition-fallback=new] [data-astro-transition-scope=astro-36ssibgs-2],[data-astro-transition=back][data-astro-transition-fallback=new][data-astro-transition-scope=astro-36ssibgs-2]{animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}</style><style>[data-astro-transition-scope=astro-36ssibgs-3]{view-transition-name:gc}@layer astro{::view-transition-old(gc){animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}::view-transition-new(gc){animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back]::view-transition-old(gc){animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back]::view-transition-new(gc){animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}}[data-astro-transition-fallback=old] [data-astro-transition-scope=astro-36ssibgs-3],[data-astro-transition-fallback=old][data-astro-transition-scope=astro-36ssibgs-3]{animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition-fallback=new] [data-astro-transition-scope=astro-36ssibgs-3],[data-astro-transition-fallback=new][data-astro-transition-scope=astro-36ssibgs-3]{animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back][data-astro-transition-fallback=old] [data-astro-transition-scope=astro-36ssibgs-3],[data-astro-transition=back][data-astro-transition-fallback=old][data-astro-transition-scope=astro-36ssibgs-3]{animation-name:astroFadeOut;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}[data-astro-transition=back][data-astro-transition-fallback=new] [data-astro-transition-scope=astro-36ssibgs-3],[data-astro-transition=back][data-astro-transition-fallback=new][data-astro-transition-scope=astro-36ssibgs-3]{animation-name:astroFadeIn;animation-duration:.18s;animation-timing-function:cubic-bezier(.76,0,.24,1);animation-fill-mode:both}</style></head> <body>  <header class="astro-3ef6ksr2"> <a id="skip-to-content" href="#main-content" class="astro-3ef6ksr2">Skip to content</a> <div class="astro-3ef6ksr2 nav-container"> <div class="astro-3ef6ksr2 top-nav-wrap"> <a href="/astro" class="astro-3ef6ksr2 logo whitespace-nowrap"> 知道的越多，才知知道的越少 </a> <nav id="nav-menu" class="astro-3ef6ksr2"> <button class="astro-3ef6ksr2 focus-outline hamburger-menu" aria-label="Open Menu" aria-expanded="false" aria-controls="menu-items"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="astro-3ef6ksr2 menu-icon"> <line x1="7" y1="12" x2="21" y2="12" class="line astro-3ef6ksr2"></line> <line x1="3" y1="6" x2="21" y2="6" class="line astro-3ef6ksr2"></line> <line x1="12" y1="18" x2="21" y2="18" class="line astro-3ef6ksr2"></line> <line x1="18" y1="6" x2="6" y2="18" class="astro-3ef6ksr2 close"></line> <line x1="6" y1="6" x2="18" y2="18" class="astro-3ef6ksr2 close"></line> </svg> </button> <ul id="menu-items" class="astro-3ef6ksr2 display-none sm:flex"> <li class="astro-3ef6ksr2"> <a href="/astro/posts/" class="astro-3ef6ksr2">
+Posts
+</a> </li> <li class="astro-3ef6ksr2"> <a href="/astro/tags/" class="astro-3ef6ksr2">
+Tags
+</a> </li> <!-- <li>
+            <a href="/about/" class={activeNav === "about" ? "active" : ""}>
+              About
+            </a>
+          </li> --> <li class="astro-3ef6ksr2"> <a href="/astro/search/" class="astro-3ef6ksr2 focus-outline flex group hover:text-skin-accent inline-block p-3 sm:p-1" aria-label="search" title="Search"> <svg xmlns="http://www.w3.org/2000/svg" class="astro-3ef6ksr2 scale-125 sm:scale-100"><path d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z" class="astro-3ef6ksr2"></path> </svg> <span class="astro-3ef6ksr2 sr-only">Search</span> </a> </li>  </ul> </nav> </div> </div> <div class="max-w-3xl mx-auto px-4"> <hr class="border-skin-line" aria-hidden="true"> </div> </header>   <div class="astro-vj4tpspi flex justify-start max-w-3xl mx-auto px-2 w-full"> <button class="astro-vj4tpspi flex focus-outline hover:opacity-75 mb-2 mt-8" onclick='history.length===1?window.location="/":history.back();
+'> <svg xmlns="http://www.w3.org/2000/svg" class="astro-vj4tpspi"><path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" class="astro-vj4tpspi"></path> </svg><span class="astro-vj4tpspi">Go back</span> </button> </div> <main id="main-content" class="astro-vj4tpspi"> <h1 class="astro-vj4tpspi post-title" data-astro-transition-scope="astro-plk3gbjq-1">垃圾回收</h1> <div class="astro-vj4tpspi flex items-center my-2 opacity-80 space-x-2"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block fill-skin-base h-6 min-w-[1.375rem] scale-100 w-6" aria-hidden="true"><path d="M7 11h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2zm0 4h2v2h-2z"></path><path d="M5 22h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2h-2V2h-2v2H9V2H7v2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2zM19 8l.001 12H5V8h14z"></path></svg><span class="italic text-base">Updated:</span><span class="italic text-base"><time datetime="2024-05-17T17:56:33.000Z">May 17, 2024</time><span aria-hidden="true"> | </span><span class="sr-only">&nbsp;at&nbsp;</span><span class="text-nowrap">05:56 PM</span></span></div> <article id="article" role="article" class="astro-vj4tpspi max-w-3xl mx-auto mt-8 prose"> <h2 id="table-of-contents">Table of contents</h2>
+<p></p><details><summary>Open Table of contents</summary><p></p>
+<ul>
+<li><a href="#%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E4%B8%80%E4%B8%AA%E5%AF%B9%E8%B1%A1%E6%98%AF%E5%90%A6%E5%AD%98%E6%B4%BB">如何判断一个对象是否存活</a>
+<ul>
+<li><a href="#%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0%E6%B3%95">引用计数法</a></li>
+<li><a href="#%E5%8F%AF%E8%BE%BE%E6%80%A7%E5%88%86%E6%9E%90%E6%B3%95">可达性分析法</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%AE%97%E6%B3%95">垃圾回收算法</a>
+<ul>
+<li><a href="#%E6%A0%87%E8%AE%B0-%E6%B8%85%E9%99%A4mark-sweep">标记-清除（Mark-Sweep）</a></li>
+<li><a href="#%E6%8B%B7%E8%B4%9D%E5%A4%8D%E5%88%B6copying">拷贝（复制）（Copying）</a></li>
+<li><a href="#%E6%A0%87%E8%AE%B0-%E5%8E%8B%E7%BC%A9%E6%95%B4%E7%90%86mark-compact">标记-压缩/整理（Mark-Compact）</a></li>
+<li><a href="#%E5%88%86%E4%BB%A3">分代</a>
+<ul>
+<li><a href="#%E5%85%B7%E4%BD%93%E6%B5%81%E7%A8%8B">具体流程</a></li>
+<li><a href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">注意事项</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E4%B8%89%E8%89%B2%E6%A0%87%E8%AE%B0%E7%AE%97%E6%B3%95">三色标记算法</a>
+<ul>
+<li><a href="#%E6%A6%82%E8%BF%B0">概述</a></li>
+<li><a href="#%E6%A0%87%E8%AE%B0%E7%9A%84%E8%BF%87%E7%A8%8B">标记的过程</a></li>
+<li><a href="#%E7%BC%BA%E7%82%B9">缺点</a>
+<ul>
+<li><a href="#%E5%A4%9A%E6%A0%87">多标</a></li>
+<li><a href="#%E6%BC%8F%E6%A0%87">漏标</a></li>
+</ul>
+</li>
+<li><a href="#%E6%BC%8F%E6%A0%87%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">漏标解决方案</a>
+<ul>
+<li><a href="#%E5%A2%9E%E9%87%8F%E6%9B%B4%E6%96%B0">增量更新</a></li>
+<li><a href="#%E5%8E%9F%E5%A7%8B%E5%BF%AB%E7%85%A7">原始快照</a></li>
+<li><a href="#%E8%AF%BB%E5%86%99%E5%B1%8F%E9%9A%9C">读写屏障</a>
+<ul>
+<li><a href="#%E5%86%99%E5%B1%8F%E9%9A%9Cstore-barrier">写屏障（Store Barrier）</a></li>
+<li><a href="#%E5%86%99%E5%B1%8F%E9%9A%9C--stab">写屏障 + STAB</a></li>
+<li><a href="#%E5%86%99%E5%B1%8F%E9%9A%9C--%E5%A2%9E%E9%87%8F%E6%9B%B4%E6%96%B0">写屏障 + 增量更新</a></li>
+<li><a href="#%E8%AF%BB%E5%B1%8F%E9%9A%9Cload-barrier">读屏障（Load Barrier）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8">垃圾收集器</a>
+<ul>
+<li><a href="#%E4%B8%B2%E8%A1%8C%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8">串行垃圾收集器</a></li>
+<li><a href="#%E5%B9%B6%E8%A1%8C%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8">并行垃圾收集器</a></li>
+<li><a href="#cms%E5%B9%B6%E5%8F%91%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8">CMS（并发）垃圾收集器</a>
+<ul>
+<li><a href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E6%B5%81%E7%A8%8B">垃圾收集流程</a>
+<ul>
+<li><a href="#%E5%A4%A7%E6%A6%82%E5%88%86%E4%B8%BA%E5%9B%9B%E4%B8%AA%E4%B8%BB%E8%A6%81%E6%AD%A5%E9%AA%A4">大概分为四个主要步骤</a></li>
+</ul>
+</li>
+<li><a href="#cms-%E7%BC%BA%E7%82%B9">cms 缺点</a></li>
+</ul>
+</li>
+<li><a href="#g1%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8">G1垃圾收集器</a>
+<ul>
+<li><a href="#g1-%E6%A6%82%E8%BF%B0">G1 概述</a></li>
+<li><a href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B">内存模型</a>
+<ul>
+<li><a href="#%E5%88%86%E5%8C%BA-region">分区 Region</a></li>
+<li><a href="#%E5%8D%A1%E7%89%87-card">卡片 Card</a></li>
+<li><a href="#%E5%B7%A8%E5%9E%8B%E5%AF%B9%E8%B1%A1-humongous-region">巨型对象 Humongous Region</a></li>
+<li><a href="#%E5%B7%B2%E8%AE%B0%E5%BF%86%E9%9B%86%E5%90%88-remember-setrset">已记忆集合 Remember Set（RSet)</a></li>
+<li><a href="#%E6%94%B6%E9%9B%86%E9%9B%86%E5%90%88cset">收集集合（CSet）</a></li>
+</ul>
+</li>
+<li><a href="#g1%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%88%86%E7%B1%BB">G1垃圾收集分类</a>
+<ul>
+<li><a href="#young-gc">Young GC</a></li>
+<li><a href="#mixed-gc">Mixed GC</a></li>
+<li><a href="#full-gc">Full GC</a></li>
+</ul>
+</li>
+<li><a href="#%E6%94%B6%E9%9B%86%E8%BF%87%E7%A8%8B">收集过程</a>
+<ul>
+<li><a href="#%E5%B9%B4%E8%BD%BB%E4%BB%A3%E6%94%B6%E9%9B%86">年轻代收集</a></li>
+<li><a href="#%E6%B7%B7%E5%90%88%E6%94%B6%E9%9B%86">混合收集</a></li>
+</ul>
+</li>
+<li><a href="#g1-%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0">G1 相关参数</a></li>
+<li><a href="#%E4%BC%98%E5%8C%96">优化</a></li>
+<li><a href="#%E5%AE%89%E5%85%A8%E7%82%B9%E4%B8%8E%E5%AE%89%E5%85%A8%E5%8C%BA%E5%9F%9F">安全点与安全区域</a></li>
+<li><a href="#g1-%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">G1 注意事项</a></li>
+<li><a href="#%E5%85%B8%E5%9E%8B%E9%97%AE%E9%A2%98">典型问题</a>
+<ul>
+<li><a href="#%E7%96%8F%E6%95%A3%E5%A4%B1%E8%B4%A5evacuation-failure">疏散失败（Evacuation Failure）</a>
+<ul>
+<li><a href="#%E7%96%8F%E6%95%A3%E5%A4%B1%E8%B4%A5%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">疏散失败解决方案</a></li>
+</ul>
+</li>
+<li><a href="#%E5%A4%A7%E5%AF%B9%E8%B1%A1%E5%88%86%E9%85%8Dhumongous-allocation">大对象分配（Humongous Allocation）</a>
+<ul>
+<li><a href="#%E5%A4%A7%E5%AF%B9%E8%B1%A1%E5%88%86%E9%85%8D%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">大对象分配解决方案</a></li>
+</ul>
+</li>
+<li><a href="#young-gc-%E8%8A%B1%E8%B4%B9%E6%97%B6%E9%97%B4%E5%A4%AA%E9%95%BF">Young GC 花费时间太长</a></li>
+<li><a href="#mixed-gc-%E8%80%97%E6%97%B6%E5%A4%AA%E9%95%BF">Mixed GC 耗时太长</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+<li><a href="#zgc%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8">ZGC垃圾收集器</a>
+<ul>
+<li><a href="#%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80">内存布局</a></li>
+<li><a href="#%E6%94%AF%E6%8C%81numa">支持NUMA</a></li>
+<li><a href="#%E7%9D%80%E8%89%B2%E6%8C%87%E9%92%88">着色指针</a></li>
+<li><a href="#%E8%AF%BB%E5%B1%8F%E9%9A%9C">读屏障</a></li>
+<li><a href="#zgc-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E6%B5%81%E7%A8%8B">ZGC 垃圾收集流程</a></li>
+<li><a href="#gc%E6%97%B6%E6%9C%BA">GC时机</a></li>
+<li><a href="#%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE">参数设置</a></li>
+</ul>
+</li>
+<li><a href="#%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8">如何选择垃圾回收器</a></li>
+</ul>
+</li>
+</ul>
+<p></p></details><p></p>
+<h2 id="如何判断一个对象是否存活">如何判断一个对象是否存活</h2>
+<h3 id="引用计数法">引用计数法</h3>
+<p>引用计数，就是记录每个对象被引用的次数，每次新建对象、赋值引用和删除引用的同时更新计数器，如果计数器值为0则直接回收内存。很明显，引用计数最大的优势就是暂停时间短。</p>
+<p>优点：</p>
+<ul>
+<li>
+<p>可即刻回收垃圾。</p>
+</li>
+<li>
+<p>最大暂停时间短。</p>
+</li>
+<li>
+<p>没有必要沿指针查找。</p>
+</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>
+<p>计数器的增减处理繁重。</p>
+</li>
+<li>
+<p>计数器需要占用很多位。</p>
+</li>
+<li>
+<p>实现繁琐复杂，每个赋值操作都得替换成引用更新操作。</p>
+</li>
+<li>
+<p>循环引用无法回收（<strong>最大的缺点</strong>）。</p>
+</li>
+</ul>
+<h3 id="可达性分析法">可达性分析法</h3>
+<p>从一个被称为 GC Roots 的对象向下搜索，如果一个对象到 GC Roots 没有任何引用链相连接时，说明此对象不可用，在java中可以作为<br>
+GC Roots 的对象有以下几种：</p>
+<ul>
+<li>
+<p>虚拟机栈中引用的对象。</p>
+</li>
+<li>
+<p>方法区类静态属性引用的变量。</p>
+</li>
+<li>
+<p>方法区常量池引用的对象。</p>
+</li>
+<li>
+<p>本地方法栈 JNI 引用的对象。</p>
+</li>
+</ul>
+<h2 id="垃圾回收算法">垃圾回收算法</h2>
+<h3 id="标记-清除mark-sweep">标记-清除（Mark-Sweep）</h3>
+<ul>
+<li>
+<p>标记阶段：从跟集合出发，将所有活动对象及其子对象打上标记。</p>
+</li>
+<li>
+<p>清除阶段：遍历堆，将非活动对象（未打上标记）的连接到空闲链表上。</p>
+</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>
+<p>碎片化，会导致无数小分块散落在堆的各处。</p>
+</li>
+<li>
+<p>分配速度不理想，每次分配都需要遍历空闲列表找到足够大的分块。</p>
+</li>
+<li>
+<p>与写时复制技术不兼容，因为每次都要在活动对象上打上标记。</p>
+</li>
+</ul>
+<h3 id="拷贝复制copying">拷贝（复制）（Copying）</h3>
+<p>为了解决碎片化的问题。原理是将内存分为两块，每次申请内存时都使用其中一块，当内存不够时，将这一块内存中所有存活的复制到另一块上，然后再把已使用的内存整个清理掉。复制算法解决了空间碎片的问题，但是，因为每次在申请内存时，都只能使用一半的内存空间，内存利用率严重不足。</p>
+<p>JVM 中新生代采用的就是复制算法。针对内存利用率不足做了一下优化：</p>
+<ul>
+<li>
+<p>IBM公司的专门研究表明，新生代中的对象 98% 是”朝生夕死”的，意思是说，在新生代中，经过一次 GC 之后能够存活下来的对象仅有 2%左右。所以并不需要按照1:1的比例划分出两块内存空间。而是将内存划分出三块，一块较大的 Eden 区，和两块较小的 Survivor 区。其中Eden 区占 80% 的内存，两块 Survivor 各占 10% 的内存。在创建新的对象时，只使用 Eden 区和其中的一块 Survivor 区，当进行 GC时，把 Eden 区和 Survivor 区存活的对象全部复制到另一块 Survivor 区中，然后清理掉 Eden 区和刚刚用过的 Survivor 区。</p>
+<p>这种内存的划分方式就解决了内存利用率的问题，每次在创建对象时，可用的内存为 90%(80% + 10%) 当前内存容量。</p>
+</li>
+</ul>
+<p>优点：</p>
+<ul>
+<li>
+<p>优秀的吞吐量，只需要关心活动对象。</p>
+</li>
+<li>
+<p>可实现高速分配，因为分块是连续的，不需要使用空闲链表。</p>
+</li>
+<li>
+<p>不会发生碎片化。</p>
+</li>
+<li>
+<p>与缓存兼容。</p>
+</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>
+<p>堆利用率低。</p>
+</li>
+<li>
+<p>递归调用函数，负质子对象需要递归调用复制函数，消耗栈。</p>
+</li>
+</ul>
+<h3 id="标记-压缩整理mark-compact">标记-压缩/整理（Mark-Compact）</h3>
+<p>复制算法在 GC 之后存活对象较少的情况下效率比较高，但如果存活对象比较多时，会执行较多的复制操作，效率就会下降。而老年代的对象在 GC 之后的存活率就比较高，所以就有人提出了”标记-整理算法”。</p>
+<p>“标记-整理”算法的”标记”过程与”标记-清除”算法的标记过程一致，但标记之后不会直接清理，而是将所有存活对象都移动到内存的一端，移动结束后直接清理掉剩余部分。</p>
+<p>优点：</p>
+<ul>
+<li>有效利用了堆，不会出现内存碎片，也不会像复制算法那样只能利用堆的一部分。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>压缩过程的开销，需要多次搜索堆。</li>
+</ul>
+<h3 id="分代">分代</h3>
+<p><strong>出发点</strong>：大部分对象生成后马上就变成垃圾，很少有对象能活很久。</p>
+<ul>
+<li>
+<p>新生代 = 生成空间 + 2 * 幸存区 <strong>复制算法</strong></p>
+</li>
+<li>
+<p>老年代 <strong>标记-清除算法</strong></p>
+</li>
+</ul>
+<p>对象在生成空间创建，当生成空间满之后进行 minor gc，将活动对象复制到第一个幸存区，并增加其”年龄”age，当这个幸存区满之后再将此次生成空间和这个幸存区的活动对象复制到另一个幸存区，如此反复，当活动对象的 age 达到一定次数（默认是15，可以通过参数 <code>-XX:MaxTenuringThreshold</code> 来设定）后将其移动到老年代； 当老年代满的时候就用标记-清除或标记-压缩算法进行major gc 吞吐量得到改善，分代回收花费的时间是 GC 复制算法的四分之一；但是如果部分程序新生成对象存活很久的话分代回收会适得其反。</p>
+<h4 id="具体流程">具体流程</h4>
+<ol>
+<li>对象优先在Eden分配。当 eden 区没有足够空间进行分配时，虚拟机将发起一次 Minor GC。</li>
+<li>在 Eden 区执行了第一次 GC 之后，存活的对象会被移动到 form 分区。</li>
+<li>Eden 区再次 GC，这时会采用复制算法，将 Eden 和 from 区一起清理，存活的对象会被复制到 to 区。</li>
+<li>当后续Eden又发生Minor GC的时候，会对Eden和 to 区进行垃圾回收，存活的对象复制到 from 区，并将Eden 和 to 区清空。</li>
+<li>部分对象会在 from 和 to 区中来回的复制，如此的交换15次（由JVM参数 Max Tenuring Threshold 决定，默认是15），最终如果还是存活，就存入老年代。</li>
+<li>Survivor 区内存不足会发生<strong>担保分配</strong>，超过指定大小的对象可以直接进入老年代(此时如果老年代的内存大小，小于对象的大小，可能会发生一次Full GC)。</li>
+<li>老年代满了而<strong>无法容纳更多的对象</strong>，Minor GC 之后通常就会进行Full GC，Full GC 清理整个内存堆 – <strong>包括年轻代和老年代</strong>。</li>
+</ol>
+<h4 id="注意事项">注意事项</h4>
+<ul>
+<li>
+<p><strong>新生代</strong>：对于一般创建的对象都会进入。</p>
+</li>
+<li>
+<p><strong>老年代</strong>：对于大对象为了避免为大对象分配内存时由于分配担保机制带来的复制而降低效率，或者经过N次（一般默认15次）的垃圾回收依然存活下来的对象，从新生代移动到老年代。</p>
+</li>
+<li>
+<p><strong>Minor GC、Major GC、Full GC的关系</strong> 1. Minor GC 又称为新生代 GC：指的是发生在新生代的垃圾回收。因为Java对象大多都具备朝生夕灭的特性，因此Minor GC（采用的是复制算法）非常频繁，一般回收速度也比较快。2. Major GC 又被称为老年代 GC ，一般的老年代 GC 总是由于每次 Minor GC 引起的，所以Major GC 发生的时候也是 Full GC，可以看作他两个等效。</p>
+</li>
+<li>
+<p><strong>空间分配担保原则</strong></p>
+<p>如果 Young GC 时新生代有大量对象存活下来，而 survivor 区放不下，这时必须转移到老年代中，但这时发现老年代也放不下这些对象了，那怎么处理？其实JVM有一个老年代空间分配担保机制来保证对象能够进入老年代。</p>
+<p>在执行每次 Young GC 之前，JVM 会先检查老年代最大可用连续空间是否大于新生代所有对象的总大小，因为在极端情况下，可能新生代 Young GC 后，所有对象都存活下来了，而 survivor 区又放不下，那可能所有对象都要进入老年代了。这个时候如果老年代的可用连续空间大于新生代所有对象的总大小的，那就可以放心进行 Young GC，但是如果老年代的内存大小小于新生代对象总大小的，那就可能老年代空间不够放入新生代所有存活对象，这个时候 JVM就会先检查 <code>-XX:HandlePromotionFailure</code> 参数是否允许担保失败，如果允许，就会判断老年代最大可用连续空间是否大于历次晋升到老年代对象的平均大小（就是每次从新生代到老年代的对象的平均大小），如果大于，将尝试进行一次Young GC ，尽管这次 Young GC 是有风险的，如果小于，或者 <code>-XX:HandlePromotionFailure</code> 参数不允许担保失败，这时就要进行一次Full GC。</p>
+</li>
+<li>
+<p><strong>在允许担保失败并尝试进行 Young GC 后，可能会出现三种情况</strong></p>
+<ol>
+<li>Young GC 后，存活对象小于 survivor 大小，此时存活对象进入 survivor 区中。</li>
+<li>Young GC 后，存活对象大于 survivor 大小，但是小于老年代可用空间大小，此时直接进入老年代。</li>
+<li>Young GC 后，存活对象大于 survivor 大小，也大于老年代可用空间大小，老年代也放不下这些对象了，此时就会发生”Handle Promotion Failure”，就触发了 Full GC。如果 Full GC 后，老年代还是没有足够的空间，此时就会发生 OOM 内存溢出了。</li>
+</ol>
+</li>
+</ul>
+<h2 id="三色标记算法">三色标记算法</h2>
+<h3 id="概述">概述</h3>
+<p>主流的垃圾收集器基本上都是基于【可达性分析】算法来判定对象是否存活的。根据对象是否被垃圾收集器扫描过而用白、灰、黑三种颜色来标记对象的状态的一种方法。在可达性分析中，CMS、G1、ZGC都采用三色标记算法（<strong>并发</strong>）。</p>
+<ul>
+<li>
+<p><strong>白色</strong></p>
+<p>对象尚未被垃圾收集器访问过。显然在可达性分析刚刚开始阶段，所有的对象都是白色的，若在分析结束之后对象仍然为白色，则表示这些对象为不可达对象，对这些对象进行回收。</p>
+</li>
+<li>
+<p><strong>灰色</strong></p>
+<p>对象已经被垃圾收集器访问过，但是这个对象至少存在一个引用（属性）还没有被扫描过。</p>
+</li>
+<li>
+<p><strong>黑色</strong></p>
+<p>对象已经被垃圾收集器访问过，且这个对象的所有引用都已经被扫描过。黑色表示这个对象扫描之后依然存活，是可达性对象，如果有其他对象引用指向了黑色对象，无需重新扫描，黑色对象不可能不经过灰色对象直接指向某个白色对象。</p>
+</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424154311461.png" alt="image-20230424154311461" loading="lazy" decoding="async"></p>
+<h3 id="标记的过程">标记的过程</h3>
+<ul>
+<li>
+<p>初始状态</p>
+<p>初始阶段只有GC Roots 是黑色的，其他对象都是白色的，如果没有被黑色对象引用那么最终都会被当做垃圾对象回收。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424164613104.png" alt="image-20230424164613104" loading="lazy" decoding="async"></p>
+</li>
+<li>
+<p><strong>开始扫描</strong></p>
+<p>A和B均为扫描过的对象并且其引用也已经被垃圾回收器扫描过所以此时A、B对象均变为了黑色，而刚扫描到对象C，由于C的D和E还没有扫描到，所以C暂时为灰色。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424164543590.png" alt="image-20230424164543590" loading="lazy" decoding="async"></p>
+</li>
+<li>
+<p><strong>扫描结束</strong></p>
+<p>此时扫描完成，黑色对象就是存活的对象，即可达对象，白色对象G为不可达对象，在垃圾回收时会被回收掉。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424164809038.png" alt="image-20230424164809038" loading="lazy" decoding="async"></p>
+<p>这个过程正确执行的前提是没有其他线程改变对象间的引用关系，然而，并发标记的过程中，用户线程仍在运行，因此就会产生漏标和错标的情况。</p>
+</li>
+</ul>
+<h3 id="缺点">缺点</h3>
+<h4 id="多标">多标</h4>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424165421241.png" alt="image-20230424165421241" loading="lazy" decoding="async"></p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="java"><code><span class="line"><span style="color:#E5C07B">C</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">E</span><span style="color:#56B6C2"> =</span><span style="color:#D19A66"> null</span></span>
+<span class="line"></span></code></pre>
+<p>假如GC线程已经扫描到了E对象，此时E对象为灰色，这个时候用户线程将C的引用E断开，那么GC就会认为E对象是可达对象，而不会对E进行垃圾回收，但实际上E是个垃圾对象，这个时候就会产生多标的问题，多标问题其实还可以接受，E作为浮动垃圾，那么等到下次垃圾回收的时候回收掉。</p>
+<p>另外，针对并发标记开始后的新对象，通常的做法是直接全部当做黑色，本轮不会进行清除。这部分对象期间可能会变成垃圾，这也算是浮动垃圾的一部分。</p>
+<p>实际上，这个问题依然可以通过【写屏障】来解决，只要在C写E的时候加入写屏障，记录下E被切断的记录，重新标记时可以再把他们标为白色即可。</p>
+<h4 id="漏标">漏标</h4>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424170559888.png" alt="image-20230424170559888" loading="lazy" decoding="async"></p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="java"><code><span class="line"><span style="color:#C678DD">var</span><span style="color:#E06C75"> E </span><span style="color:#56B6C2">=</span><span style="color:#E5C07B"> C</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">E</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"><span style="color:#E5C07B">C</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">E</span><span style="color:#56B6C2"> =</span><span style="color:#D19A66"> null</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic"> // 灰色C 断开引用 白色E</span></span>
+<span class="line"><span style="color:#E5C07B">B</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">E</span><span style="color:#56B6C2"> =</span><span style="color:#E06C75"> E</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic"> // 黑色B 引用 白色E</span></span>
+<span class="line"></span></code></pre>
+<p>假如用户线程先断开了C到E的引用，那么E对象就认为是不可达对象，而此时B对象又引用了E对象，但是三色标记又不会重新从B点开始标记到E，那么E就会被认为是垃圾对象，但实际上E是有引用的，那么此时对E进行垃圾回收，之后就一定会产生错误。</p>
+<h3 id="漏标解决方案">漏标解决方案</h3>
+<p>漏标<strong>只有在满足下面两种情况</strong>下才会发生，那么要想解决并发扫描时漏标的问题只需要破坏任何一个条件即可。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424171617866.png" alt="image-20230424171617866" loading="lazy" decoding="async"></p>
+<h4 id="增量更新">增量更新</h4>
+<p>增量更新（Incremental Update）是站在<strong>新增引用对象</strong>的角度来解决问题。当黑色对象插入新的指向白色对象的引用关系时，就将这个新插入的引用记录下来，等并发扫描结束之后，再将这些记录过的引用关系中的黑色对象作为跟对象，再重新扫描一遍。比如漏标问题中，一旦B对象直接指向了E对象，那么在并发扫描之后，就会把B对象作为灰色对象，再重新扫描一遍。这样虽然避免了漏标问题，但是重新标记会导致STW的时间变长。</p>
+<h4 id="原始快照">原始快照</h4>
+<p>原始快照（Snapshot At The Beginning, SATB）是站在<strong>减少引用的对象</strong>的角度来解决问题。当灰色对象要删除指向白色对象的引用关系时，就将这个要删除的引用记录下来，在并发扫描结束后，再将这些记录过的引用关系中的灰色对象作为跟对象，再重新扫描一遍。例如漏标问题中，C断开了E的引用关系时会保存一个快照，然后等扫描结束之后，会把C当作跟再重新扫描一遍，例如B没有引用E，那么E对象会认为是不可达对象，这样E就成了浮动垃圾，只能等下次垃圾回收时再回收。</p>
+<p>无论是对引用关系记录的插入还是删除，虚拟机的记录操作都是通过写屏障实现的，在HotSpot 虚拟机中，<strong>CMS是基于增量更新来做并发标记的，G1、Shenandoah则是用STAB来实现的。</strong></p>
+<h4 id="读写屏障">读写屏障</h4>
+<blockquote>
+<p>这个屏障指的不是并发编程里的屏障，这里的屏障可以理解成就是在读写操作前后插入一段代码，用于记录一些信息、保存某些数据等，概念类似于AOP。</p>
+</blockquote>
+<p>从代码角度看：</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="java"><code><span class="line"><span style="color:#C678DD">var</span><span style="color:#E06C75"> E </span><span style="color:#56B6C2">=</span><span style="color:#E5C07B"> C</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">E</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic"> // 1.读</span></span>
+<span class="line"><span style="color:#E5C07B">C</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">E</span><span style="color:#56B6C2"> =</span><span style="color:#D19A66"> null</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic">  // 2.写</span></span>
+<span class="line"><span style="color:#E5C07B">B</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">E</span><span style="color:#56B6C2"> =</span><span style="color:#E06C75"> E</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic">     // 3.写</span></span>
+<span class="line"></span></code></pre>
+<ol>
+<li><strong>读取</strong>对象C的成员变量E的引用值，即对象E。</li>
+<li>对象C 往其成员变量 E，<strong>写入</strong> null。</li>
+<li>对象B 往其成员变量 E，<strong>写入</strong>对象 E。</li>
+</ol>
+<h5 id="写屏障store-barrier">写屏障（Store Barrier）</h5>
+<p>给某个对象的成员变量赋值时，代码大概如此：</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="c"><code><span class="line"><span style="color:#7F848E;font-style:italic">/**</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">* </span><span style="color:#C678DD;font-style:italic">@param</span><span style="color:#E06C75;font-style:italic"> field</span><span style="color:#7F848E;font-style:italic"> 某对象的成员变量，如 D.fieldG</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">* </span><span style="color:#C678DD;font-style:italic">@param</span><span style="color:#E06C75;font-style:italic"> new_value</span><span style="color:#7F848E;font-style:italic"> 新值，如 null</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">*/</span></span>
+<span class="line"><span style="color:#C678DD">void</span><span style="color:#61AFEF"> oop_field_store</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">oop</span><span style="color:#C678DD">*</span><span style="color:#E06C75;font-style:italic"> field</span><span style="color:#ABB2BF">,</span><span style="color:#E06C75"> oop </span><span style="color:#E06C75;font-style:italic">new_value</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">    *</span><span style="color:#ABB2BF">field </span><span style="color:#C678DD">=</span><span style="color:#ABB2BF"> new_value;</span><span style="color:#7F848E;font-style:italic"> // 赋值操作</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span></code></pre>
+<p>所谓的写屏障，其实就是指在赋值操作前后，加入一些处理（可以参考AOP的概念）：</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="c"><code><span class="line"><span style="color:#C678DD">void</span><span style="color:#61AFEF"> oop_field_store</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">oop</span><span style="color:#C678DD">*</span><span style="color:#E06C75;font-style:italic"> field</span><span style="color:#ABB2BF">,</span><span style="color:#E06C75"> oop </span><span style="color:#E06C75;font-style:italic">new_value</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#61AFEF">    pre_write_barrier</span><span style="color:#ABB2BF">(field);</span><span style="color:#7F848E;font-style:italic"> // 写屏障-写前操作</span></span>
+<span class="line"><span style="color:#C678DD">    *</span><span style="color:#ABB2BF">field </span><span style="color:#C678DD">=</span><span style="color:#ABB2BF"> new_value;</span></span>
+<span class="line"><span style="color:#61AFEF">    post_write_barrier</span><span style="color:#ABB2BF">(field, value);</span><span style="color:#7F848E;font-style:italic">  // 写屏障-写后操作</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span></code></pre>
+<h5 id="写屏障--stab">写屏障 + STAB</h5>
+<p>当对象 C 的成员变量的引用发生变化时（C.E = null），我们可以利用写屏障，将C原来的成员变量的引用对象 E 记录下来：</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="c"><code><span class="line"><span style="color:#C678DD">void</span><span style="color:#61AFEF"> pre_write_barrier</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">oop</span><span style="color:#C678DD">*</span><span style="color:#E06C75;font-style:italic"> field</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#ABB2BF">    oop old_value </span><span style="color:#C678DD">=</span><span style="color:#C678DD"> *</span><span style="color:#ABB2BF">field;</span><span style="color:#7F848E;font-style:italic"> // 获取旧值</span></span>
+<span class="line"><span style="color:#E5C07B">    remark_set</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">add</span><span style="color:#ABB2BF">(old_value);</span><span style="color:#7F848E;font-style:italic"> // 记录 原来的引用对象</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span></code></pre>
+<p><strong>当原来成员变量的引用发生变化之前，记录下原来的引用对象</strong>。这种做法的思路是：尝试保留开始时的对象图，即原始快照，当某个时刻的GC Roots 确定后，当时的对象图就已经确定了。比如当时B是引用着E的，那后续的标记也应该是按照这个时刻的对象图走（B引用着E）。如果期间发生了变化，则可以记录起来，保证标记依然按照原本的视图来。</p>
+<p>扫描所有GC Roots 这个操作通常是需要STW，否则有可能永远都扫不完，因为并发期间可能增加新的GC Roots 。</p>
+<p>优化：如果不是处于垃圾回收的并发标记阶段，或者已经被标记过了，其实是没必要再记录了，所以可以加个简单的判断：</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="c"><code><span class="line"><span style="color:#C678DD">void</span><span style="color:#61AFEF"> pre_write_barrier</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">oop</span><span style="color:#C678DD">*</span><span style="color:#E06C75;font-style:italic"> field</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // 处于GC并发标记阶段 且 该对象没有被标记（访问）过</span></span>
+<span class="line"><span style="color:#C678DD">  if</span><span style="color:#ABB2BF">($gc_phase </span><span style="color:#C678DD">==</span><span style="color:#ABB2BF"> GC_CONCURRENT_MARK </span><span style="color:#56B6C2">&amp;&amp;</span><span style="color:#56B6C2"> !</span><span style="color:#61AFEF">isMarkd</span><span style="color:#ABB2BF">(field)) {</span></span>
+<span class="line"><span style="color:#ABB2BF">      oop old_value </span><span style="color:#C678DD">=</span><span style="color:#C678DD"> *</span><span style="color:#ABB2BF">field;</span><span style="color:#7F848E;font-style:italic"> // 获取旧值</span></span>
+<span class="line"><span style="color:#E5C07B">      remark_set</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">add</span><span style="color:#ABB2BF">(old_value);</span><span style="color:#7F848E;font-style:italic"> // 记录  原来的引用对象</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span></code></pre>
+<h5 id="写屏障--增量更新">写屏障 + 增量更新</h5>
+<p>当对象B的成员变量的引用发生变化时（B.E = E），可以利用写屏障，将B新的成员变量引用对象E记录下来：</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="c"><code><span class="line"><span style="color:#C678DD">void</span><span style="color:#61AFEF"> post_write_barrier</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">oop</span><span style="color:#C678DD">*</span><span style="color:#E06C75;font-style:italic"> field</span><span style="color:#ABB2BF">,</span><span style="color:#E06C75"> oop </span><span style="color:#E06C75;font-style:italic">new_value</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">  if</span><span style="color:#ABB2BF">($gc_phase </span><span style="color:#C678DD">==</span><span style="color:#ABB2BF"> GC_CONCURRENT_MARK </span><span style="color:#56B6C2">&amp;&amp;</span><span style="color:#56B6C2"> !</span><span style="color:#61AFEF">isMarkd</span><span style="color:#ABB2BF">(field)) {</span></span>
+<span class="line"><span style="color:#E5C07B">      remark_set</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">add</span><span style="color:#ABB2BF">(new_value);</span><span style="color:#7F848E;font-style:italic"> // 记录新引用的对象</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span></code></pre>
+<p><strong>当有新引用插入进来时，记录下新的引用对象</strong>。思路：不要求保留原始快照，而是针对新增的引用，将其记录下来等待遍历，即增量更新。</p>
+<h5 id="读屏障load-barrier">读屏障（Load Barrier）</h5>
+<p>读屏障是直接针对：var E = C.E，当读取成员变量时，一律记录下来：</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="java"><code><span class="line"><span style="color:#E06C75">oop </span><span style="color:#61AFEF">oop_field_load</span><span style="color:#E06C75">(oop</span><span style="color:#56B6C2">*</span><span style="color:#E06C75"> field) {</span></span>
+<span class="line"><span style="color:#61AFEF">    pre_load_barrier</span><span style="color:#E06C75">(field)</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic"> // 读屏障-读取前操作</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#56B6C2"> *</span><span style="color:#E06C75">field</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"><span style="color:#E06C75">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">void</span><span style="color:#61AFEF"> pre_load_barrier</span><span style="color:#E06C75">(oop</span><span style="color:#56B6C2">*</span><span style="color:#E06C75"> field</span><span style="color:#ABB2BF">,</span><span style="color:#E06C75"> oop old_value) {</span></span>
+<span class="line"><span style="color:#C678DD">  if</span><span style="color:#E06C75">($gc_phase </span><span style="color:#56B6C2">==</span><span style="color:#E06C75"> GC_CONCURRENT_MARK </span><span style="color:#56B6C2">&amp;&amp;</span><span style="color:#56B6C2"> !</span><span style="color:#61AFEF">isMarkd</span><span style="color:#E06C75">(field)) {</span></span>
+<span class="line"><span style="color:#E06C75">      oop old_value </span><span style="color:#56B6C2">=</span><span style="color:#56B6C2"> *</span><span style="color:#E06C75">field</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"><span style="color:#E5C07B">      remark_set</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">add</span><span style="color:#ABB2BF">(old_value);</span><span style="color:#7F848E;font-style:italic"> // 记录读取到的对象</span></span>
+<span class="line"><span style="color:#E06C75">  }</span></span>
+<span class="line"><span style="color:#E06C75">}</span></span>
+<span class="line"></span></code></pre>
+<p>这种做法是保守的，但也是安全的。【黑色对象重新引用白色对象】，重新引用的前提是：得获取到该白色对象，此时已经读屏障就发挥作用了。</p>
+<p>对于读写屏障，以 Java HotSpot VM 为例，其并发标记时对漏标的处理方案如下：</p>
+<ul>
+<li><strong>CMS：写屏障 + 增量更新</strong></li>
+<li><strong>G1、Shenandoah：写屏障 + SATB</strong></li>
+<li><strong>ZGC：读屏障</strong></li>
+</ul>
+<p>读写屏障还有其他功能，比如写屏障可以用来记录跨代/区引用的变化，读屏障可以用于支持移动对象的并发执行等。</p>
+<p>CMS中使用的增量更新，再重新标记阶段，除了需要遍历写屏障的记录，还需要重新扫描遍历GC Roots（标记过的无需再遍历），这是由于CMS对于astore_x等指令不添加写屏障的原因。</p>
+<p><strong>为什么G1用SATB？CMS用增量更新？</strong></p>
+<p>SATB（原始快照）相对增量更新效率比较高（当然SATB可能会造成更多的浮动垃圾），因为不需要在重新标记阶段再次深度扫描被删除引用对象，而CMS 对增量引用对象会做深度扫描，G1因为很多对象都处于不同的 Region，CMS就一块老年代区域，重新深度扫描对象的话，G1的代价会比CMS高，所以G1选择STAB不深度扫描对象，只是简单标记，等到下一轮再深度扫描。</p>
+<h2 id="垃圾收集器">垃圾收集器</h2>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424105126389.png" alt="image-20230424105126389" loading="lazy" decoding="async"></p>
+<p><strong>GC 为什么要暂停用户线程？</strong></p>
+<p>首先，如果不暂停用户线程，就意味着期间会不断有垃圾产生，永远也清理不干净。</p>
+<p>其次，用户线程的运行必然会导致对象的引用关系发生改变，这就会导致两种情况：多标和漏标。</p>
+<ol>
+<li>
+<p><strong>多标</strong></p>
+<p>原本不是垃圾，但是GC的过程中，用户线程将其引用关系修改，导致GC Roots不可达，成为了垃圾。这种情况还好一点，无非就是产生了一些浮动垃圾，下次GC再清理就好了。</p>
+</li>
+<li>
+<p><strong>漏标</strong></p>
+<p>原来是垃圾，但是GC的过程中，用户线程将引用重新指向了它，这时如果GC一旦将其回收，将会导致程序运行错误。</p>
+</li>
+</ol>
+<h3 id="串行垃圾收集器">串行垃圾收集器</h3>
+<p>为单线程环境设计且只使用一个线程进行垃圾回收，会暂停所有的用户线程，所以不适合服务器环境。</p>
+<ul>
+<li>
+<p><strong>堆内存中新生代垃圾回收器（Serial）</strong></p>
+<p>串行收集器是最古老，最稳定以及效率高的收集器，只使用一个线程去回收，但其在进项垃圾收集过程中可能会产生较长的停顿（Stop-The-World）状态。虽然在收集垃圾的过程找那个需要暂停所有其他的工作线程，但是它简单高效，对于限定单个CPU环境来说，没有线程交互的开销，可以获得最高的单线程垃圾收集效率，因此Serial 垃圾收集器依然是Java虚拟机运行在 Client 模式下默认的新生代垃圾收集器。</p>
+</li>
+<li>
+<p><strong>堆内存中老年代垃圾回收器（Serial Old）</strong></p>
+<p>Serial Old 是 Serial 垃圾收集器老年代版本，它同样是单线程的收集器，使用标记-压缩算法，这个收集器也主要是运行在 Client<br>
+默认的老年代垃圾收集器，在老年代中，也充当 CMS 收集器的后备垃圾收集方案（$\textcolor{red}{GC 单线程}$）。</p>
+</li>
+</ul>
+<h3 id="并行垃圾收集器">并行垃圾收集器</h3>
+<p>多个垃圾回收器并行工作，此时用户线程是暂时的，适用于科学计算/大数据处理等弱交互场景。</p>
+<ul>
+<li>
+<p><strong>堆内存中新生代垃圾回收器（ParNew、Parallel Scavenge）</strong></p>
+<p>ParNew 收集器其实就是 Serial 收集器新生代的并行多线程版本，最常见的应用场景是配合老年代 CMS GC 工作，其余的行为和<br>
+Serial 收集器完全一样，ParNew 垃圾收集器在垃圾收集过程中同样也要暂停所有其他的工作线程（$\textcolor{red}{GC 多线程}$）。$\textcolor{CornflowerBlue}{JVM 配置：-XX:+UseParNewGC 使用ParNew收集器}$</p>
+<p>Parallel Scavenge 收集器类似 ParNew 也是一个新生代垃圾收集器，使用拷贝算法，也是一个并行的多线程的垃圾收集器，俗称吞吐量优先收集器（$\textcolor{red}{GC<br>
+多线程}$）。</p>
+<p>$\textcolor{CornflowerBlue}{JVM配置：-XX:+UseParallelGC 使用Parallel Scavenge收集器}$</p>
+</li>
+<li>
+<p><strong>堆内存中老年代垃圾回收器（Parallel Old）</strong></p>
+<p>Parallel Old 收集器是Parallel Scavenge 的老年代版本，使用多线程的标记-压缩算法，Parallel Old 收集器在 JDK1.6 才开始提供在 JDK1.6 之前，新生代使用Parallel Scavenge 收集器只能搭配老年代的 Serial Old 收集器，只能保证新生代的吞吐量优先，无法保证整体吞吐量。</p>
+<p>JDK1.8 后考虑新生代 Parallel Scavenge 和老年代 Parallel Old 收集器的搭配策略。</p>
+<p>$\textcolor{CornflowerBlue}{JVM配置：-XX:+UseParallelOldGC 使用Parallel Old收集器}$</p>
+</li>
+</ul>
+<h3 id="cms并发垃圾收集器">CMS（并发）垃圾收集器</h3>
+<p>CMS（Concurrent Mark Sweep:并发标记清除）是一款里程碑式的垃圾收集器，因为在它之前，GC线程和用户线程是无法同时工作的，即使是 Parallel Scavenge，也不过是GC时开启多个线程并行回收而已，GC的整个过程依然要暂停用户线程，即Stop The World。这带来的后果就是Java程序运行一段时间就会卡顿一会，降低应用的响应速度，这对于运行在服务端的程序是不会被接收的。</p>
+<p>CMS 是一种以<strong>获取最短回收停顿时间为目标</strong>的收集器。CMS 非常适合堆内存大、CPU核数多的服务器端应用，也是G1出现之前大型应用的首选收集器。<strong>用户线程和垃圾收集线程同时执行（不一定是并行，可能交替执行），不需要停顿用户线程</strong>，适用对响应时间有要求的场景，主要在老年代回收。</p>
+<p>$\textcolor{CornflowerBlue}{JVM配置：-XX:+UseConcMarkSweepGC 使用CMS收集器}$</p>
+<h4 id="垃圾收集流程">垃圾收集流程</h4>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424111120289.png" alt="image-20230424111120289" loading="lazy" decoding="async"></p>
+<h5 id="大概分为四个主要步骤">大概分为四个主要步骤</h5>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424111223763.png" alt="image-20230424111223763" loading="lazy" decoding="async"></p>
+<ul>
+<li>
+<p><strong>初始标记（Initial Mark）</strong></p>
+<p>只是标记一下GC Roots 能关联的对象，速度很快。<strong>仍然需要暂停所有工作线程</strong>。不过这个过程非常快，而且<strong>初始标记的耗时不会因为堆空间的变大而变慢</strong>，是可控的，因此可以忽略这个过程导致的短暂停顿。</p>
+</li>
+<li>
+<p><strong>并发标记（Concurrent Mark）</strong></p>
+<p>进项 GC Roots 跟踪过程，和用户线程一起执行，不需要暂停工作线程，主要标记过程、标记全部对象。将初始标记的对象进行深度遍历，以这些对象为根，遍历整个对象图，这个过程耗时较长，而且<strong>标记的时间会随着堆空间的变大而变大</strong>。不会触发STW，用户线程仍然可以工作，程序依然可以响应，只是程序的性能会受到一点影响。因为GC线程会占用一定的CPU和系统资源，对处理器比较敏感。CMS默认开启的GC线程数是：（CPU核心数+3）/ 4，当CPU核心数超过4个时，GC线程会占用不到25%的CPU资源，如果CPU数不足4个，GC线程对程序的影响就会非常大，导致程序的性能大幅降低。</p>
+</li>
+<li>
+<p><strong>重新标记（Remark）</strong></p>
+<p>由于并发标记时，用户线程仍在运行，这意味着并发标记期间，用户线程有可能改变了对象间的引用关系，可能会发生两种情况：一种是原本不能被回收的对象，现在可以被回收了，另一种是原本可以被回收的对象，现在不能被回收了。针对这两种情况，CMS需要<strong>暂停所有用户线程</strong>，进行一次重新标记。</p>
+</li>
+<li>
+<p><strong>并发清除（Concurrent Sweep）</strong></p>
+<p>清楚 GC Roots 不可达对象，和用户线程一起工作，不需要暂停工作线程，基于标记结果，直接清除对象。这个过程耗时也比较长，且清理的开销会随着堆空间的变大而变大，和并发标记一样，清理时GC线程依然要占用一定的CPU和系统资源，会导致程序的性能降低。</p>
+</li>
+</ul>
+<h4 id="cms-缺点">cms 缺点</h4>
+<p>尽管CMS是一款里程碑式的垃圾收集器，开启了GC线程和用户线程同时工作的先河，但是不管是哪个JDK版本，CMS从来都不是默认的垃圾收集器。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230424144233399.png" alt="image-20230424144233399" loading="lazy" decoding="async"></p>
+<ul>
+<li>
+<p><strong>对处理器敏感</strong></p>
+<p>并发标记、并发清理阶段，虽然CMS不会触发STW，但是标记和清理需要GC线程介入处理，GC线程会占用一定的CPU资源，进而导致程序的性能下降，程序响应速度变慢。CPU核心数多的话还稍微好一点，CPU资源紧张的情况下，GC线程对程序的性能影响比较大。</p>
+</li>
+<li>
+<p><strong>浮动垃圾</strong></p>
+<p>并发清理阶段，由于用户线程仍在运行，在次期间用户线程制造的垃圾就被称为”浮动垃圾”，浮动垃圾本次GC无法清理，只能留到下次GC再清理。</p>
+</li>
+<li>
+<p><strong>并发失败</strong></p>
+<p>由于浮动垃圾的存在，因此CMD必须预留一部分空间来装载这些新产生的垃圾。CMS不能像Serial Old收集器那样，等到Old区填满了再来清理。在JDK5时，CMS会在老年代使用了68%的空间时激活，预留了32%的空间来装载浮动垃圾，这是一个比较偏保守的配置。如果实际引用中，老年代增长的不是太快，可以通过 <code>-XX：CMSInitiatingOccupancyFraction</code> 参数适当调高这个值。到了 JDK6，触发的阈值就被提升至92%，只预留了8%的空间来装载浮动垃圾。</p>
+<p>如果CMS预留的内存无法容纳浮动垃圾，那么就会导致并发失败，这时JVM不得不触发预备方案，启用Serial Old 收集器来回收Old区，这时停顿时间就变得更长了。</p>
+</li>
+<li>
+<p><strong>内存碎片</strong></p>
+<p>由于CMS采用的是[标记清除]算法，这就意味着清理完成厚会在堆中产生大量的内存碎片。内存碎片过多会带来很多麻烦，其一就是很难为大对象分配内存。导致的后果就是：堆空间明明还有很多，但就是找不到一块连续的内存区域为大对象分配内存，而不得不触发一次Full GC，这样GC的停顿时间又会变得更长。</p>
+<p>针对这种情况，CMS提供了一种备选方案，通过 <code>-XX：CMSFullGCsBeforeCompaction</code> 参数设置，当CMS由于内存碎片导致出发了N次 Full GC 后，下次进入Full GC 前先整理内存碎片，不过这个参数在 JDK9 被弃用了。</p>
+</li>
+</ul>
+<h3 id="g1垃圾收集器">G1垃圾收集器</h3>
+<h4 id="g1-概述">G1 概述</h4>
+<p>G1（Garbage-First）垃圾回收器是在JDK7引入的一个新的垃圾收集器。在JDK9时被选定为默认收集收集器。</p>
+<p>G1 最大的特点是引入分区的思路，弱化了分代的概念，合理利用垃圾收集各个周期的资源，解决了其他收集器的众多缺陷。</p>
+<p>G1垃圾回收器将堆内存分割成不同的区域，然后并发的对其进行垃圾回收，G1 收集器的设计目标是取代 CMS 收集器。G1 和 CMS 相比，有以下不同：</p>
+<ul>
+<li>
+<p>G1 能充分利用多CPU、多核环境硬件优势，尽量缩短 STW。部分其他收集器原本需要停顿 Java 线程执行的 GC 动作，G1 收集器仍然可以通过并发的方式让Java程序继续运行。</p>
+</li>
+<li>
+<p>与 CMS 的 “标记-清除”算法不同，G1 从整体来看是基于”<strong>标记-压缩</strong>”算法实现的收集器，从局部来看是基于”复制”算法。因此其回收得到的空间是连续的。这避免了 CMS 回收器因为不连续空间所造成的问题，例如：需要更大的堆空间，更多的 floating garbage。连续空间意味着 G1 垃圾收集器可以不必采用空闲链表的内存分配方式，而可以直接采用 bump-the-pointer （撞针） 的方式。</p>
+</li>
+<li>
+<p>G1 的内存与 CMS 要求的内存模型有极大的不同。G1 将内存划分一个个固定大小的region，每个region既可以是年轻代，也可以是老年代的。<strong>内存的回收是以region作为基本单位的</strong>。</p>
+</li>
+<li>
+<p>G1 还要一个极其重要的特性：<strong>软实时</strong>（soft real-time）。所谓的实时垃圾回收，是指在要求的时间内完成垃圾回收。软实时则是指，用户可以指定垃圾回收时间的现时，G1 会努力在这个时限内完成垃圾回收，但是 G1 并不担保每次都能在这个时限内完成垃圾回收。通过设定一个合理的目标，可以让达到90%以上的垃圾回收时间都在这个时限内。</p>
+<p>用户可以指定期望停顿时间（可通过配置 XX:MaxGCPauseMills=n最大停顿时间）。期<strong>望停顿时间模型是能够支持指定在一个长度为M毫秒的时间片段内，消耗在垃圾收集上的时间大概率不超过N毫秒这样的目标。</strong></p>
+</li>
+<li>
+<p>G1可以面向堆内存任何部分来组成回收集（Collection Set，CSet）进行回收，衡量标准不再是它属于哪个分代，而是哪块内存中存放的垃圾数量最多，回收收益最大。</p>
+</li>
+<li>
+<p>G1 虽然也是分代收集器，但整个内存分区不存在物理上的年轻代和老年代的区别，也不需要完全独立的 Survivor 堆做复制准备，G1只有逻辑上的分代概念，或者说每个分区都可以随 G1 的运作在不同代之间前后切换。</p>
+<p>$\textcolor{CornflowerBlue}{JVM配置：-XX:+UseG1GC 使用G1收集器}$</p>
+</li>
+</ul>
+<h4 id="内存模型">内存模型</h4>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230425145527908.png" alt="image-20230425145527908" loading="lazy" decoding="async"></p>
+<p>G1收集器采用一种不同的方式来管理内存：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230414181654804.png" alt="image-20230414181654804" loading="lazy" decoding="async"></p>
+<p>**堆内存被划分为多个大小相等的heap区，每个heap区都是逻辑上连续的一段内存（virtual memory)，其中一部分区域被当成收集器相同的角色（eden，survivor，old），但每个角色的区域个数都不是固定的。**这在内存使用上提供了更多的灵活性。</p>
+<h5 id="分区-region">分区 Region</h5>
+<p>G1 采用了分区（Region）的思路，将整个堆内存区域分成<strong>大小相同</strong>的子区（Region），在JVM 启动时会自动设置这些子区域的大小，在堆的使用上，G1并不要求对象的存储一定要在物理上连续，只要逻辑上连续即可，每个分区也不会固定地为某个代服务，可以按需在年轻代和老年代之间切换。启动时可以通过参数设置 <code>-XX:G1HeapRegionSize=n</code> 可指定分区大小（1MB~32MB，且必须是2的幂），默认将整堆划分为2048个分区。也即能够支持的最大内存为：32MB*2048 = 65536MB ≈ 64G内存。</p>
+<p>这些 Region 的一部分包含新生代，新生代的垃圾收集依然采用暂停所有应用线程的方式，将存活的对象拷贝到老年代或者 Survivor空间。这些 Region 的一部分包含老年代，G1 收集器通过将对象从一个区域复制到另一个区域，完成了清理工作。这就意味着，在正常的处理过程中，G1完成了堆的压缩（至少是部分堆的压缩），这样就不会有CMS 的内存碎片问题了。</p>
+<h5 id="卡片-card">卡片 Card</h5>
+<p>在每个分区内部又被分成了若干个大小为512Byte卡片（Card），标识堆内存最小可用粒度。所有分区的卡片，将会记录在全局卡片表（Global Card Table）中，分配的对象会占用物理上连续的若干个卡片，当查找分区内对象的引用时，便可通过卡片来查找该引用对象（见 RSet）。每次对内存的回收，都是对指定分区的卡片进行处理。</p>
+<p>G1 对内存的使用以分区（Region）为单位，而对对象的分配则以卡片（Card）为单位。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230425160046585.png" alt="image-20230425160046585" loading="lazy" decoding="async"></p>
+<h5 id="巨型对象-humongous-region">巨型对象 Humongous Region</h5>
+<p><strong>Region中还有一类特殊的Humongous区域,专门用来存储大对象。G1认为只要大小超过了一个Region容量一半的对象即可判定为大对象</strong>，而对于那些超过整个Region容量的超级大对象，将会被存放在N个连续的Humongous Region之中，G1的大多数行为都把Humongous Region作为老年代的一部分来进行看待。G1 内部做了一个优化，一旦发现没有引用指向巨型对象，则可直接在年轻代收集周期中被回收。</p>
+<p>巨型对象会独占一个或多个连续分区，其中第一个分区被标记为开始巨型（StartsHumongous），相邻连续分区被标记为连续巨型（ContinuesHumongous）。由于需要一片连续的内存空间需要扫描整堆，因此确定巨型对象开始位置的成本比较高，如果可以，应用程序应避免生成巨型对象。</p>
+<h5 id="已记忆集合-remember-setrset">已记忆集合 Remember Set（RSet)</h5>
+<p>除了 Card Table 数组之外，每个 Region 还会有一个 RSet 数据结构。RSet 主要用来记录哪个 Region 的哪个 Card 上的对象引用了本 Region 中的对象。Remembered Set “<strong>记住谁引用了我，以后我垃圾回收的时候，我好找它去</strong> ！“。</p>
+<p>实际实现中，RSet 默认是一个 HashMap，Map的key是引用的 Region，value 是一个 List，List 中存储引用Region 中的引用 Card 列表。Region、Card Table 以及 RSet 的示意图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230425162127860.png" alt="image-20230425162127860" loading="lazy" decoding="async"></p>
+<p>上图中，RegionA 和 RegionB 中分别有对象引用 RegionC 中的对象，在 RegionC 对应的 RSet 就会记录这样的引用关系。这时候只需要扫描那两张Card 里的对象就可以了。这是一种<strong>典型的空间换时间</strong>的方法，避免了整个堆的扫描，提高效率。该 RSet 中有两个 KV 对，第一个 KV 的key是 RegionA，value 是一个列表，列表中有两个元素 3 和 65534，分别代表 RegionA 中引用对象在对应 Card Table 中的下标。第二个 KV 对的 key 是RegionB，value 中列表只有一个元素 1565，代表 RegionB 中引用对象在对应 Card Table 中的下标。</p>
+<h5 id="收集集合cset">收集集合（CSet）</h5>
+<p>CSet 收集示意图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230425172916290.png" alt="image-20230425172916290" loading="lazy" decoding="async"></p>
+<p>收集集合（Collection Set）代表每次GC暂停时回收的一系列目标分区。在任意一次收集暂停中，CSet 所有分区都会被释放，内部存活的对象都会被转移到分配的空闲分区中。因此无论是年轻代收集，还是混合收集，工作的机制都是一致的。年轻代收集 CSet 只容纳年轻代分区，而混合收集会通过启发式算法，在老年代候选回收分区中，筛选出回收收益最高的分区添加到 CSet 中。</p>
+<p>候选老年代分区的 CSet 准入条件，可以通过活跃度阈值 <code>-XX:G1MixedGCLiveThresholdPercent</code>（默认85%）进行设置，即只有存活对象低于85%的 Region 才可能被回收，从而拦截那些回收开销巨大的对象；同时，每次混合收集可以包含候选老年代分区，可根据 CSet 对堆的总大小占比 <code>-XX:G1OldCSetRegionThresholdPercent</code>（默认10%）设置数量上限，即老年代一次最大收集总内存的10%。</p>
+<p>由上述可知，G1 的收集都是根据 CSet 进行操作的，年轻代收集与混合收集没有明显的不同，最大的区别在于两种收集的触发条件。</p>
+<h4 id="g1垃圾收集分类">G1垃圾收集分类</h4>
+<p>G1的垃圾收集分为 <code>Young GC</code>、<code>Mixed GC</code> 和 <code>Full GC</code>。</p>
+<h5 id="young-gc">Young GC</h5>
+<p>G1 与之前垃圾收集器的 Young GC 有所不同，并不是当新生代的 Eden 区放满了就进行垃圾回收，G1 会计算当前 Eden 区回收大概需要多久的时间，如果回收时间远小于参数 <code>-XX:MaxGCPauseMills</code> 设定的值，那么 G1 就会增加年轻代的 Region（可以从老年代或Humongous区划分 Region 给新生代），继续给新对象存放；直到下一次 Eden 区放满，G1 计算回收时间接近参数 <code>-XX:MaxGCPauseMills</code> 设定的值，那么就会触发 <strong>Young GC</strong> 。</p>
+<h5 id="mixed-gc">Mixed GC</h5>
+<p>如果老年代的堆空间内存占用达到了参数 <code>-XX:InitiatingHeapOccupancyPercent</code> 设定的值就会触发 <code>Mixed GC</code>，回收所有的新生代和部分老年代（根据用户设置的 GC 停顿时间来确定老年代垃圾收集的先后顺序）以及 Humongous 区。正常情况下 G1 的垃圾收集是先做 <code>Mixed GC</code>，主要是使用复制算法，需要把每个 Region 中存活的对象复制到另一个空闲的 Region，如果在复制过程中发现没有足够的空 Region 放复制的对象，那么就会触发一次 <code>Full GC</code>。</p>
+<h5 id="full-gc">Full GC</h5>
+<p>停止系统程序，然后采用单线程进行标记、清理和压缩整理，以便空闲出来一批 Region 供下一次 <code>Mixed GC</code> 使用，这个过程是非常耗时的。</p>
+<p><strong>G1 是如何满足目标暂停时间的？</strong></p>
+<p>前提：G1 的JVM内存模型在物理上分区Region，逻辑上分代。</p>
+<ol>
+<li>在年轻代收集（Young GC）期间，G1 GC 调整年轻代（Eden 和 Survivor）的大小以来匹配软实时（soft real-time）的目标。</li>
+<li>在混合收集（Mixed GC）期间，G1 GC 根据混合垃圾收集的目标数量、堆中每个区域中活动对象的百分比以及总体可接收的堆浪费百分比来调整收集的旧区域的数量，以满足目标暂停时间目标。</li>
+</ol>
+<h4 id="收集过程">收集过程</h4>
+<p>G1 在进行垃圾收集的时候，会根据每个 Region 预计垃圾收集所需时间与预计回收内存大小的占比来选择对哪些区域进行回收，也就是不再有 <code>Minor GC/Young GC</code> 和 <code>Major GC/Full GC</code> 的概念，而是采用一种 <code>Mixed GC</code> 的方式，即混合回收的 GC 方式。</p>
+<h5 id="年轻代收集">年轻代收集</h5>
+<p>G1 的 Young GC 和 CMS 的 Young GC ，其标记-复制全过程 STW。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230426112834867.png" alt="image-20230426112834867" loading="lazy" decoding="async"></p>
+<h5 id="混合收集">混合收集</h5>
+<p>年轻代收集不断活动后，老年代的空间也会被逐渐填充。当老年代占用空间超过整堆比阈值 <code>-XX:InitiatingHeapOccupancyPercent</code>（默认45%）时，G1 就会启动一次混合垃圾收集周期，即<code>Mixed GC</code> 。</p>
+<p>该算法并不是一个老年代，除了回收整个年轻代，还会回收一部分老年代。需要注意：是一部分老年代，而不是全部老年代，可以选择哪些老年代进行收集，从而可以对垃圾回收的耗时时间进行控制。</p>
+<p>G1 没有Full GC概念，需要 Full GC 时，调用 serialOldGC 进行全堆扫描（包括 Eden、Survivor、o、perm）。</p>
+<p>为了满足暂停目标，G1 可能不能一口气将所有的候选分区收集掉，因此G1 可能会产生连续多次的混合收集要应用线程交替执行，每次STW 的混合收集与年轻代收集过程相类似。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230426140913494.png" alt="image-20230426140913494" loading="lazy" decoding="async"></p>
+<p>GC 步骤分两步：</p>
+<ol>
+<li>全局并发标记（Global Concurrent Marking）</li>
+<li>拷贝存活对象（Evacuation）</li>
+</ol>
+<p><strong>全局并发标记：</strong></p>
+<ul>
+<li>
+<p>**初始标记（Initial Mark，STW）：**从 GC Roots 出发标记全部直接子节点的过程，这个阶段会执行一次年轻代 GC，会产生全局停顿。由于 GC Roots 数量不多，通常该阶段耗时比较短。</p>
+</li>
+<li>
+<p><strong>跟区域扫描（Root Region Scan）：</strong></p>
+<ul>
+<li>G1 GC 在初始标记的存活区扫描对老年代的引用，并标记该被引用的对象。</li>
+<li>该阶段与应用程序（非 STW）同时运行，并且只有完成该阶段后，才能开始下一次 STW 年轻代垃圾回收。</li>
+</ul>
+</li>
+<li>
+<p>**并发标记（Concurrent Marking）：**从 GC Roots 开始对堆中对象进行可达性分析，找出可访问的（存活的）对象。该阶段是并发的，即应用线程和 GC 线程可以同时活动。<strong>可以被 STW 年轻代垃圾回收中断</strong>。并发标记耗时相对长很多，但因为不是 STW，所以沃恩不太关心阶段耗时的长短。</p>
+</li>
+<li>
+<p>**重新标记（Remark，STW）：**修正并发标记期间，因程序运行而导致标记发生变化的那一部分对象。该阶段是 STW 的。</p>
+</li>
+<li>
+<p>**清除垃圾（Cleanup，STW）：**清点和重置标记状态，该阶段会 STW，<strong>这个阶段不会清理垃圾对象</strong>，也不会执行存活对象的复制，等待 evacuation 阶段来回收。</p>
+</li>
+</ul>
+<p><strong>拷贝存活对象（并发清理）：</strong></p>
+<p>该阶段把一部分 Region 里的存活对象拷贝到另一部分 Region 中，从而实现垃圾的回收清理。复制算法的转移阶段需要分配新内存和复制对象的成员变量。<strong>转移阶段是 STW 的</strong>，其中内存分配通常耗时非常短，但对象成员变量的复制耗时有可能较长，这是因为复制耗时与存活对象数量和对象复杂度成正比。对象越复杂，复制耗时越长。</p>
+<p>四个 STW 过程中，出事标记因为只标记 GC Roots，耗时较短。重新标记因为对象较少，耗时也比较短。清理阶段因为内存分区数量少，耗时也较短。转移阶段要处理所有存活对象，耗时会较长。因此，G1 停顿时间的瓶颈主要是标记-复制中的转移阶段 STW。为什么转移阶段不能喝标记阶段一样并发执行？<strong>主要是 G1 未能解决转移过程中准确定位对象地址的问题。</strong></p>
+<h4 id="g1-相关参数">G1 相关参数</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="center">参数</th><th align="center">说明</th></tr></thead><tbody><tr><td align="center">-XX:+UseG1GC</td><td align="center">开启使用G1垃圾收集器</td></tr><tr><td align="center">-XX:ParallelGCThreads</td><td align="center">指定GC工作的线程数量</td></tr><tr><td align="center">-XX:G1HeapRegionSize</td><td align="center">指定分区大小(1MB~32MB，且必须是2的N次幂)，默认将整堆划分为2048个分区</td></tr><tr><td align="center">-XX:MaxGCPauseMillis</td><td align="center">目标暂停(STW)时间(默认200ms)</td></tr><tr><td align="center">-XX:G1NewSizePercent</td><td align="center">新生代内存初始空间(默认整堆5%，<strong>值配置整数，比如5</strong>，默认就是百分比)</td></tr><tr><td align="center">-XX:G1MaxNewSizePercent</td><td align="center">新生代内存最大空间(最大60%，值配置整数)</td></tr><tr><td align="center">-XX:TargetSurvivorRatio</td><td align="center">Survivor区的填充容量(默认50%)，Survivor区域里的一批对象(年龄1+年龄2+年龄n的多个年龄对象)总和超过了Survivor区域的50%，此时就会把年龄n(含)以上的对象都放入老年代</td></tr><tr><td align="center">-XX:MaxTenuringThreshold</td><td align="center">最大年龄阈值(默认15)</td></tr><tr><td align="center">-XX:InitiatingHeapOccupancyPercent</td><td align="center">老年代占用空间达到整堆内存阈值(默认45%)，则执行新生代和老年代的混合收集(MixedGC)，比如堆默认有2048个region，如果有接近1000个region都是老年代的region，则可能就要触发MixedGC了</td></tr><tr><td align="center">-XX:G1MixedGCLiveThresholdPercent</td><td align="center">默认85%，Region中的存活对象低于这个值时才会回收该Region，如果超过这个值，存活对象过多，回收的的意义不大</td></tr><tr><td align="center">-XX:G1MixedGCCountTarget</td><td align="center">在一次回收过程中指定做几次筛选回收(默认8次)，在最后一个筛选回收阶段可以回收一会，然后暂停回收，恢复系统运行，一会再开始回收，这样可以让系统不至于单次停顿时间过长。</td></tr><tr><td align="center">-XX:G1HeapWastePercent</td><td align="center">默认5%，GC过程中空出来的Region是否充足阈值，在混合回收的时候，对Region回收都是基于复制算法进行的，都是把要回收的Region里的存活对象放入其他Region，然后这个Region中的垃圾对象全部清理掉，这样的话在回收过程就会不断空出来新的Region，一旦空闲出来的Region数量达到了堆内存的5%，此时就会立即停止混合回收，意味着本次混合回收就结束了</td></tr></tbody></table>
+<h4 id="优化">优化</h4>
+<p>假设参数 <code>-XX:MaxGCPauseMills</code> 设置的值很大，导致系统运行很久，年轻代可能都占用了堆内存的60%了，此时才触发年轻代 GC。那么存活下来的对象可能就会很多，此时就会导致 Survivor 区域放不下那么多的对象，就会进入老年代中。或者是年轻代 GC 过后，存活下来的对象过多，导致进入 Survivor 区域后出发了动态年龄判断规则，达到了 Survivor 区域的50%，也会快速导致一些对象进入老年代中。</p>
+<p>所以核心还是在于调节 -XX:MaxGCPauseMills 这个参数的值，在保证他的年轻代 GC 别太频繁的同时，还得考虑每次 GC 过后的存活对象有多少，避免存活对象太多快速进入老年代，频繁触发 <code>Mixed GC</code>。</p>
+<p>什么场景适合使用 G1？</p>
+<ul>
+<li>50%以上的堆被存活对象占用</li>
+<li>对象分配和晋升的速度变化非常大</li>
+<li>垃圾回收时间特别长，超过1秒</li>
+<li>8GB以上的堆内存（建议值）</li>
+<li>停顿时间是500ms以内</li>
+</ul>
+<h4 id="安全点与安全区域">安全点与安全区域</h4>
+<p>JVM 的所有垃圾收集器在做垃圾收集时，以 G1 的 <code>Mixed GC</code> 为例，初始标记、并发标记等每一步都需要到达一个安全点或安全区域时才能开始执行。</p>
+<p>安全点就是指代码中一些特定的位置，当线程运行到这些位置时它的状态是确定的，这样 JVM 就可以安全的进行一些操作，比如 GC 等，所以 GC 不是想什么时候做就立即触发的，是需要等待所有线程运行到安全点后才能触发。</p>
+<p>这些特定的安全点文职主要有以下几种：</p>
+<ul>
+<li>方法返回之前</li>
+<li>调用某个方法之后</li>
+<li>抛出异常的位置</li>
+<li>循环的末尾</li>
+</ul>
+<p>大体实现思想是当垃圾收集需要中断线程的时候，不直接对线程操作，仅仅简单地设置一个标志位，各个线程执行过程时会不停地主动去轮询这个标志，一旦发现中断标志位镇时就自己在最近的安全点上主动中断挂起。轮询标志的地方和安全点是重合的。<code>Safe Point</code> 是对正在执行的线程设定的。如果一个线程处于 Sleep 或中断状态，它就不能响应 JVM 的中断请求，再运行到 <code>Safe Point</code> 上。因此 JVM 引入了 <code>Safe Region</code> 。<code>Safe Region</code> 是指在一段代码片段中，引用关系不会发生变化。在这个区域内的任何地方开始 GC 都是安全的。</p>
+<h4 id="g1-注意事项">G1 注意事项</h4>
+<ul>
+<li>避免通过 -Xmn 或其他相关选项（如 <code>-XX:NewRate</code>）显式设置年轻代的大小，因为年轻代的大小被固定后会导致 G1 的目标暂停机制失效。</li>
+<li>当设置目标暂停时间 MaxGCPauseMillis 时，需要评估 G1 GC 的延迟和应用吞吐量之间的取舍，当该值设置较小时，标明你愿意承担垃圾收集开销的增加，从而会导致应用程序吞吐量的降低。</li>
+<li>Mixed GC 的调优
+<ul>
+<li><code>-XX:InitiatingHeapOccupancyPercent</code>： 控制并发标记开始的内存占比阈值。</li>
+<li><code>-XX:G1HeapWastePercent</code>： 设置G1中愿意浪费的堆的百分比，如果可回收Region的占比小于该值，G1不会启动Mixed GC，默认值10%，主要用来控制Mixed GC的触发时机。</li>
+<li><code>-XX:G1MixedGCLiveThresholdPercent</code>：设置老年代Region进入CSet的活跃对象占比阈值，避免活跃对象占比过高的Region进入CSet。</li>
+<li>-XX:G1MixedGCCountTarget 和 <code>-XX:G1OldCSetRegionThresholdPercent</code>: 主要是为了控制单次Mixed GC中Region的个数，CSet中Region的个数越多，GC过程中暂停时间越长。</li>
+</ul>
+</li>
+</ul>
+<h4 id="典型问题">典型问题</h4>
+<h5 id="疏散失败evacuation-failure">疏散失败（Evacuation Failure）</h5>
+<p>当没有更多的空闲Region被提升到老年代或者复制到Survivor时，并且由于堆已经达到最大值，堆不能扩展，从而发生 Evacuation Failure，这时 G1 的 GC 已经无能为力，只能使用通过 Serial Old GC 进行 Full GC 来收集整个Java堆空间，这个过程就是转移失败。</p>
+<h6 id="疏散失败解决方案">疏散失败解决方案</h6>
+<ul>
+<li>如果有大量”空间耗尽（to-space exhausted）“或”空间溢出（to-space overflow）” GC 事件，则增加 <code>-XX:G1ReservePercent</code> 以增加”to-space” 的预留内存量，默认值是Java堆的10%。注意：G1 GC 将此值限制在50%以内。</li>
+<li>通过减少 <code>-XX: InitiatingHeapOccupancyPercent</code> 的值来更早地启动并发标记周期，来及时回收不包含活跃对象的区域，同时促使 Mixed GC 更快发生。</li>
+<li>增加选项 <code>-XX:ConcGCThreads</code> 的值以增加并行标记线程的数量，减少并行标记阶段的耗时。</li>
+</ul>
+<h5 id="大对象分配humongous-allocation">大对象分配（Humongous Allocation）</h5>
+<p>出现大对象分配导致的内存耗尽问题，一般老年代剩余的 Region 中已经不能够找到一组连续的区域分配给新的巨型对象。</p>
+<h6 id="大对象分配解决方案">大对象分配解决方案</h6>
+<ul>
+<li>通过 <code>-XX: G1HeapRegionSize</code> 选项增加内存区域 Region 的大小，提升 Region 对象的判断标准，以减少巨大对象的数量。</li>
+<li>增加堆Java的大小使得有更多的空间来存放巨型对象。</li>
+<li>通过 <code>-XX:G1MaxNewSizePercent</code> 降低年轻代 Region 的占比，给老年代预留更多的空间，从而给巨型对象提供更多的内存空间。</li>
+</ul>
+<p>一般在疏散暂停（Evacuation Pause）和大对象分配（Humongous Allocation）会比较容易出现”空间耗尽（to-space exhausted）“或”空间溢出（to-space overflow）“的GC 事件，导致出现转移失败，进而引发 Full GC 从而导致GC的暂停时间超过 G1 设置的目标暂停时间。所以要尽量避免出现转移失败。</p>
+<h5 id="young-gc-花费时间太长">Young GC 花费时间太长</h5>
+<p>通常 Young GC 的耗时与年轻代的大小成正比，具体地说，是需要复制的集合中的活跃对象的数量。</p>
+<p>如果 Young GC 中 CSet 的疏散阶段（Evacuate Collection Set phase）需要很长时间，尤其是其中的对象复制-转移，可以通过降低 <code>-XX:G1NewSizePercent</code> 的值，降低年轻代的最小尺寸，从而降低停顿时间。</p>
+<p>还可以使用 <code>-XX:G1MaxNewSizePercent</code> 降低年轻代的最大占比，从而减少 Young GC 暂停期间需要处理的对象数量。</p>
+<h5 id="mixed-gc-耗时太长">Mixed GC 耗时太长</h5>
+<ul>
+<li>通过降低 <code>-XX:InitiatingHeapOccupancyPercent</code> 的值，来调低并发标记阶段开始的阈值，让并发标记阶段更早触发，只有并发标记完成才能开始执行 Mixed GC。</li>
+<li>通过调节 <code>-XX:G1MixedGCCountTarget</code> 和 <code>-XX:G1OldCSetRegionThresholdPercent</code> 参数，降低单次回收的Region 数量，减少暂停时间。</li>
+<li>通过调节 <code>-XX:G1MixedGCLiveThresholdPercent</code> 的值，避免活跃对象占比过高的Region进入 CSet。因为活的对象越多，Region中可回收的空间就越少，暂停时间就越长，GC 效果就越不明显。</li>
+<li>通过调节 <code>-XX:G1HeapWastePercent</code> 的值，设置愿意浪费的堆的百分比，只有垃圾占比大于此参数，才会发生 Mixed GC，该值越小，会越早触发 Mixed GC。</li>
+</ul>
+<h4 id="总结">总结</h4>
+<p>G1 是一款非常优秀的垃圾收集器，不仅适合堆内存大的应用，同时也简化了调优的工作。通过主要的参数初始和最大堆空间、以及最大容忍的 GC 暂停目标，就能得到不错的性能。</p>
+<ul>
+<li>G1 的设计原则是<strong>首先收集尽可能多的垃圾</strong>（Garbage First）。因此，G1 并不会等内存耗尽的时候开始垃圾收集，而是在内部采用了启发式算法，在老年代找出具有高收集收益的分区进行收集。同时G1 可以根据用户设置的暂停时间目标自动调整年轻代和总堆大小，暂停目标越短，年轻代空间越小、总空间就越大；</li>
+<li>G1 采用内存分区（Region）的思路，将内存划分为一个个相等大小的内存分区，回收时则以分区为单位进行回收，存活的对象复制到另一个空闲分区中。由于都是以相等大小的分区为单位进行操作，因此 G1 天然就是一种压缩方案（局部压缩）；</li>
+<li>G1 虽然也是分代收集器，但整个内存分区不存在物理上的年轻代与老年代的区别，也不需要完全独立的 Survivor 堆做复制准备。G1 只有逻辑上的分代概念，或者说每个分区都可能随 G1 的运行在不同代之间前后切换；</li>
+<li>G1 的收集都是 STW 的，但年轻代和老年代的收集界限比较模糊，采用了混合（Mixed）收集的方式，即每次收集既可能只收集年轻代分区（年轻代收集），也可能在收集年轻代的同时，包含部分老年代分区（混合收集），这样即使堆内存很大时，也可以限制收集范围，从而降低停顿。</li>
+</ul>
+<h3 id="zgc垃圾收集器">ZGC垃圾收集器</h3>
+<p>从G1 垃圾收集器开始，后面的垃圾收集器都不再将堆按照新生代和老年代作为整体进行回收，都采用了局部收集的设计思想。可能是由于G1作为第一代局部收集的垃圾收集器，所以它继续保留了新生代和老年代的概念。</p>
+<p>ZGC设计目标：</p>
+<ul>
+<li>停顿时间不超过10ms。</li>
+<li>停顿时间不会随堆的大小，或者活跃对象的大小而增加。</li>
+<li>支持8MB~4TB级别的堆。</li>
+</ul>
+<p>从设计目标来看，我们知道ZGC适用于大内存低延迟服务的内存管理和回收。</p>
+<p>与CMS中的ParNew和G1类似，ZGC也采用标记-复制算法，不过ZGC对该算法做了重大改进：ZGC在标记、转移和重定位阶段几乎都是并发的，这是ZGC实现停顿时间小于10ms目标的最关键原因。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230417102646070.png" alt="image-20230417102646070" loading="lazy" decoding="async"></p>
+<p>ZGC只有三个STW：初始标记、再标记、初始转移。其中，初始标记和初始转移分别都只需要扫描所有GC Roots，其处理时间和GC Roots的数量成正比，一般情况耗时比较短；再标记阶段STW时间很短，最多1ms，超过1ms则再次进入并发标记阶段，即，ZGC几乎所有的暂停都只依赖于GC Roots集合大小，停顿时间不会随着堆的大小或者活跃对象的大小而增加。与ZGC对比，G1的转移阶段完全STW的，且停顿时间随存活对象的大小增加而增加。</p>
+<h4 id="内存布局">内存布局</h4>
+<p>ZGC（Z Garbage Collector）完全抛弃了按代收集理论，它与G1一样将内存划分成各个小的区域，但与G1有所不同的是，ZGC的各个内存区域称为页面（Page或ZPage），而且页面也不是全部大小相等。ZGC按照页面大小将页面分为三类：小页面、中页面和大页面。</p>
+<p>在x64的硬件平台上，ZGC的页面大小为：</p>
+<ul>
+<li>
+<p>小页面：容量固定为2MB，用来存放小于256KB的小对象。</p>
+</li>
+<li>
+<p>中页面：容量固定为32MB，用来存放大于等于256KB但小于4MB的对象。</p>
+</li>
+<li>
+<p>大页面：容量不固定，可以动态变化，但必须为2MB的整数倍，用来存放大小大于等于4MB的对象。每个大页面只会存放一个大对象，也就是虽然它叫大页面，但它的容量可能还没中页面大，最小容量4MB。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230414172817666.png" alt="image-20230414172817666" loading="lazy" decoding="async"></p>
+</li>
+</ul>
+<p>ZGC对于大页面的回收策略是不同的，简单说就是小页面优先回收，中页面和大页面则尽量不回收。</p>
+<h4 id="支持numa">支持NUMA</h4>
+<p>在过去，对于X86架构的计算机，内存控制器还没有整合进CPU，所有对内存的访问都需要通过北桥芯片来完成。X86系统中的所有内存都可以通过CPU进行同等访问。任何CPU访问任何内存的速度是一致的，不必考虑不同内存地址之间的差异，这称为”统一内存访问”（Uniform Memory Access，UMA）。UMA系统的架构示意图如图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230414175606068.png" alt="image-20230414175606068" loading="lazy" decoding="async"></p>
+<p>在UMA中，各处理器与内存单元通过互联总线进行连接，各个CPU之间没有主从关系。之后的X86平台经历了一场从”拼频率”到”拼核心数”的转变，越来越多的核心被尽可能的塞进了同一块芯片上，各个核心对于内存带宽的争抢访问称为瓶颈，所以人们希望能够把CPU和内存集成在一个单元上（称Socket），这就是非统一内存访问（Non-Uniform Memory Access，NUMA）。在NUMA下，CPU访问本地存储器的速度比访问非本地存储器快一些。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230414175933503.png" alt="image-20230414175933503" loading="lazy" decoding="async"></p>
+<p>ZGC是支持NUMA的，在进行小页面分配时优先从本地内存分配，当不能分配时才会从远端的内存分配。对于中页面和大页面的分配，ZGC并没有要求从本地内存分配，而是直接交给操作系统，由操作系统找到一块能满足ZGC页面的空间。ZGC这样设计的目的在于，对于小页面，存放的都是小对象，从本地内存分配速度很快，且不会造成内存使用的不平衡，而中页面和大页面因为需要空间大，如果也优先从本地内存分配，极易造成内存使用不均衡，反而影响性能。</p>
+<h4 id="着色指针">着色指针</h4>
+<p>ZGC收集器有一个标志性的设计就是它采用染色指针技术（Colored Pointer，也可以称为Tag Pointer或Version Pointer）。在之前如果想要在对象上存储一些额外的、只供垃圾收集器或虚拟机本身使用的数据，通常都会在对象头中添加额外的字段，比如对象的哈希码、分代年龄、锁状态等。</p>
+<p>对于垃圾收集器而言，可能关注更多的是对象的引用指针，比如三色标记，这些标记本质上就只和对象的引用有关，而与对象本身无关，也就是某个对象只有它的引用关系能决定它存活与否，对象上的其他属性无法影响它的存活判断。</p>
+<p>HotSpot集中收集器的标记实现方案，有得把标记直接记录在对象头（Serial），有得把标记记录在与对象完全独立的数据结构上（如G1采用BitMap的结构来记录标记信息，BitMap相当于堆内存大小的1/64）。而ZGC的染色指针是最最直接的，直接把标记信息记在引用对象的指针上，这时，与其说可达性分析是遍历对象来标记对象，还不如说是遍历<strong>引用图标</strong>来标记<strong>引用</strong>。</p>
+<p>染色指针是一种直接将少量额外的信息存储到指针上的技术。在ZGC之前的虚拟机中，可以采用指针压缩技术，将35位以内的对象引用地址压缩到32位，而ZGC的染色质真就是要借助指针的bit位来存储额外信息。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230417111630085.png" alt="image-20230417111630085" loading="lazy" decoding="async"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230417113559100.png" alt="image-20230417113559100" loading="lazy" decoding="async"></p>
+<p>ZGC必须要在64bit的机器上才能运行，其中使用低42位来表示对空间，然后借用几个高位来记录GC中的状态信息，分别为M0、M1、Remapped和一个预留字段，因为对象的引用地址大于35bit，所以在ZGC中是无法使用压缩指针的。</p>
+<p>当应用程序创建对象时，首先在堆空间申请一个虚拟地址，但该虚拟地址并不会映射到真正的物理地址。ZGC同时会为该对象在M0、M1、Remapped地址空间分别申请一个虚拟地址，且这三个虚拟地址对应同一个物理地址，但这三个空间在同一时间有且只有一个空间有效。ZGC之所以设置三个虚拟地址空间，是因为它使用”空间换时间”思想，去降低GC停顿时间。“空间换时间”中的空间是虚拟空间，而不是真正的物理空间。</p>
+<p>与上述地址空间划分相对应，ZGC实际仅使用64位地址空间的第0-41位，而第42-45位存储元数据，第47-63位固定位0。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230417114248169.png" alt="image-20230417114248169" loading="lazy" decoding="async"></p>
+<p>每个对象有一个64位指针，这64位被分为：</p>
+<ul>
+<li><strong>18位</strong>：预留给以后使用；</li>
+<li><strong>1位</strong>：Finalizable标识，此位与并发引用处理有关，它标识这个对象只能通过finalizable才能访问（finalizable：object基类的一个空方法，如果被重写则会在GC之前调用该方法，该方法会且只会被调用一次）；</li>
+<li><strong>1位</strong>：Remapped标识，设置此位的值后，对象为指向relocation set中（relocation set表示需要GC的Region集合）；</li>
+<li><strong>1位</strong>：Marked1标识；</li>
+<li><strong>1位</strong>：Marked0标识，和上面的Marked1都是标记对象用于辅助GC；</li>
+<li><strong>42位</strong>：对象的地址（所以它可以支持2^42=4T内存）。</li>
+</ul>
+<p>ZGC将对象存活信息存储在42-45位中，这与传统的垃圾回收并将对象存活信息放在对象头中完全不同。</p>
+<p>在GC的过程中，指针中用于存储额外信息的bit位是变化的，也就是说对象的引用地址一直是在变化的，这怎么可能是物理空间的地址呢，对程序来说，只要这个对象没有被移动，那么它的物理地址空间就一定是不变的，那么ZGC的对象引用地址一直在变，这里指的是对象的虚拟地址，JVM怎么知道真实的物理地址空间？</p>
+<p>这里面就涉及到了虚拟地址空间与物理地址空间的映射，不同层次的虚拟内存到物理内存的转换关系可以在硬件层面、操作系统层面以及软件进程层面来实现，如何完成地址转换，是一对一、多对一还是一对多的映射，也可以根据实际需要来设计。</p>
+<p>Linux/x86-64平台上的ZGC使用的是多重映射（Multi-Mapping），即将多个不同的虚拟内存地址映射到同一个物理内存地址上，这种多对一映射，意味着ZGC在虚拟地址中看到的地址空间要比实际的堆空间容量更大，因为在虚拟空间中，ZGC的对象占45bit，而在物理内存空间中，只有其中的41bit表示内存地址。</p>
+<p>有个多重映射，ZGC在GC过程中，不论M0、M1和Remapped对应的bit位怎么变化，它们对应的具体对象的内存空间都是同一个。</p>
+<p>Linux多视图映射，Linux中主要通过系统函数mmap完成视图映射。多个视图映射就是多次调用mmap函数，多次调用的返回结果就是不同的虚拟地址。</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="c"><code><span class="line"><span style="color:#C678DD">#include</span><span style="color:#98C379"> &lt;stdio.h&gt;</span></span>
+<span class="line"><span style="color:#C678DD">#include</span><span style="color:#98C379"> &lt;stdlib.h&gt;</span></span>
+<span class="line"><span style="color:#C678DD">#include</span><span style="color:#98C379"> &lt;unistd.h&gt;</span></span>
+<span class="line"><span style="color:#C678DD">#include</span><span style="color:#98C379"> &lt;sys/mman.h&gt;</span></span>
+<span class="line"><span style="color:#C678DD">#include</span><span style="color:#98C379"> &lt;sys/types.h&gt;</span></span>
+<span class="line"><span style="color:#C678DD">#include</span><span style="color:#98C379"> &lt;fcntl.h&gt;</span></span>
+<span class="line"><span style="color:#C678DD">#include</span><span style="color:#98C379"> &lt;sys/stat.h&gt;</span></span>
+<span class="line"><span style="color:#C678DD">#include</span><span style="color:#98C379"> &lt;stdint.h&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">int</span><span style="color:#61AFEF"> main</span><span style="color:#ABB2BF">()</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    //创建一个共享内存的文件描述符</span></span>
+<span class="line"><span style="color:#C678DD">    int</span><span style="color:#ABB2BF"> fd </span><span style="color:#C678DD">=</span><span style="color:#61AFEF"> shm_open</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"/example"</span><span style="color:#ABB2BF">, O_RDWR </span><span style="color:#C678DD">|</span><span style="color:#ABB2BF"> O_CREAT </span><span style="color:#C678DD">|</span><span style="color:#ABB2BF"> O_EXCL, </span><span style="color:#E06C75">0</span><span style="color:#D19A66">600</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#C678DD">    if</span><span style="color:#ABB2BF"> (fd </span><span style="color:#C678DD">==</span><span style="color:#C678DD"> -</span><span style="color:#D19A66">1</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">return</span><span style="color:#D19A66"> 0</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    //防止资源泄露,需要删除。执行之后共享对象仍然存活,但是不能通过名字访问</span></span>
+<span class="line"><span style="color:#61AFEF">    shm_unlink</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"/example"</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    //将共享内存对象的大小设置为4字节</span></span>
+<span class="line"><span style="color:#C678DD">    size_t</span><span style="color:#ABB2BF"> size </span><span style="color:#C678DD">=</span><span style="color:#C678DD"> sizeof</span><span style="color:#ABB2BF">(</span><span style="color:#C678DD">uint32_t</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#61AFEF">    ftruncate</span><span style="color:#ABB2BF">(fd, size);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    //3次调用mmap,把一个共享内存对象映射到3个虚拟地址上</span></span>
+<span class="line"><span style="color:#C678DD">    int</span><span style="color:#ABB2BF"> prot </span><span style="color:#C678DD">=</span><span style="color:#ABB2BF"> PROT_READ </span><span style="color:#C678DD">|</span><span style="color:#ABB2BF"> PROT_WRITE;</span></span>
+<span class="line"><span style="color:#C678DD">    uint32_t</span><span style="color:#C678DD"> *</span><span style="color:#ABB2BF">remapped </span><span style="color:#C678DD">=</span><span style="color:#61AFEF"> mmap</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">NULL</span><span style="color:#ABB2BF">, size, prot, MAP_SHARED, fd, </span><span style="color:#D19A66">0</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#C678DD">    uint32_t</span><span style="color:#C678DD"> *</span><span style="color:#ABB2BF">m0 </span><span style="color:#C678DD">=</span><span style="color:#61AFEF"> mmap</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">NULL</span><span style="color:#ABB2BF">, size, prot, MAP_SHARED, fd, </span><span style="color:#D19A66">0</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#C678DD">    uint32_t</span><span style="color:#C678DD"> *</span><span style="color:#ABB2BF">m1 </span><span style="color:#C678DD">=</span><span style="color:#61AFEF"> mmap</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">NULL</span><span style="color:#ABB2BF">, size, prot, MAP_SHARED, fd, </span><span style="color:#D19A66">0</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    //关闭文件描述符</span></span>
+<span class="line"><span style="color:#61AFEF">    close</span><span style="color:#ABB2BF">(fd);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    //测试,通过一个虚拟地址设置数据,3个虚拟地址得到相同的数据</span></span>
+<span class="line"><span style="color:#C678DD">    *</span><span style="color:#ABB2BF">remapped </span><span style="color:#C678DD">=</span><span style="color:#E06C75"> 0x</span><span style="color:#D19A66">deafbeef</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"><span style="color:#61AFEF">    printf</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"48bit of remapped is: </span><span style="color:#D19A66">%p</span><span style="color:#98C379">, value of 32bit is: 0x</span><span style="color:#D19A66">%x</span><span style="color:#56B6C2">\n</span><span style="color:#98C379">"</span><span style="color:#ABB2BF">, remapped, </span><span style="color:#C678DD">*</span><span style="color:#ABB2BF">remapped);</span></span>
+<span class="line"><span style="color:#61AFEF">    printf</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"48bit of m0 is: </span><span style="color:#D19A66">%p</span><span style="color:#98C379">, value of 32bit is: 0x</span><span style="color:#D19A66">%x</span><span style="color:#56B6C2">\n</span><span style="color:#98C379">"</span><span style="color:#ABB2BF">, m0, </span><span style="color:#C678DD">*</span><span style="color:#ABB2BF">m0);</span></span>
+<span class="line"><span style="color:#61AFEF">    printf</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"48bit of m1 is: </span><span style="color:#D19A66">%p</span><span style="color:#98C379">, value of 32bit is: 0x</span><span style="color:#D19A66">%x</span><span style="color:#56B6C2">\n</span><span style="color:#98C379">"</span><span style="color:#ABB2BF">, m1, </span><span style="color:#C678DD">*</span><span style="color:#ABB2BF">m1);</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#D19A66"> 0</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span>
+<span class="line"></span></code></pre>
+<p><strong>三大优势</strong>：</p>
+<ul>
+<li>一旦某个Region的存活对象被移走后，这个Region立即就能够释放和重用掉，而不必等待整个堆中所有指向该Region的引用都被修改后才能清理，这使得理论上只要还有一个空闲Region，ZGC就能完成收集。</li>
+<li>着色指针可以大幅减少在垃圾收集过程中内存屏障的使用数量，ZGC只使用了读屏障。</li>
+<li>着色指针具备强大的扩展性，因为还要18位未使用，它可以作为一种可扩展的存储结构用来记录更多与对象标记、重定位过程相关的数据，以便日后进一步提高性能。</li>
+</ul>
+<h4 id="读屏障">读屏障</h4>
+<p>并发标记阶段会进行对象的重定位以及删除对应的转发表，在ZGC中是通过读屏障实现的。</p>
+<p>读屏障就是JVM向应用程序代码中插入一小段代码的技术，当应用程序线程需要从堆中读取对象引用时，就会执行这段代码。</p>
+<pre class="astro-code one-dark-pro" style="color:#abb2bf;white-space:pre-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabindex="0" data-language="java"><code><span class="line"><span style="color:#E5C07B">Object</span><span style="color:#E06C75"> o </span><span style="color:#56B6C2">=</span><span style="color:#E5C07B"> obj</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">FieldA</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic"> // 从堆中读取引用，需要加入屏障</span></span>
+<span class="line"><span style="color:#E5C07B">Object</span><span style="color:#E06C75"> p </span><span style="color:#56B6C2">=</span><span style="color:#E06C75"> o</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic"> // 无需加入屏障，因为不是从堆中读取引用</span></span>
+<span class="line"><span style="color:#E5C07B">o</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">dosomething</span><span style="color:#ABB2BF">();</span><span style="color:#7F848E;font-style:italic"> // 无需加入屏障，因为不是从堆中读取引用</span></span>
+<span class="line"><span style="color:#C678DD">int</span><span style="color:#E06C75"> i </span><span style="color:#56B6C2">=</span><span style="color:#E5C07B">  obj</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">FieldB</span><span style="color:#ABB2BF">;</span><span style="color:#7F848E;font-style:italic"> // 无需加入屏障，因为不是对象引用</span></span>
+<span class="line"></span></code></pre>
+<p>ZGC采用读屏障的方式来修正指针引用，由于ZGC采用的是复制整理的方式进行GC，很有可能在对象的位置改表之后指针位置尚未更新时程序调用了该对象，那么此时在程序需要并行的获取该对象的引用时，ZGC就会对该对象的指针进行读取，判断Remapped标识，如果标识为该对象位于本次需要清理的Region区中，该对象则会有内存地址变化，会在指针中将新的引用地址替换原有对象的引用地址，然后再进行返回。如此，使用读屏障便解决了并发GC的对象读取问题。</p>
+<h4 id="zgc-垃圾收集流程">ZGC 垃圾收集流程</h4>
+<p>ZGC一次垃圾回收周期中地址视图的切换过程：</p>
+<p><strong>初始化</strong>：ZGC初始化之后，整个内存空间的地址被设置为Remapped。程序正常运行，在内存分配对象，满足一定条件后垃圾回收启动，此时进入阶段。</p>
+<p><strong>并发标记阶段</strong>：第一次进入标记阶段时视图为M0，如果对象被GC标记线程或者应用线程访问过，那么就将对象的地址视图从Remapped调整为M0。所以在标记阶段结束之后，对象的地址要么是M0视图，要么是Remapped。如果对象的地址是M0视图，那么说明对象是活跃的；如果对象的地址是Remapped视图，说明对象是不活跃的。</p>
+<p><strong>并发转移阶段</strong>：标记结束后就进入转移阶段，此时地址视图再次被设置为Remapped。如果对象被GC转移线程或者应用线程访问过，那么就将对象的地址视图从M0调整为Remapped。</p>
+<p>其实，再标记阶段存在两个地址视图M0和M1，上面的过程显示只用了一个地址视图，之所以设计成两个，是为了区别前一次标记和当前标记。也即，第一次进入并发标记阶段后，地址视图调整为M1，而非M0。</p>
+<p>着色指针和读屏障技术不仅应用在并发转移阶段，还应用在并发标记阶段：将对象设置为已标记，传统的垃圾回收器需要进行一次内存访问，并将对象存活信息放在对象头中；而在ZGC中，只需要设置指针地址的第42-45位即可，并且因为是寄存器访问，所以速度比访问内存更快。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423160203752.png" alt="image-20230423160203752" loading="lazy" decoding="async"></p>
+<ul>
+<li>
+<p><strong>标记</strong></p>
+<p>从GC Roots出发，标记活跃对象，此时内存中存在或与对象和垃圾对象。</p>
+<p>在标记阶段，与G1基本相同，唯一的不同在于，在初始标记的时候，G1只能单线程进行，而ZGC为了追求性能，使用多线程（多个GC线程）进行。</p>
+<p>ZGC的再标记过程与G1的最终标记是一样，都是为了处理漏标对象，也是通过<strong>原始快照</strong>（STAB）算法解决，因为内存布局都是基于Region/Page。</p>
+<p>染色指针，通过M0、M1和Remapped来标记指针的状态，其中M0和M1主要用于区分连续的两次GC，ZGC的整个GC过程涉及到两次连续的GC，并不是一次GC就把所有工作都做了。</p>
+<p>我们给M0、M1和Remapped三种状态赋予不同的颜色，方便理解：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423150650176.png" alt="image-20230423150650176" loading="lazy" decoding="async"></p>
+<p>假设现在有四个对象，都在小页面（对象大小&lt;2MB）A中，因为此时还没有开始进行GC，所以所有引用的指针都处于Remapped状态：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423153653755.png" alt="image-20230423153653755" loading="lazy" decoding="async"></p>
+<p>经过初次标记阶段厚，对象A被GC Root 引用，对象D被任何对象引用，A对象引用的指针颜色发生变化：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423154450713.png" alt="image-20230423154450713" loading="lazy" decoding="async"></p>
+<p>然后进行并发标记，并发标记过程中，将所有存活对象的指针状态全部改为M0，由于D对象不可达，所以它的指针颜色还是蓝色，但在并发标记阶段，B对象又引用了一个新的对象E，因为是新的对象还没有被GC扫描过，所以指针颜色是蓝色：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423154608727.png" alt="image-20230423154608727" loading="lazy" decoding="async"></p>
+<p>而在重新标记阶段，根据原始快照（STAB）会从B对象继续开始扫描，然后把E对象的指针变为绿色：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423154643033.png" alt="image-20230423154643033" loading="lazy" decoding="async"></p>
+<p>至此标记阶段就完成了，剩下的对象指针为Remapped的都是垃圾对象，转移阶段进行回收。</p>
+</li>
+<li>
+<p><strong>转移</strong></p>
+<p>将活跃对象转移（复制）到新的内存上，原来的内存空间可回收，在并发转移阶段准备阶段，如果发现某个页全部都是垃圾对象，直接在该过程就把这些区域全部回收了。</p>
+<p>在并发转移阶段，会分析最有价值的GC分页，这个过程类似于G1筛选回收阶段的澄碧于收益比分析。</p>
+<p>在初始转移阶段，只会转移初始标记的存活对象，同时做对象的重定位，假设小页面A的对象都要转移到小页面B中，经过初始转移后，对象的位置及指针颜色如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423163652891.png" alt="image-20230423163652891" loading="lazy" decoding="async"></p>
+<p>因为A对象转移到新的页面时进行了重定位，所以A对象的指针状态变为了Remapped蓝色。但对B对象的引用指针还是绿色。</p>
+<p>然后进行并发转移，把B、C、E对象也都转移到小页面B中：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423165819998.png" alt="image-20230423165819998" loading="lazy" decoding="async"></p>
+<p>在并发转移阶段，只会把B、C、E对象转移到新的小页面B中，并不会修改它们对应的引用指针，也就是B对C的引用还指向原来小页面中的旧地址，并没有对转移对象做重定位。</p>
+<p>但对象既然转移了，那肯定需要根据之前旧的地址找到新的地址，所以每个页面都会维护一张<strong>转发表</strong>，这个转发表就记录了指针旧地址到新地址的映射。</p>
+<p><strong>注：对象转移与转发表插入记录这是一个原子操作，要么都成功，要么都失败。</strong></p>
+</li>
+<li>
+<p><strong>重定位</strong></p>
+<p>因为活跃对象的地址发生了变化，所以所有指向对象老地址的指针需要调整到新的对象地址上。</p>
+<p>在第一次GC的时候，只是用了M0，在第二次GC的时候，就会用到M1，这两个标志位就是为了区分两次不同的垃圾回收的。</p>
+<p>在第一次GC完成和第二次GC开始的间隙，A对象又引用了一个新的对象F，如下图所示：</p>
+<p>因为是一个新创建的对象，所以指针状态为Remapped。</p>
+<p>当第二次GC开始，由于上一次GC使用M0来表示存活对象，那么这一次就采用M1来标识存活对象，然后经过初始标记后，对象A的引用就变成了红色：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423165640436.png" alt="image-20230423165640436" loading="lazy" decoding="async"></p>
+<p>然后进行并发标记，在并发标记的过程中，因为F对象的指针为蓝色，就将其直接改为红色。当对象A扫描引用B时，发现它的指针颜色为绿色，状态为M0，它就会到原来的小页面A的转发表取到对象B的新地址进行重定位，然后再从转发表删除B指针的记录，重定位和删除转发表同样也是原子操作。C对象和E对象的操作一样，经过并发标记厚，新的对象布局如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/chou401/pic-md@main/img/image-20230423170212287.png" alt="image-20230423170212287" loading="lazy" decoding="async"></p>
+<p>然后依次类推，下一次GC做标记时，在使用M0来标记存活对象。</p>
+<p>为什么要把重定向放到下一次GC的并发标记过程来做呢？</p>
+<p>重定向需要遍历所有存活对象，而下一次GC并发标记的时候也需要遍历所有存活，直接利用并发标记过程中遍历对象顺带做重定位减少一次扫描全部存活对象的开销，这样可以非常显著地提高垃圾收集性能。</p>
+</li>
+</ul>
+<h4 id="gc时机">GC时机</h4>
+<ul>
+<li>
+<p><strong>预热规则</strong></p>
+<p>服务刚启动时出现，一般不需要关注。日志中关键字是”Warmup”。</p>
+<p>JVM启动预热，如果从来没有发生过GC，则在堆内存使用超过**10%、20%、30%**时，分别触发一次GC，以收集GC数据。</p>
+</li>
+<li>
+<p><strong>基于分配速率的自适应算法</strong></p>
+<p>最主要的GC触发方式（默认方式），其算法原理可简单描述为<strong>ZGC根据近期的对象分配速率以及GC时间，计算出当内存占用达到什么阈值时触发下一次GC</strong>。通过 ZAllocationSpikeTolerance 参数控制阈值大小，该参数默认2，数值越大，越早的触发GC。日志中关键字 <strong>Allocation Rate</strong>。</p>
+</li>
+<li>
+<p><strong>基于固定时间间隔</strong></p>
+<p>通过 ZCollectionInterval 控制，适合应对突增流量场景。</p>
+<p>流量平稳变化时，自适应算法可能在堆使用率达到95%以上才触发GC。流量突增时，自适应算法触发的时机可能会过晚，导致部分线程阻塞。我们通过调整此参数解决流量突增场景的问题，比如定时任务、秒杀场景。</p>
+</li>
+<li>
+<p><strong>主动触发</strong></p>
+<p>类似于固定间隔规则，但时间间隔不固定，是ZGC自行算出来的时机，服务因为已经加了基于固定时间间隔的触发机制，所以通过 -ZProactive 参数将该功能关闭，以免GC频繁，影响服务可用性。</p>
+</li>
+<li>
+<p><strong>阻塞内存分配请求触发</strong></p>
+<p>当垃圾来不及回收，垃圾将堆占满时，会导致部分线程阻塞。我们应当避免出现这种触发方式。日志中关键字是 <strong>Allocation Stall</strong>。</p>
+</li>
+<li>
+<p><strong>外部触发</strong></p>
+<p>代码中显式调用 System.gc() 触发。日志中关键字是 <strong>System.gc()</strong>。</p>
+</li>
+<li>
+<p><strong>元数据分配触发</strong></p>
+<p>元数据区不足时导致，一般不需要关注。日志中关键字是 <strong>Metadata GC Threshold</strong>。</p>
+</li>
+</ul>
+<h4 id="参数设置">参数设置</h4>
+<p>ZGC优势不仅在于其超低的STW停顿，也在于其参数的简单，绝大部分生产场景都可以自适应。当然，极端情况下，还是有可能需要对ZGC个别参数做个调整，大致可以分为三类：</p>
+<ul>
+<li>
+<p><strong>堆大小</strong></p>
+<p>Xms。当分配速率过高，超过回收速率，造成堆内存不够时，会触发<strong>Allocation Stall</strong>，这类 Stall 会减缓当前的用户线程。因此，当我们在GC日志中看到 <strong>Allocation Stall</strong>，通常可以认为堆空间偏下或者 concurrent gc threads 数偏小。</p>
+</li>
+<li>
+<p><strong>GC 触发时机</strong></p>
+<p>ZAllocationSpikeTolerance，ZCollectionInterval。</p>
+<p>ZAllocationSpikeTolerance 用来估算当前的堆内存分配速率，在当前剩余的堆内存下，ZAllocationSpikeTolerance 越大，估算的达到OOM的时间越快，ZGC就会更早地进行触发GC。ZCollectionInterval 用来指定GC发生的间隔，以秒为单位触发 GC。</p>
+</li>
+<li>
+<p><strong>GC线程</strong></p>
+<p>ParallelGCThreads，ConcGCThreads。ParallelGCThreads是设置STW任务的GC线程数目，默认为CPU个数的60%。</p>
+<p>ConcGCThreads 是并发阶段GC线程的数目，默认为CPU个数的12.5%。增加GC线程数目，可以加快GC完成任务，减少各个阶段的时间，但也会增加CPU的抢占开销，可根据生产情况调整。</p>
+</li>
+</ul>
+<h3 id="如何选择垃圾回收器">如何选择垃圾回收器</h3>
+<ul>
+<li>
+<p>单CPU或小内存，单机程序</p>
+<blockquote>
+<p>-XX:+UseSerialGC</p>
+</blockquote>
+</li>
+<li>
+<p>多CPU，需要最大吞吐量，如后台计算型应用</p>
+<blockquote>
+<p>-XX:+UseParallelGC或者</p>
+<p>-XX:+UseParallelOldGC</p>
+</blockquote>
+</li>
+<li>
+<p>多CPU，追求低停顿时间，需快速响应如互联网应用</p>
+<blockquote>
+<p>-XX:+UseConcMarkSweepGC</p>
+<p>-XX:+ParNewGC</p>
+</blockquote>
+</li>
+</ul> </article> <ul class="astro-vj4tpspi my-8"> <li class="inline-block astro-blwjyjpt my-1 underline-offset-4"> <a href="/astro/tags/java/" class="astro-blwjyjpt group pr-2 text-sm" data-astro-transition-scope="astro-36ssibgs-2"> <svg xmlns="http://www.w3.org/2000/svg" class="astro-blwjyjpt scale-75"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
+&nbsp;<span class="astro-blwjyjpt">java</span> </a> </li> <li class="inline-block astro-blwjyjpt my-1 underline-offset-4"> <a href="/astro/tags/gc/" class="astro-blwjyjpt group pr-2 text-sm" data-astro-transition-scope="astro-36ssibgs-3"> <svg xmlns="http://www.w3.org/2000/svg" class="astro-blwjyjpt scale-75"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
+&nbsp;<span class="astro-blwjyjpt">gc</span> </a> </li>  </ul> <div class="astro-vj4tpspi flex items-center flex-col-reverse gap-6 justify-between sm:flex-row-reverse sm:gap-4 sm:items-end"> <button id="back-to-top" class="astro-vj4tpspi focus-outline hover:opacity-75 py-1 whitespace-nowrap"> <svg xmlns="http://www.w3.org/2000/svg" class="astro-vj4tpspi rotate-90"> <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" class="astro-vj4tpspi"></path> </svg> <span class="astro-vj4tpspi">Back to Top</span> </button> <div class="astro-wkojbtzc social-icons"> <span class="astro-wkojbtzc italic">Share this post on:</span> <div class="astro-wkojbtzc text-center"> <a href="https://wa.me/?text=https://chou401.github.io/astro/posts/java-garbage-collection/" class="astro-wkojbtzc group hover:text-skin-accent inline-block link-button" title="Share this post via WhatsApp"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"></path>
+      <path d="M9 10a0.5 .5 0 0 0 1 0v-1a0.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a0.5 .5 0 0 0 0 -1h-1a0.5 .5 0 0 0 0 1"></path>
+    </svg> <span class="astro-wkojbtzc sr-only">Share this post via WhatsApp</span> </a><a href="https://www.facebook.com/sharer.php?u=https://chou401.github.io/astro/posts/java-garbage-collection/" class="astro-wkojbtzc group hover:text-skin-accent inline-block link-button" title="Share this post on Facebook"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3"></path>
+  </svg> <span class="astro-wkojbtzc sr-only">Share this post on Facebook</span> </a><a href="https://twitter.com/intent/tweet?url=https://chou401.github.io/astro/posts/java-garbage-collection/" class="astro-wkojbtzc group hover:text-skin-accent inline-block link-button" title="Tweet this post"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z"></path>
+    </svg> <span class="astro-wkojbtzc sr-only">Tweet this post</span> </a><a href="https://t.me/share/url?url=https://chou401.github.io/astro/posts/java-garbage-collection/" class="astro-wkojbtzc group hover:text-skin-accent inline-block link-button" title="Share this post via Telegram"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4"></path>
+      </svg> <span class="astro-wkojbtzc sr-only">Share this post via Telegram</span> </a><a href="https://pinterest.com/pin/create/button/?url=https://chou401.github.io/astro/posts/java-garbage-collection/" class="astro-wkojbtzc group hover:text-skin-accent inline-block link-button" title="Share this post on Pinterest"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <line x1="8" y1="20" x2="12" y2="11"></line>
+      <path d="M10.7 14c.437 1.263 1.43 2 2.55 2c2.071 0 3.75 -1.554 3.75 -4a5 5 0 1 0 -9.7 1.7"></path>
+      <circle cx="12" cy="12" r="9"></circle>
+    </svg> <span class="astro-wkojbtzc sr-only">Share this post on Pinterest</span> </a><a href="mailto:?subject=See%20this%20post&amp;body=https://chou401.github.io/astro/posts/java-garbage-collection/" class="astro-wkojbtzc group hover:text-skin-accent inline-block link-button" title="Share this post via email"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+      <polyline points="3 7 12 13 21 7"></polyline>
+    </svg> <span class="astro-wkojbtzc sr-only">Share this post via email</span> </a> </div> </div>  </div> </main> <footer class="astro-sz7xmlte mt-auto"> <div class="max-w-3xl mx-auto px-0"> <hr class="border-skin-line" aria-hidden="true"> </div> <div class="astro-sz7xmlte footer-wrapper"> <div class="astro-upu6fzxr flex social-icons"> <a href="https://github.com/chou401/astro" class="inline-block group hover:text-skin-accent link-button astro-upu6fzxr" title=" 知道的越多，才知知道的越少 on Github"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"></path>
+  </svg> <span class="sr-only astro-upu6fzxr"> 知道的越多，才知知道的越少 on Github</span> </a><a href="https://github.com/chou401/astro" class="inline-block group hover:text-skin-accent link-button astro-upu6fzxr" title="知道的越多，才知知道的越少 on Facebook"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3"></path>
+  </svg> <span class="sr-only astro-upu6fzxr">知道的越多，才知知道的越少 on Facebook</span> </a><a href="https://github.com/chou401/astro" class="inline-block group hover:text-skin-accent link-button astro-upu6fzxr" title="知道的越多，才知知道的越少 on Instagram"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <rect x="4" y="4" width="16" height="16" rx="4"></rect>
+    <circle cx="12" cy="12" r="3"></circle>
+    <line x1="16.5" y1="7.5" x2="16.5" y2="7.501"></line>
+  </svg> <span class="sr-only astro-upu6fzxr">知道的越多，才知知道的越少 on Instagram</span> </a><a href="https://github.com/chou401/astro" class="inline-block group hover:text-skin-accent link-button astro-upu6fzxr" title="知道的越多，才知知道的越少 on LinkedIn"> <svg xmlns="http://www.w3.org/2000/svg" class="icon-tabler" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+    <line x1="8" y1="11" x2="8" y2="16"></line>
+    <line x1="8" y1="8" x2="8" y2="8.01"></line>
+    <line x1="12" y1="16" x2="12" y2="11"></line>
+    <path d="M16 16v-3a2 2 0 0 0 -4 0"></path>
+  </svg> <span class="sr-only astro-upu6fzxr">知道的越多，才知知道的越少 on LinkedIn</span> </a> </div>  <div class="astro-sz7xmlte copyright-wrapper"> <span class="astro-sz7xmlte">Copyright © 2024</span> <span class="astro-sz7xmlte separator">&nbsp;|&nbsp;</span> <span class="astro-sz7xmlte">All rights reserved.</span> </div> </div> </footer>     <script>function addHeadingLinks(){let c=Array.from(document.querySelectorAll("h2, h3, h4, h5, h6"));for(let d of c){d.classList.add("group");let t=document.createElement("a");t.innerText="#",t.className="heading-link hidden group-hover:inline-block ml-2",t.href="#"+d.id,t.ariaHidden="true",d.appendChild(t)}}addHeadingLinks();function attachCopyButtons(){let c="Copy",d=Array.from(document.querySelectorAll("pre"));for(let e of d){let o=document.createElement("div");o.style.position="relative";let n=document.createElement("button");n.className="copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium",n.innerHTML=c,e.setAttribute("tabindex","0"),e.appendChild(n),e?.parentNode?.insertBefore(o,e),o.appendChild(e),n.addEventListener("click",async()=>{await t(e,n)})}async function t(e,o){let i=e.querySelector("code")?.innerText;await navigator.clipboard.writeText(i??""),o.innerText="Copied",setTimeout(()=>{o.innerText=c},700)}}attachCopyButtons();function backToTop(){document.querySelector("#back-to-top")?.addEventListener("click",()=>{document.body.scrollTop=0,document.documentElement.scrollTop=0})}backToTop();
+</script></body></html>
